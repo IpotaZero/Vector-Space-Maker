@@ -8,12 +8,12 @@ import { Pages } from "./utils/Pages/Pages.js"
 export const input = new DigitalInput({
     up: ["ArrowUp", "KeyW"],
     down: ["ArrowDown", "KeyS"],
-    left: ["ArrowLeft", "KeyD"],
-    right: ["ArrowRight", "KeyA"],
+    left: ["ArrowLeft", "KeyA"],
+    right: ["ArrowRight", "KeyD"],
     jump: ["ArrowUp", "KeyW", "Space"],
 
-    ok: ["Enter", "KeyZ"],
-    cancel: ["KeyX", "Escape"],
+    ok: ["Enter", "KeyZ", "Space"],
+    cancel: ["KeyX", "Escape", "Backspace"],
     pause: ["Escape", "KeyP"],
 })
 

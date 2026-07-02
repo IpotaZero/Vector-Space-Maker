@@ -12,6 +12,12 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -60,6 +66,8 @@ button {
     cursor: pointer;
 
     font-family: "normal", sans-serif;
+
+    pointer-events: auto;
 }
 
 .options {
@@ -79,12 +87,9 @@ button {
     }
 }
 
-:focus {
-    outline: none;
-    background: #00000020;
-}
-
+:focus,
 .nav-focus {
     outline: none;
     background: #00000020;
+    border-radius: 0.1em;
 }
