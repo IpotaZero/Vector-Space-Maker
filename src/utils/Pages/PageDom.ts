@@ -1,7 +1,6 @@
 import { Awaits } from "../Functions/Awaits"
-import { Transition } from "../Functions/Transition"
 import { RegExpDict } from "../RegExpDict"
-import { FadeOption } from "./Pages"
+import { PageTransition } from "./Pages"
 
 /**
  * domのセットアップ、保持、フェードを行う。
@@ -9,7 +8,6 @@ import { FadeOption } from "./Pages"
 export class PageDom {
     readonly container: HTMLElement
     private readonly pages = new RegExpDict<HTMLElement>({})
-    private readonly gotoable = new Set<string>()
 
     readonly ready
 
@@ -19,22 +17,11 @@ export class PageDom {
         this.ready = this.setup(html, override)
     }
 
-    isGotoable(pageId: string) {
-        return this.gotoable.has(pageId)
-    }
-
-    async fadeOut(currentPageId: string, { msOut }: FadeOption = {}) {
+    async fade(currentPageId: string, nextPageId: string, pageTransition: PageTransition) {
         const from = this.getPage(currentPageId)
-
-        await Transition.fadeOut(this.getPage(currentPageId), msOut)
-        from.classList.add("hidden")
-    }
-
-    async fadeIn(nextPageId: string, { msIn }: FadeOption = {}) {
         const to = this.getPage(nextPageId)
 
-        to.classList.remove("hidden")
-        await Transition.fadeIn(this.getPage(nextPageId), msIn)
+        await pageTransition(from, to)
     }
 
     getPage(pageId: string, option: { noError: true }): HTMLElement | undefined
@@ -72,10 +59,6 @@ export class PageDom {
             .forEach((page) => {
                 this.pages.add(page.id, page)
                 page.classList.add("hidden")
-
-                if (page.hasAttribute("data-gotoable")) {
-                    this.gotoable.add(page.id)
-                }
             })
 
         const load = Promise.all([

@@ -1,13 +1,16 @@
+import { Transition } from "../Functions/Transition"
 import { PageDom } from "./PageDom"
 import { PageEventSetter } from "./PageEventSetter"
-import { PageRun } from "./PageRun"
 import { PageState } from "./PageState"
 
-export type FadeOption = Partial<{ msIn: number; msOut: number }>
+export type FadeOption = Partial<{ msIn: number; msOut: number; pageTransition: PageTransition }>
 export type GotoOption = FadeOption & {
     button?: HTMLButtonElement
     back?: boolean
+    pageTransition?: PageTransition
 }
+
+export type PageTransition = (from: HTMLElement, to: HTMLElement) => Promise<void>
 
 type LoadOption = Partial<{ history: readonly string[]; override: boolean }>
 
@@ -20,14 +23,6 @@ export class Pages {
 
     private dom!: PageDom
     private state!: PageState
-
-    private isLoaded = false
-
-    private readonly run = new PageRun()
-    onEnter = this.run.setOnEnter.bind(this.run)
-    onLeft = this.run.setOnLeft.bind(this.run)
-    beforeEnter = this.run.setBeforeEnter.bind(this.run)
-    onBack = this.run.setOnBack.bind(this.run)
 
     static onTransitionStart = (pages: Pages) => {}
     static onTransitionEnd = (pages: Pages) => {}
@@ -62,7 +57,6 @@ export class Pages {
         this.state = new PageState(history)
 
         await this.goto(this.state.currentPageId, { msIn: 0, msOut: 0 })
-        this.isLoaded = true
     }
 
     getPage(pageId: string, option: { noError: true }): HTMLElement | undefined
@@ -92,7 +86,6 @@ export class Pages {
     }
 
     async back(depth: number, option: FadeOption = {}) {
-        this.run.onBack(this.state.currentPageId)
         await this.goto(this.state.back(depth), Object.assign(option, { back: true }))
     }
 
@@ -101,30 +94,18 @@ export class Pages {
     }
 
     private async goto(id: string, option: GotoOption) {
-        // pages.gotoで直接来た奴
-        if (!this.dom.isGotoable(id) && !option.button && this.isLoaded) {
-            console.error(id)
-            throw new Error(
-                "このページはボタン以外から来ることを禁じられている。pageにdata-gotoableを付ける事を考えよ。",
-            )
-        }
-
         // 0. 遷移中に別の遷移が発生しないように
         if (this.state.isTransitioning()) return
+
         this.state.startTransition()
         Pages.onTransitionStart(this)
 
-        // 1. 遷移可能かチェック（ガード節）
-        const canTransition = await this.run.beforeEnter(id, option)
-        if (!canTransition) {
-            this.state.endTransition()
-            Pages.onTransitionEnd(this)
-            return
-        }
-
         // layerに応じて場合分け
-        const layerFrom = parseToNumber(this.dom.getPage(this.state.currentPageId).dataset["layer"], 0)
-        const layerTo = parseToNumber(this.dom.getPage(id).dataset["layer"], 0)
+        const layerFrom = parseToNumber(
+            this.dom.getPage(this.state.currentPageId, { noError: true })?.dataset["layer"],
+            0,
+        )
+        const layerTo = parseToNumber(this.dom.getPage(id, { noError: true })?.dataset["layer"], 0)
 
         await this.transition(layerFrom, layerTo, id, option)
 
@@ -136,36 +117,53 @@ export class Pages {
         layerFrom: number,
         layerTo: number,
         id: string,
-        { button, msIn, msOut, back }: GotoOption,
+        { button, back, msIn, msOut, pageTransition }: GotoOption,
     ) {
         if (layerFrom === layerTo) {
             // 2. 現在のページを去る
-            await this.dom.fadeOut(this.state.currentPageId, { msOut })
-            await this.run.onLeft(this.state.currentPageId, { button })
+            await this.dom.fade(
+                this.state.currentPageId,
+                id,
+                pageTransition ??
+                    (async (from, to) => {
+                        console.log(from, to)
+                        await Transition.fadeOut(from, msIn)
+                        await Transition.fadeIn(to, msOut)
+                        to.classList.remove("hidden")
+                    }),
+            )
 
             // 3. 状態の更新
             this.state.goto(id)
 
-            // 4. 新しいページに入る
-            await this.run.onEnter(id, { button })
-
             Pages.onTransitionEnd(this)
-            await this.dom.fadeIn(id, { msIn })
         } else if (layerFrom < layerTo) {
             this.state.goto(id)
 
-            await this.run.onEnter(id, { button })
             Pages.onTransitionEnd(this)
-            await this.dom.fadeIn(id, { msIn })
+            await this.dom.fade(
+                this.state.currentPageId,
+                id,
+                pageTransition ??
+                    (async (from, to) => {
+                        to.classList.remove("hidden")
+                        await Transition.fadeIn(to, msOut)
+                    }),
+            )
         } else {
             if (!back) throw new Error("下のlayerにback以外でgotoしようとした。")
 
-            await this.dom.fadeOut(this.state.currentPageId, { msOut })
-            await this.run.onLeft(this.state.currentPageId, { button })
+            await this.dom.fade(
+                this.state.currentPageId,
+                id,
+                pageTransition ??
+                    (async (from, to) => {
+                        await Transition.fadeOut(from, msIn)
+                    }),
+            )
 
             this.state.goto(id)
 
-            await this.run.onEnter(id, { button })
             Pages.onTransitionEnd(this)
         }
     }

@@ -20,6 +20,7 @@ export class SceneTitle extends Scene {
 
     async start(): Promise<void> {
         await this.pages.loadFromFile(Dom.container, "assets/pages/title/index.html")
+        // this.pages.setTransition("stages", { enter: () => {}, exit: () => {} })
 
         this.selector.load(Dom.container)
         this.selector
