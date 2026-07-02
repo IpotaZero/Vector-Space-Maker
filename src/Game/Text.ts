@@ -14,7 +14,7 @@ export class Text {
         ctx.translate(this.x, this.y)
         ctx.rotate(this.rotation)
         ctx.fillStyle = "#000"
-        ctx.font = `${this.fontSize}px sans-serif`
+        ctx.font = `${this.fontSize}px normal, japanese`
         // ctx.textAlign = "center"
         ctx.textBaseline = "top"
         ctx.fillText(this.text, 0, 0)

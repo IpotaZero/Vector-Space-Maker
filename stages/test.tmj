@@ -134,7 +134,7 @@
                  "y":80
                 }, 
                 {
-                 "height":19.296875,
+                 "height":43.296875,
                  "id":11,
                  "name":"",
                  "opacity":1,
@@ -142,12 +142,12 @@
                  "text":
                     {
                      "pixelsize":32,
-                     "text":"Hello World",
+                     "text":"Hello World\u3042\u3042\u3042\u3042\u3042",
                      "wrap":true
                     },
                  "type":"",
                  "visible":true,
-                 "width":81.046875,
+                 "width":215.046875,
                  "x":442.143229166667,
                  "y":146.3515625
                 }, 
@@ -276,7 +276,7 @@
                 }, 
                 {
                  "ellipse":true,
-                 "height":145.333333333333,
+                 "height":177.333333333333,
                  "id":24,
                  "name":"Scale",
                  "opacity":1,
@@ -289,8 +289,8 @@
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":133.333333333333,
-                 "x":2074.66666666667,
+                 "width":160,
+                 "x":2048,
                  "y":174.666666666667
                 }],
          "opacity":1,
