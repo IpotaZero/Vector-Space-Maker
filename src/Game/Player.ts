@@ -1,4 +1,4 @@
-import { Ctx } from "../utils/Ctx"
+import { Ctx } from "../utils/Functions/Ctx"
 import { vec, Vec2 } from "../utils/Vec"
 import { Edge } from "./Edge.js"
 

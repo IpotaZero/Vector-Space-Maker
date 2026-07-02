@@ -1,6 +1,7 @@
 {
     "dependencies": {
         "@kayahr/tiled": "^0.0.1",
+        "jszip": "^3.10.1",
         "vite": "^8.1.2"
     },
     "scripts": {

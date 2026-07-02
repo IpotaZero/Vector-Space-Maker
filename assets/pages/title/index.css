@@ -1,0 +1,27 @@
+#first {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+}
+
+#stages {
+    display: flex;
+    padding: 1em;
+    gap: 1em;
+
+    button {
+        border: none;
+        background: none;
+
+        font-size: 1.5em;
+
+        cursor: pointer;
+
+        &:hover {
+            color: #00000050;
+        }
+    }
+}

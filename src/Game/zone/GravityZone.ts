@@ -7,8 +7,8 @@ import { Zone } from "./Zone.js"
 export class GravityZone extends Zone {
     readonly gravity: Vec2
 
-    constructor(x: number, y: number, radius: number, gravity: Vec2) {
-        super(x, y, radius)
+    constructor(x: number, y: number, width: number, height: number, gravity: Vec2) {
+        super(x, y, width, height)
         this.gravity = gravity
     }
 

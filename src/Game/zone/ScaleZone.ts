@@ -5,8 +5,8 @@ import { Zone } from "./Zone"
 export class ScaleZone extends Zone {
     readonly scale: number
 
-    constructor(x: number, y: number, radius: number, scale: number) {
-        super(x, y, radius)
+    constructor(x: number, y: number, width: number, height: number, scale: number) {
+        super(x, y, width, height)
         this.scale = scale
     }
 

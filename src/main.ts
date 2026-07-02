@@ -1,10 +1,8 @@
-import { Game } from "./Game/Game.js"
-import { SceneGame } from "./Scene/SceneGame.js"
+import { Dom } from "./Dom.js"
 import { SceneManager } from "./Scene/SceneManager.js"
+import { SceneTitle } from "./Scene/SceneTitle.js"
 
-const sm = new SceneManager()
+Dom.init()
 
-// --- エントリーポイント ---
-const canvas = document.getElementById("main") as HTMLCanvasElement
-
-sm.changeScene(new SceneGame(new Game(canvas)))
+export const sm = new SceneManager()
+sm.changeScene(new SceneTitle())

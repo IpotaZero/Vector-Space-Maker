@@ -5,37 +5,9 @@
         <title>Vector Space Maker</title>
 
         <link rel="stylesheet" href="css/style.css" />
-
-        <style>
-            html,
-            body {
-                margin: 0;
-                height: 100%;
-                background: #e8e8e8;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-family: sans-serif;
-            }
-            #wrap {
-                text-align: center;
-            }
-            canvas {
-                background: #fcfcfc;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-                border-radius: 4px;
-            }
-            p {
-                color: #444;
-                font-size: 14px;
-            }
-        </style>
     </head>
     <body>
-        <div id="wrap">
-            <canvas id="main"></canvas>
-            <p>← → 移動 / ↑・Space ジャンプ / R リスタート</p>
-        </div>
+        <div id="container"></div>
         <script type="module" src="dist/module/main.js"></script>
     </body>
 </html>

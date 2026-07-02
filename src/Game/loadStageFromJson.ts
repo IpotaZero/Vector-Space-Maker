@@ -53,13 +53,19 @@ export async function loadStageFromJson(url: string): Promise<Stage> {
                 const gx = (obj.properties?.find((p) => p.name === "gx")?.value as number) || 0
                 const gy = (obj.properties?.find((p) => p.name === "gy")?.value as number) || 1
                 zones.push(
-                    new GravityZone(obj.x + obj.width! / 2, obj.y + obj.height! / 2, obj.width! / 2, vec(gx, gy)),
+                    new GravityZone(
+                        obj.x + obj.width! / 2,
+                        obj.y + obj.height! / 2,
+                        obj.width!,
+                        obj.height!,
+                        vec(gx, gy),
+                    ),
                 )
             }
 
             if (obj.name === "Scale") {
                 const gx = (obj.properties?.find((p) => p.name === "scale")?.value as number) || 1
-                zones.push(new ScaleZone(obj.x + obj.width! / 2, obj.y + obj.height! / 2, obj.width!, gx))
+                zones.push(new ScaleZone(obj.x + obj.width! / 2, obj.y + obj.height! / 2, obj.width!, obj.height!, gx))
             }
 
             if (obj.name === "Start") {

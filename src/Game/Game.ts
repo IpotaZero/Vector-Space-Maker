@@ -56,7 +56,7 @@ export class Game {
     }
 
     /** イベントリスナーの登録とゲームループの開始 */
-    attach(): void {
+    start(): void {
         if (this.attached) return
         this.attached = true
         window.addEventListener("keydown", this.handleKeyDown)
@@ -65,7 +65,7 @@ export class Game {
     }
 
     /** イベントリスナーの解除とゲームループの停止 */
-    detach(): void {
+    pause(): void {
         if (!this.attached) return
         this.attached = false
         window.removeEventListener("keydown", this.handleKeyDown)
