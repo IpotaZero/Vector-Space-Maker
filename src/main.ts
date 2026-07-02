@@ -1,7 +1,10 @@
 import { Game } from "./Game/Game.js"
+import { SceneGame } from "./Scene/SceneGame.js"
+import { SceneManager } from "./Scene/SceneManager.js"
+
+const sm = new SceneManager()
 
 // --- エントリーポイント ---
 const canvas = document.getElementById("main") as HTMLCanvasElement
-const game = new Game(canvas)
-await game.load("stages/test.tmj")
-game.attach()
+
+sm.changeScene(new SceneGame(new Game(canvas)))

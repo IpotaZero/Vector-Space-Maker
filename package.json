@@ -1,6 +1,9 @@
 {
-  "dependencies": {
-    "@kayahr/tiled": "^0.0.1",
-    "vite": "^8.1.2"
-  }
+    "dependencies": {
+        "@kayahr/tiled": "^0.0.1",
+        "vite": "^8.1.2"
+    },
+    "scripts": {
+        "build": "npx vite build --watch"
+    }
 }
