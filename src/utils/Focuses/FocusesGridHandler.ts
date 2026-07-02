@@ -32,10 +32,7 @@ export class FocusesGridHandler {
 
     setGrid(grid: Grid): void {
         this.grid = grid
-        this.row = 0
-        this.col = 0
-
-        this.focusInput()
+        this.blur()
     }
 
     moveRow(delta: number): void {
@@ -128,6 +125,12 @@ export class FocusesGridHandler {
         return button ?? null
     }
 
+    getFocusedKey(): FocusKey | null {
+        if (!this.hasFocus()) return null
+
+        return [this.row, this.col]
+    }
+
     getAllButtons(): HTMLElement[] {
         return this.grid.flat()
     }
@@ -143,8 +146,13 @@ export class FocusesGridHandler {
         }
     }
 
-    focusByKey([row, col]: [row: number, col: number]) {
+    focusByKey([row, col]: readonly [row: number, col: number]): boolean {
+        if (row < 0 || col < 0) return false
+        if (row >= this.grid.length) return false
+        if (col >= this.grid[row].length) return false
+
         this.row = row
         this.col = col
+        return true
     }
 }

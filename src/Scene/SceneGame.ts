@@ -49,8 +49,6 @@ export class SceneGame extends Scene {
     }
 
     update() {
-        console.log(input)
-
         if (input.isPushed("pause")) {
             if (this.pages.getCurrentPageId() === "pause") {
                 this.pages.back(1)

@@ -9,8 +9,8 @@ type OnclickHandlers = {
  * linkやbackがクリックされたときのメソッドを設定する。
  */
 export class PageEventSetter {
-    private static readonly DEFAULT_IN_MS = 0
-    private static readonly DEFAULT_OUT_MS = 0
+    private static readonly DEFAULT_IN_MS = 100
+    private static readonly DEFAULT_OUT_MS = 100
 
     static setOnclick(container: HTMLElement, { enter, back }: OnclickHandlers) {
         Array.from(container.querySelectorAll("[data-link]"))

@@ -12,7 +12,7 @@ export class SceneTitle extends Scene {
     constructor() {
         super()
         this.selector = new Selector({
-            "#stages": { alias: "stages" },
+            "#stage-buttons": { alias: "stages" },
         })
     }
 

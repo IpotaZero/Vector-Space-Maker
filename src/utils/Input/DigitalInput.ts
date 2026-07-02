@@ -2,6 +2,7 @@ export type DigitalInputReader<Action extends string> = {
     isPressed(action: Action): boolean
     isReleased(action: Action): boolean
     isPushed(action: Action): boolean
+    isSomethingPressed(): boolean
 }
 
 export class DigitalInput<Action extends string> {
@@ -108,6 +109,10 @@ export class DigitalInput<Action extends string> {
 
     isPushed(action: Action): boolean {
         return this.pushed.has(action)
+    }
+
+    isSomethingPressed(): boolean {
+        return this.pressed.size > 0
     }
 
     private onKeyDown = (e: KeyboardEvent) => {

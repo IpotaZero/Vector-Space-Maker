@@ -53,15 +53,13 @@ button {
     border: none;
     background: none;
 
+    width: 6em;
+
     font-size: 1.5em;
 
     cursor: pointer;
 
     font-family: "normal", sans-serif;
-
-    &:hover {
-        color: #00000050;
-    }
 }
 
 .options {
@@ -79,4 +77,14 @@ button {
     &[data-direction="column"] {
         flex-direction: column;
     }
+}
+
+:focus {
+    outline: none;
+    background: #00000020;
+}
+
+.nav-focus {
+    outline: none;
+    background: #00000020;
 }
