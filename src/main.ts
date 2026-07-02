@@ -1,8 +1,56 @@
 import { Dom } from "./Dom.js"
-import { SceneManager } from "./Scene/SceneManager.js"
+import { SceneChanger } from "./utils/Scene/SceneChanger.js"
 import { SceneTitle } from "./Scene/SceneTitle.js"
+import { Focuses } from "./utils/Focuses/Focuses.js"
+import { DigitalInput } from "./utils/Input/DigitalInput.js"
+import { Pages } from "./utils/Pages/Pages.js"
+
+export const input = new DigitalInput({
+    up: ["ArrowUp", "KeyW"],
+    down: ["ArrowDown", "KeyS"],
+    left: ["ArrowLeft", "KeyD"],
+    right: ["ArrowRight", "KeyA"],
+    jump: ["ArrowUp", "KeyW", "Space"],
+
+    ok: ["Enter", "KeyZ"],
+    cancel: ["KeyX", "Escape"],
+    pause: ["Escape", "KeyP"],
+})
 
 Dom.init()
 
-export const sm = new SceneManager()
-sm.changeScene(new SceneTitle())
+export const focuses = new Focuses(input)
+
+export const sc = new SceneChanger(Dom.container)
+sc.goto(new SceneTitle())
+
+sc.onTransitionStart = () => {
+    input.pause("scene-transition")
+}
+
+sc.onTransitionEnd = () => {
+    input.resume("scene-transition")
+}
+
+Pages.onTransitionStart = () => {
+    input.pause("page-transition")
+}
+
+Pages.onTransitionEnd = (pages) => {
+    input.resume("page-transition")
+    focuses.setPage(pages.getCurrentPage())
+}
+
+const update = () => {
+    sc.update()
+    focuses.update()
+    input.update()
+
+    requestAnimationFrame(update)
+}
+
+requestAnimationFrame(update)
+
+window.addEventListener("keydown", (e) => {
+    if (e.code === "Tab") e.preventDefault()
+})

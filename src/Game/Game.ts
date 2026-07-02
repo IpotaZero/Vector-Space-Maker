@@ -1,18 +1,12 @@
 import { Camera } from "./Camera"
 import { loadStageFromJson } from "./loadStageFromJson"
-import { Input, Player } from "./Player"
+import { Player } from "./Player"
 import { Stage } from "./Stage"
 import { vec } from "../utils/Vec"
+import { DigitalInputReader } from "../utils/Input/DigitalInput"
 
 const WIDTH = 900
 const HEIGHT = 600
-
-const KEY_MAP: Record<string, keyof Input> = {
-    ArrowLeft: "left",
-    ArrowRight: "right",
-    ArrowUp: "jump",
-    Space: "jump",
-}
 
 /**
  * ゲーム本体をカプセル化したクラス。
@@ -27,14 +21,11 @@ export class Game {
     player!: Player
     camera!: Camera
 
-    private readonly input: Input = { left: false, right: false, jump: false }
     private gens: Generator<void, void, unknown>[] = []
-
-    private rafId: number | null = null
-    private attached = false
 
     constructor(
         canvas: HTMLCanvasElement,
+        private readonly input: DigitalInputReader<"right" | "left" | "jump">,
         readonly onFinish: () => void,
     ) {
         this.canvas = canvas
@@ -44,11 +35,6 @@ export class Game {
 
         this.canvas.width = WIDTH
         this.canvas.height = HEIGHT
-
-        // イベントリスナーの着脱に使うため bind して保持する
-        this.handleKeyDown = this.handleKeyDown.bind(this)
-        this.handleKeyUp = this.handleKeyUp.bind(this)
-        this.loop = this.loop.bind(this)
     }
 
     /** ステージを読み込み、初期状態をセットアップする */
@@ -58,57 +44,13 @@ export class Game {
         this.reset()
     }
 
-    /** イベントリスナーの登録とゲームループの開始 */
-    start(): void {
-        if (this.attached) return
-        this.attached = true
-        window.addEventListener("keydown", this.handleKeyDown)
-        window.addEventListener("keyup", this.handleKeyUp)
-        this.rafId = requestAnimationFrame(this.loop)
-    }
-
-    /** イベントリスナーの解除とゲームループの停止 */
-    pause(): void {
-        if (!this.attached) return
-        this.attached = false
-        window.removeEventListener("keydown", this.handleKeyDown)
-        window.removeEventListener("keyup", this.handleKeyUp)
-        if (this.rafId !== null) {
-            cancelAnimationFrame(this.rafId)
-            this.rafId = null
-        }
-
-        this.input.left = false
-        this.input.right = false
-        this.input.jump = false
-    }
-
     private reset(): void {
         this.player = new Player(vec(this.stage.start.x, this.stage.start.y))
         this.camera.scale = 1
         this.gens = []
     }
 
-    private handleKeyDown(e: KeyboardEvent): void {
-        const key = KEY_MAP[e.code]
-        if (key) {
-            this.input[key] = true
-            e.preventDefault()
-        }
-        if (e.code === "KeyR") {
-            this.reset()
-        }
-    }
-
-    private handleKeyUp(e: KeyboardEvent): void {
-        const key = KEY_MAP[e.code]
-        if (key) {
-            this.input[key] = false
-            e.preventDefault()
-        }
-    }
-
-    private loop(): void {
+    update(): void {
         const stage = this.stage
 
         stage.zones.forEach((zone) => {
@@ -156,9 +98,5 @@ export class Game {
         this.player.draw(ctx)
 
         ctx.restore()
-
-        if (this.attached) {
-            this.rafId = requestAnimationFrame(this.loop)
-        }
     }
 }

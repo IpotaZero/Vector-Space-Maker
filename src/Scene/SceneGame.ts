@@ -1,9 +1,9 @@
 import { Dom } from "../Dom"
 import { Game } from "../Game/Game"
-import { sm } from "../main"
+import { input, sc } from "../main"
 import { Pages } from "../utils/Pages/Pages"
 import { Selector } from "../utils/Selector"
-import { Scene } from "./Scene"
+import { Scene } from "../utils/Scene/Scene"
 import { SceneTitle } from "./SceneTitle"
 
 export class SceneGame extends Scene {
@@ -30,45 +30,41 @@ export class SceneGame extends Scene {
         this.selector.load(Dom.container)
 
         this.selector.onClick("retry", () => {
-            sm.changeScene(new SceneGame(this.stagePath))
+            sc.goto(new SceneGame(this.stagePath))
         })
 
         this.selector.onClick("next", () => {
-            sm.changeScene(new SceneTitle())
+            sc.goto(new SceneTitle())
         })
 
-        this.game = new Game(this.selector.getFirst("main", HTMLCanvasElement), () => {
-            this.game.pause()
+        this.game = new Game(this.selector.getFirst("main", HTMLCanvasElement), input, () => {
             this.pages.enter("clear")
         })
 
-        window.addEventListener(
-            "keydown",
-            (e) => {
-                if (e.code === "Escape") {
-                    if (this.pages.getCurrentPageId() === "pause") {
-                        this.pages.back(1)
-                        this.game.start()
-                    } else {
-                        this.game.pause()
-                        this.pages.enter("pause")
-                    }
-                }
-            },
-            { signal: this.ac.signal },
-        )
-
         this.selector.onClick("resume", () => {
             this.pages.back(1)
-            this.game.start()
         })
 
         await this.game.load(`stages/${this.stagePath}.tmj`)
-        this.game.start()
+    }
+
+    update() {
+        console.log(input)
+
+        if (input.isPushed("pause")) {
+            if (this.pages.getCurrentPageId() === "pause") {
+                this.pages.back(1)
+            } else {
+                this.pages.enter("pause")
+            }
+        }
+
+        if (this.pages.getCurrentPageId() === "first") {
+            this.game.update()
+        }
     }
 
     async end(): Promise<void> {
-        this.game.pause()
         this.ac.abort()
     }
 }

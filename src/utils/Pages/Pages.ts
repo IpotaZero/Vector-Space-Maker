@@ -36,11 +36,7 @@ export class Pages {
         return this.state.getHistory()
     }
 
-    async loadFromFile(
-        container: HTMLElement,
-        path: string,
-        options: LoadOption = {},
-    ) {
+    async loadFromFile(container: HTMLElement, path: string, options: LoadOption = {}) {
         if (!Pages.cache.has(path)) {
             const html = await fetch(path).then((res) => res.text())
             Pages.cache.set(path, html)
@@ -49,11 +45,7 @@ export class Pages {
         await this.load(container, Pages.cache.get(path)!, options)
     }
 
-    async load(
-        container: HTMLElement,
-        html: string,
-        { history, override = true }: LoadOption = {},
-    ) {
+    async load(container: HTMLElement, html: string, { history, override = true }: LoadOption = {}) {
         if (this.dom) {
             throw new Error("Pages have already been loaded")
         }
@@ -95,12 +87,13 @@ export class Pages {
         return this.state.currentPageId
     }
 
+    isTransitioning(): boolean {
+        return this.state.isTransitioning()
+    }
+
     async back(depth: number, option: FadeOption = {}) {
         this.run.onBack(this.state.currentPageId)
-        await this.goto(
-            this.state.back(depth),
-            Object.assign(option, { back: true }),
-        )
+        await this.goto(this.state.back(depth), Object.assign(option, { back: true }))
     }
 
     async enter(id: string, option: FadeOption = {}) {
@@ -130,10 +123,7 @@ export class Pages {
         }
 
         // layerに応じて場合分け
-        const layerFrom = parseToNumber(
-            this.dom.getPage(this.state.currentPageId).dataset["layer"],
-            0,
-        )
+        const layerFrom = parseToNumber(this.dom.getPage(this.state.currentPageId).dataset["layer"], 0)
         const layerTo = parseToNumber(this.dom.getPage(id).dataset["layer"], 0)
 
         await this.transition(layerFrom, layerTo, id, option)
@@ -168,8 +158,7 @@ export class Pages {
             Pages.onTransitionEnd(this)
             await this.dom.fadeIn(id, { msIn })
         } else {
-            if (!back)
-                throw new Error("下のlayerにback以外でgotoしようとした。")
+            if (!back) throw new Error("下のlayerにback以外でgotoしようとした。")
 
             await this.dom.fadeOut(this.state.currentPageId, { msOut })
             await this.run.onLeft(this.state.currentPageId, { button })
@@ -182,10 +171,7 @@ export class Pages {
     }
 }
 
-export function parseToNumber(
-    str: string | undefined | null,
-    defaultValue: number,
-) {
+export function parseToNumber(str: string | undefined | null, defaultValue: number) {
     if (!str) return defaultValue
 
     if (Number.isNaN(Number(str))) return defaultValue

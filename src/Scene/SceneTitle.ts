@@ -1,10 +1,8 @@
-import JSZip from "jszip"
 import { Dom } from "../Dom"
-import { Game } from "../Game/Game"
 import { Pages } from "../utils/Pages/Pages"
 import { Selector } from "../utils/Selector"
-import { Scene } from "./Scene"
-import { sm } from "../main"
+import { Scene } from "../utils/Scene/Scene"
+import { focuses, sc } from "../main"
 import { SceneGame } from "./SceneGame"
 
 export class SceneTitle extends Scene {
@@ -18,6 +16,8 @@ export class SceneTitle extends Scene {
         })
     }
 
+    update() {}
+
     async start(): Promise<void> {
         await this.pages.loadFromFile(Dom.container, "assets/pages/title/index.html")
 
@@ -26,8 +26,10 @@ export class SceneTitle extends Scene {
             .getFirst("stages")
             .insertAdjacentHTML("beforeend", `<button data-stage="${"test"}">${"test"}</button>`)
 
+        focuses.setPage(this.pages.getCurrentPage())
+
         this.selector.onDelegateClick("stages", "button", async (args) => {
-            sm.changeScene(new SceneGame(args.dataset.stage!))
+            sc.goto(new SceneGame(args.dataset.stage!))
         })
     }
 

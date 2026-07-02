@@ -1,12 +1,7 @@
 import { Ctx } from "../utils/Functions/Ctx"
+import { DigitalInputReader } from "../utils/Input/DigitalInput"
 import { vec, Vec2 } from "../utils/Vec"
 import { Edge } from "./Edge.js"
-
-export type Input = {
-    left: boolean
-    right: boolean
-    jump: boolean
-}
 
 // player.js を忠実に再現した自機(点)
 export class Player {
@@ -42,15 +37,15 @@ export class Player {
     }
 
     // 入力
-    move(input: Input): void {
-        if (input.right) {
+    move(input: DigitalInputReader<"left" | "right" | "jump">): void {
+        if (input.isPressed("right")) {
             this.v = this.v.add(this.g.normal().mul(0.3))
         }
-        if (input.left) {
+        if (input.isPressed("left")) {
             this.v = this.v.add(this.g.normal().mul(-0.3))
         }
 
-        if (input.jump) {
+        if (input.isPressed("jump")) {
             if (this.onFloor.includes(true)) {
                 // 初速（大ジャンプの高さ）
                 this.v = this.v.add(this.g.normalized().mul(-48 * 0.3))
