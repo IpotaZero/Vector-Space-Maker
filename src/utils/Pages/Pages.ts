@@ -64,9 +64,9 @@ export class Pages {
     getPage(pageId: string, option: { noError?: boolean } = {}) {
         if (option.noError) {
             return this.dom.getPage(pageId, { noError: true })
-        } else {
-            return this.dom.getPage(pageId)
         }
+
+        return this.dom.getPage(pageId)
     }
 
     getAllPages(pageId: string) {
@@ -117,54 +117,50 @@ export class Pages {
         layerFrom: number,
         layerTo: number,
         id: string,
-        { button, back, msIn, msOut, pageTransition }: GotoOption,
+        { button, back, msIn = 200, msOut = 200, pageTransition }: GotoOption,
     ) {
+        const currentPageId = this.state.currentPageId
+        const transition = pageTransition ?? this.getDefaultPageTransition(layerFrom, layerTo, msIn, msOut)
+
         if (layerFrom === layerTo) {
-            // 2. 現在のページを去る
-            await this.dom.fade(
-                this.state.currentPageId,
-                id,
-                pageTransition ??
-                    (async (from, to) => {
-                        console.log(from, to)
-                        await Transition.fadeOut(from, msIn)
-                        await Transition.fadeIn(to, msOut)
-                        to.classList.remove("hidden")
-                    }),
-            )
-
-            // 3. 状態の更新
+            await this.dom.fade(currentPageId, id, transition)
             this.state.goto(id)
-
             Pages.onTransitionEnd(this)
-        } else if (layerFrom < layerTo) {
+            return
+        }
+
+        if (layerFrom < layerTo) {
             this.state.goto(id)
-
             Pages.onTransitionEnd(this)
-            await this.dom.fade(
-                this.state.currentPageId,
-                id,
-                pageTransition ??
-                    (async (from, to) => {
-                        to.classList.remove("hidden")
-                        await Transition.fadeIn(to, msOut)
-                    }),
-            )
-        } else {
-            if (!back) throw new Error("下のlayerにback以外でgotoしようとした。")
+            await this.dom.fade(currentPageId, id, transition)
+            return
+        }
 
-            await this.dom.fade(
-                this.state.currentPageId,
-                id,
-                pageTransition ??
-                    (async (from, to) => {
-                        await Transition.fadeOut(from, msIn)
-                    }),
-            )
+        if (!back) throw new Error("下のlayerにback以外でgotoしようとした。")
 
-            this.state.goto(id)
+        await this.dom.fade(currentPageId, id, transition)
+        this.state.goto(id)
+        Pages.onTransitionEnd(this)
+    }
 
-            Pages.onTransitionEnd(this)
+    private getDefaultPageTransition(layerFrom: number, layerTo: number, msIn: number, msOut: number): PageTransition {
+        if (layerFrom === layerTo) {
+            return async (from, to) => {
+                await Transition.fadeOut(from, msIn)
+                await Transition.fadeIn(to, msOut)
+                to.classList.remove("hidden")
+            }
+        }
+
+        if (layerFrom < layerTo) {
+            return async (_from, to) => {
+                to.classList.remove("hidden")
+                await Transition.fadeIn(to, msOut)
+            }
+        }
+
+        return async (from, _to) => {
+            await Transition.fadeOut(from, msIn)
         }
     }
 }
