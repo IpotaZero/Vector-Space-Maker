@@ -6,6 +6,7 @@ import { vec } from "../utils/Vec"
 import { Text } from "./Text.js"
 import { ScaleZone } from "./zone/ScaleZone.js"
 import { Zone } from "./zone/Zone.js"
+import { GoalZone } from "./zone/GoalZone.js"
 
 export async function loadStageFromJson(url: string): Promise<Stage> {
     const response = await fetch(url)
@@ -16,7 +17,6 @@ export async function loadStageFromJson(url: string): Promise<Stage> {
     const edges: Edge[] = []
     const zones: Zone[] = []
     let start = { x: 0, y: 0 }
-    let goal = { x: 0, y: 0, r: 16 }
 
     for (const layer of mapData.layers) {
         // 型ガードを使って ObjectGroup（オブジェクトレイヤー）のみに絞り込む
@@ -48,7 +48,7 @@ export async function loadStageFromJson(url: string): Promise<Stage> {
             }
 
             // カスタムプロパティを持つオブジェクト
-            if (obj.name === "GravityZone") {
+            if (obj.name === "Gravity") {
                 // properties から値を取り出す際も型推論が効く
                 const gx = (obj.properties?.find((p) => p.name === "gx")?.value as number) || 0
                 const gy = (obj.properties?.find((p) => p.name === "gy")?.value as number) || 1
@@ -73,18 +73,10 @@ export async function loadStageFromJson(url: string): Promise<Stage> {
             }
 
             if (obj.name === "Goal") {
-                goal = { x: obj.x + obj.width! / 2, y: obj.y + obj.height! / 2, r: obj.width! / 2 }
+                zones.push(new GoalZone(obj.x + obj.width! / 2, obj.y + obj.height! / 2, obj.width!, obj.height!))
             }
         }
     }
 
-    return new Stage(
-        mapData.width * mapData.tilewidth,
-        mapData.height * mapData.tileheight,
-        texts,
-        edges,
-        zones,
-        start,
-        goal,
-    )
+    return new Stage(mapData.width * mapData.tilewidth, mapData.height * mapData.tileheight, texts, edges, zones, start)
 }

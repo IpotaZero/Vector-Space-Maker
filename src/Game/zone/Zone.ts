@@ -1,6 +1,7 @@
 import { Camera } from "../Camera.js"
 import { Player } from "../Player.js"
 import { Vec2, vec } from "../../utils/Vec.js"
+import { Game } from "../Game.js"
 
 // 触れると何かが起こる円形のゾーン
 export abstract class Zone {
@@ -28,5 +29,5 @@ export abstract class Zone {
         ctx.setLineDash([])
     }
 
-    abstract onEnter(obj: { player: Player; camera: Camera }): Generator<void, void, unknown>
+    abstract onEnter(obj: Game): Generator<void, void, unknown>
 }

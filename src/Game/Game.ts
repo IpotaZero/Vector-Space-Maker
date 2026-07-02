@@ -24,8 +24,8 @@ export class Game {
     private readonly ctx: CanvasRenderingContext2D
 
     private stage!: Stage
-    private player!: Player
-    private camera!: Camera
+    player!: Player
+    camera!: Camera
 
     private readonly input: Input = { left: false, right: false, jump: false }
     private gens: Generator<void, void, unknown>[] = []
@@ -33,7 +33,10 @@ export class Game {
     private rafId: number | null = null
     private attached = false
 
-    constructor(canvas: HTMLCanvasElement) {
+    constructor(
+        canvas: HTMLCanvasElement,
+        readonly onFinish: () => void,
+    ) {
         this.canvas = canvas
         const ctx = canvas.getContext("2d")
         if (!ctx) throw new Error("2D context is not available")
@@ -74,6 +77,10 @@ export class Game {
             cancelAnimationFrame(this.rafId)
             this.rafId = null
         }
+
+        this.input.left = false
+        this.input.right = false
+        this.input.jump = false
     }
 
     private reset(): void {
@@ -106,7 +113,7 @@ export class Game {
 
         stage.zones.forEach((zone) => {
             if (zone.contains(this.player.p)) {
-                const gen = zone.onEnter({ player: this.player, camera: this.camera })
+                const gen = zone.onEnter(this)
                 this.gens.push(gen)
             }
         })
@@ -131,6 +138,7 @@ export class Game {
 
         this.gens = this.gens.filter((gen) => {
             const result = gen.next()
+
             return !result.done
         })
 
@@ -146,11 +154,6 @@ export class Game {
         for (const z of stage.zones) z.draw(ctx)
         for (const e of stage.edges) e.draw(ctx)
         this.player.draw(ctx)
-
-        ctx.beginPath()
-        ctx.fillStyle = "#000"
-        ctx.arc(stage.goal.x, stage.goal.y, stage.goal.r, 0, Math.PI * 2)
-        ctx.fill()
 
         ctx.restore()
 

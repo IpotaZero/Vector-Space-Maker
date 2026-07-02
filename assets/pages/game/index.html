@@ -1,5 +1,32 @@
 <link rel="stylesheet" href="/assets/pages/game/index.css" />
 
-<div class="page" id="first">
+<div class="page" id="first" data-gotoable>
     <canvas id="main" width="800" height="600"></canvas>
+</div>
+
+<div class="page" id="clear" data-layer="1" data-gotoable>
+    <div class="kakomi">
+        <h2>Clear</h2>
+
+        <div class="options" data-direction="column">
+            <button class="next">Next</button>
+            <button class="retry">Retry</button>
+        </div>
+
+        <span style="opacity: 0">1</span>
+    </div>
+</div>
+
+<div class="page" id="pause" data-layer="1" data-gotoable>
+    <div class="kakomi">
+        <h2>Pause</h2>
+
+        <div class="options" data-direction="column">
+            <button class="resume">Resume</button>
+            <button class="next">Back</button>
+            <button class="retry">Retry</button>
+        </div>
+
+        <span style="opacity: 0">1</span>
+    </div>
 </div>

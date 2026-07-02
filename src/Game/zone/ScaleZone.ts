@@ -1,5 +1,4 @@
-import { Camera } from "../Camera"
-import { Player } from "../Player"
+import { Game } from "../Game"
 import { Zone } from "./Zone"
 
 export class ScaleZone extends Zone {
@@ -10,7 +9,7 @@ export class ScaleZone extends Zone {
         this.scale = scale
     }
 
-    override *onEnter({ camera }: { player: Player; camera: Camera }): Generator<void, void, unknown> {
+    override *onEnter({ camera }: Game): Generator<void, void, unknown> {
         const frame = 15
 
         const startScale = camera.scale

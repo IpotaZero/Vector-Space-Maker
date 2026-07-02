@@ -1,7 +1,6 @@
-import { Camera } from "../Camera.js"
-import { Player } from "../Player.js"
 import { Vec2 } from "../../utils/Vec.js"
 import { Zone } from "./Zone.js"
+import { Game } from "../Game.js"
 
 // 触れると重力の向き・強さが変わる円形のゾーン
 export class GravityZone extends Zone {
@@ -12,7 +11,7 @@ export class GravityZone extends Zone {
         this.gravity = gravity
     }
 
-    override *onEnter({ player }: { player: Player; camera: Camera }): Generator<void, void, unknown> {
+    override *onEnter({ player }: Game): Generator<void, void, unknown> {
         player.g = this.gravity
     }
 

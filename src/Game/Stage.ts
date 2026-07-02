@@ -10,6 +10,5 @@ export class Stage {
         public edges: Edge[],
         public zones: Zone[],
         public start: { x: number; y: number },
-        public goal: { x: number; y: number; r: number },
     ) {}
 }
