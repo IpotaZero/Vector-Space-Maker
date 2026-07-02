@@ -3,11 +3,10 @@ import { PageDom } from "./PageDom"
 import { PageEventSetter } from "./PageEventSetter"
 import { PageState } from "./PageState"
 
-export type FadeOption = Partial<{ msIn: number; msOut: number; pageTransition: PageTransition }>
+export type FadeOption = Partial<{ msIn: number; msOut: number }>
 export type GotoOption = FadeOption & {
     button?: HTMLButtonElement
     back?: boolean
-    pageTransition?: PageTransition
 }
 
 export type PageTransition = (from: HTMLElement, to: HTMLElement) => Promise<void>
@@ -29,6 +28,16 @@ export class Pages {
 
     getHistory() {
         return this.state.getHistory()
+    }
+
+    private readonly transitions: Record<string, Record<string, PageTransition>> = {}
+
+    setTransition(from: string, to: string, transition: PageTransition) {
+        if (!this.transitions[from]) {
+            this.transitions[from] = {}
+        }
+
+        this.transitions[from][to] = transition
     }
 
     async loadFromFile(container: HTMLElement, path: string, options: LoadOption = {}) {
@@ -117,10 +126,11 @@ export class Pages {
         layerFrom: number,
         layerTo: number,
         id: string,
-        { button, back, msIn = 200, msOut = 200, pageTransition }: GotoOption,
+        { button, back, msIn = 200, msOut = 200 }: GotoOption,
     ) {
         const currentPageId = this.state.currentPageId
-        const transition = pageTransition ?? this.getDefaultPageTransition(layerFrom, layerTo, msIn, msOut)
+        const transition =
+            this.transitions[currentPageId]?.[id] ?? this.getDefaultPageTransition(layerFrom, layerTo, msIn, msOut)
 
         if (layerFrom === layerTo) {
             await this.dom.fade(currentPageId, id, transition)
