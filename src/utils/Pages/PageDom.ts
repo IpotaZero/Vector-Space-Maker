@@ -11,6 +11,8 @@ export class PageDom {
 
     readonly ready
 
+    private animationId = 0
+
     constructor(container: HTMLElement, html: string, override: boolean) {
         // Initialize container
         this.container = container
@@ -18,13 +20,28 @@ export class PageDom {
     }
 
     async fade(currentPageId: string, nextPageId: string, transition: TransitionArgs) {
+        const animationId = ++this.animationId
+
         const from = this.getPage(currentPageId)
         const to = this.getPage(nextPageId)
+
+        from.getAnimations().forEach((a) => a.cancel())
+        to.getAnimations().forEach((a) => a.cancel())
+
+        to.classList.remove("hidden")
+
+        to.style.opacity = "0"
+        await Awaits.frame()
+        to.style.opacity = ""
 
         const animationFrom = from.animate(transition.from[0], transition.from[1])
         const animationTo = to.animate(transition.to[0], transition.to[1])
 
         await Promise.all([animationFrom.finished, animationTo.finished])
+
+        if (animationId !== this.animationId) return
+        from.classList.add("hidden")
+        to.classList.remove("hidden")
     }
 
     getPage(pageId: string, option: { noError: true }): HTMLElement | undefined

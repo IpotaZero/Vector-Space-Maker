@@ -30,8 +30,6 @@ export class Pages {
     static onTransitionStart = (pages: Pages) => {}
     static onTransitionEnd = (pages: Pages) => {}
 
-    private animationId = 0
-
     getHistory() {
         return this.state.getHistory()
     }
@@ -49,39 +47,6 @@ export class Pages {
         }
 
         this.transitions[from][to] = forward
-    }
-
-    private async animatePair(
-        animate: (element: HTMLElement, ...args: AnimateArgs) => Animation,
-        from: HTMLElement,
-        to: HTMLElement,
-        args: TransitionArgs,
-    ) {
-        const animationId = ++this.animationId
-
-        to.getAnimations().forEach((a) => a.cancel())
-        from.getAnimations().forEach((a) => a.cancel())
-
-        to.style.opacity = "0"
-        to.classList.remove("hidden")
-
-        await Awaits.frame()
-
-        const fromAnimation = animate(from, ...args.from)
-        const toAnimation = animate(to, ...args.to)
-
-        to.style.opacity = ""
-        fromAnimation.play()
-        toAnimation.play()
-
-        await Promise.all([fromAnimation.finished, toAnimation.finished])
-
-        if (animationId !== this.animationId) return
-        from.classList.add("hidden")
-        to.classList.remove("hidden")
-
-        // fromAnimation.cancel()
-        // toAnimation.cancel()
     }
 
     async loadFromFile(container: HTMLElement, path: string, options: LoadOption = {}) {
