@@ -9,7 +9,17 @@ export type GotoOption = FadeOption & {
     back?: boolean
 }
 
-export type PageTransition = (from: HTMLElement, to: HTMLElement) => Promise<void>
+type AnimateArgs = Parameters<HTMLElement["animate"]>
+type TransitionArgs = {
+    from: AnimateArgs
+    to: AnimateArgs
+}
+
+export type PageTransition = (
+    animate: (element: HTMLElement, ...args: AnimateArgs) => Animation,
+    from: HTMLElement,
+    to: HTMLElement,
+) => Promise<void>
 
 type LoadOption = Partial<{ history: readonly string[]; override: boolean }>
 
@@ -32,12 +42,39 @@ export class Pages {
 
     private readonly transitions: Record<string, Record<string, PageTransition>> = {}
 
-    setTransition(from: string, to: string, transition: PageTransition) {
+    setTransition(from: string, to: string, forward: TransitionArgs) {
         if (!this.transitions[from]) {
             this.transitions[from] = {}
         }
 
-        this.transitions[from][to] = transition
+        this.transitions[from][to] = async (animate, fromPage, toPage) => {
+            await this.animatePair(animate, fromPage, toPage, forward)
+        }
+    }
+
+    private async animatePair(
+        animate: (element: HTMLElement, ...args: AnimateArgs) => Animation,
+        from: HTMLElement,
+        to: HTMLElement,
+        args: TransitionArgs,
+    ) {
+        to.classList.remove("hidden")
+
+        const fromAnimation = animate(from, ...args.from)
+        const toAnimation = animate(to, ...args.to)
+
+        await Promise.all([fromAnimation.finished, toAnimation.finished])
+        from.classList.add("hidden")
+        fromAnimation.cancel()
+        toAnimation.cancel()
+    }
+
+    private reverseAnimateArgs([keyframes, options]: AnimateArgs): AnimateArgs {
+        if (typeof options === "number") {
+            return [keyframes, options]
+        }
+
+        return [keyframes, { ...(options ?? {}), direction: "reverse" }]
     }
 
     async loadFromFile(container: HTMLElement, path: string, options: LoadOption = {}) {
@@ -155,22 +192,24 @@ export class Pages {
 
     private getDefaultPageTransition(layerFrom: number, layerTo: number, msIn: number, msOut: number): PageTransition {
         if (layerFrom === layerTo) {
-            return async (from, to) => {
+            return async (_animate, from, to) => {
                 await Transition.fadeOut(from, msIn)
+                from.classList.add("hidden")
                 await Transition.fadeIn(to, msOut)
                 to.classList.remove("hidden")
             }
         }
 
         if (layerFrom < layerTo) {
-            return async (_from, to) => {
+            return async (_animate, _from, to) => {
                 to.classList.remove("hidden")
                 await Transition.fadeIn(to, msOut)
             }
         }
 
-        return async (from, _to) => {
+        return async (_animate, from, _to) => {
             await Transition.fadeOut(from, msIn)
+            from.classList.add("hidden")
         }
     }
 }

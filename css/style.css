@@ -30,6 +30,8 @@ body {
     background: #e8e8e8;
 
     font-size: 24px;
+
+    overflow: hidden;
 }
 
 #container {

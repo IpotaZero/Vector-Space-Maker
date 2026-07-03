@@ -21,7 +21,7 @@ export class PageDom {
         const from = this.getPage(currentPageId)
         const to = this.getPage(nextPageId)
 
-        await pageTransition(from, to)
+        await pageTransition((element, keyframes, options) => element.animate(keyframes, options), from, to)
     }
 
     getPage(pageId: string, option: { noError: true }): HTMLElement | undefined

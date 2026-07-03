@@ -2,54 +2,29 @@ import { Awaits } from "./Awaits"
 
 export class Transition {
     static async fadeOut(container: HTMLElement, ms: number = 200) {
-        if (ms === 0) {
-            container.style.transition = "opacity 0s"
-            container.style.opacity = "0"
-            container.style.pointerEvents = "none"
-            return
-        }
-
-        container.style.transition = "opacity 0s"
         container.style.pointerEvents = "none"
 
-        await Awaits.frame(() => {
-            container.style.opacity = "1"
+        const animation = container.animate([{ opacity: 1 }, { opacity: 0 }], {
+            duration: ms,
+            easing: "ease",
+            fill: "forwards",
         })
 
-        await Awaits.frame(() => {
-            container.style.transition = `opacity ${ms}ms`
-            container.style.opacity = "0"
-        })
-
-        await Awaits.sleep(ms)
+        await animation.finished
     }
 
     static async fadeIn(container: HTMLElement, ms: number = 200) {
-        if (ms === 0) {
-            container.style.transition = "opacity 0s"
-            container.style.opacity = "1"
-            container.style.pointerEvents = ""
-            return
-        }
-
-        container.style.opacity = "0"
-        container.style.transition = "opacity 0s"
         container.style.pointerEvents = "none"
 
-        await Awaits.frame(() => {
-            container.style.opacity = "0"
+        const animation = container.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: ms,
+            easing: "ease",
+            fill: "forwards",
         })
 
-        await Awaits.frame(() => {
-            container.style.transition = `opacity ${ms}ms`
-            container.style.opacity = "1"
-        })
+        await animation.finished
 
-        await Awaits.sleep(ms)
-
-        await Awaits.frame(() => {
-            container.style.pointerEvents = ""
-        })
+        container.style.pointerEvents = ""
     }
 
     static async valeOut(container: HTMLElement, ms: number = 200) {
