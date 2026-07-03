@@ -52,5 +52,5 @@ const update = () => {
 requestAnimationFrame(update)
 
 window.addEventListener("keydown", (e) => {
-    if (e.code === "Tab") e.preventDefault()
+    if (["Tab", "Enter"].includes(e.code)) e.preventDefault()
 })
