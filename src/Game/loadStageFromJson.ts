@@ -8,11 +8,15 @@ import { ScaleZone } from "./zone/ScaleZone.js"
 import { Zone } from "./zone/Zone.js"
 import { GoalZone } from "./zone/GoalZone.js"
 
-export async function loadStageFromJson(url: string): Promise<Stage> {
+export async function loadStageFromUrl(url: string): Promise<Stage> {
     const response = await fetch(url)
     // JSON全体を tiled.Map 型としてキャスト
     const mapData = (await response.json()) as tiled.Map
 
+    return loadStageFromMapData(mapData)
+}
+
+export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
     const texts: Text[] = []
     const edges: Edge[] = []
     const zones: Zone[] = []

@@ -4,6 +4,9 @@ import { Selector } from "../utils/Selector"
 import { Scene } from "../utils/Scene/Scene"
 import { focuses, sc } from "../main"
 import { SceneGame } from "./SceneGame"
+import { Awaits } from "../utils/Functions/Awaits"
+import * as tiled from "@kayahr/tiled"
+import { downLoadString } from "../utils/Functions/downLoadString"
 
 export class SceneTitle extends Scene {
     private pages = new Pages()
@@ -13,6 +16,8 @@ export class SceneTitle extends Scene {
         super()
         this.selector = new Selector({
             "#stage-buttons": { alias: "stages" },
+            ".download": { alias: "download" },
+            ".load": { alias: "load" },
         })
     }
 
@@ -73,7 +78,28 @@ export class SceneTitle extends Scene {
         focuses.setPage(this.pages.getCurrentPage())
 
         this.selector.onDelegateClick("stages", "button", async (args) => {
-            sc.goto(new SceneGame(args.dataset.stage!))
+            const mapData = (await fetch(`stages/${args.dataset.stage}.tmj`).then((res) => res.json())) as tiled.Map
+            console.log(mapData)
+            sc.goto(new SceneGame(mapData))
+            // sc.goto(new SceneGame(args.dataset.stage!))
+        })
+
+        this.selector.onClick("download", async () => {
+            const mapData = await fetch(`stages/test.tmj`).then((res) => res.text())
+
+            downLoadString(mapData, "test", "tmj")
+        })
+
+        this.selector.onClick("load", async () => {
+            const file = await Awaits.inputFile("json")
+            if (!file) return
+
+            const text = await file.text()
+            const data = JSON.parse(text)
+
+            console.log(data)
+
+            sc.goto(new SceneGame(data))
         })
     }
 

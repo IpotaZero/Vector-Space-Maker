@@ -1,4 +1,4 @@
-export function downLoadString(string: string, defaultName: string) {
+export function downLoadString(string: string, defaultName: string, extension: string = "json") {
     // 2. ユーザーにファイル名を決めてもらう
     // キャンセルされたら終了
     const fileName = window.prompt("保存するファイルを命名しよう", defaultName)
@@ -12,7 +12,7 @@ export function downLoadString(string: string, defaultName: string) {
     const a = document.createElement("a")
 
     a.href = url
-    a.download = `${fileName}.json` // 拡張子を付ける
+    a.download = `${fileName}.${extension}` // 拡張子を付ける
 
     // 5. リンクを自動クリックしてダウンロード開始
     a.click()

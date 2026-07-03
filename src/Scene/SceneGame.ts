@@ -5,6 +5,7 @@ import { Pages } from "../utils/Pages/Pages"
 import { Selector } from "../utils/Selector"
 import { Scene } from "../utils/Scene/Scene"
 import { SceneTitle } from "./SceneTitle"
+import * as tiled from "@kayahr/tiled"
 
 export class SceneGame extends Scene {
     private game!: Game
@@ -13,7 +14,7 @@ export class SceneGame extends Scene {
 
     private readonly ac = new AbortController()
 
-    constructor(private readonly stagePath: string) {
+    constructor(private readonly mapData: tiled.Map) {
         super()
 
         this.selector = new Selector({
@@ -30,7 +31,7 @@ export class SceneGame extends Scene {
         this.selector.load(Dom.container)
 
         this.selector.onClick("retry", () => {
-            sc.goto(new SceneGame(this.stagePath))
+            sc.goto(new SceneGame(this.mapData))
         })
 
         this.selector.onClick("next", () => {
@@ -45,7 +46,7 @@ export class SceneGame extends Scene {
             this.pages.back(1)
         })
 
-        await this.game.load(`stages/${this.stagePath}.tmj`)
+        await this.game.loadFromMapData(this.mapData)
     }
 
     update() {

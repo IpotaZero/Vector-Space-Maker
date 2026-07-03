@@ -1,9 +1,10 @@
 import { Camera } from "./Camera"
-import { loadStageFromJson } from "./loadStageFromJson"
+import { loadStageFromMapData, loadStageFromUrl } from "./loadStageFromJson"
 import { Player } from "./Player"
 import { Stage } from "./Stage"
 import { vec } from "../utils/Vec"
 import { DigitalInputReader } from "../utils/Input/DigitalInput"
+import * as tiled from "@kayahr/tiled"
 
 const WIDTH = 1200
 const HEIGHT = 900
@@ -38,8 +39,8 @@ export class Game {
     }
 
     /** ステージを読み込み、初期状態をセットアップする */
-    async load(stagePath: string): Promise<void> {
-        this.stage = await loadStageFromJson(stagePath)
+    async loadFromMapData(mapData: tiled.Map): Promise<void> {
+        this.stage = await loadStageFromMapData(mapData)
         this.camera = new Camera(vec(this.stage.start.x, this.stage.start.y))
         this.reset()
     }
