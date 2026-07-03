@@ -13,6 +13,7 @@ export type AnimateArgs = Parameters<HTMLElement["animate"]>
 export type TransitionArgs = {
     from: AnimateArgs
     to: AnimateArgs
+    crossFade?: boolean
 }
 
 type LoadOption = Partial<{ history: readonly string[]; override: boolean }>
@@ -36,12 +37,7 @@ export class Pages {
 
     private readonly transitions: Record<string, Record<string, TransitionArgs>> = {}
 
-    setTransition(
-        from: string,
-        to: string,
-        forward: TransitionArgs,
-        options: { crossFade: boolean } = { crossFade: false },
-    ) {
+    setTransition(from: string, to: string, forward: TransitionArgs) {
         if (!this.transitions[from]) {
             this.transitions[from] = {}
         }
@@ -127,8 +123,6 @@ export class Pages {
 
         await this.transition(layerFrom, layerTo, id, option)
 
-        this.getCurrentPage().classList.remove("hidden")
-
         // 5. 遷移完了
         this.state.endTransition()
     }
@@ -141,10 +135,10 @@ export class Pages {
     ) {
         const currentPageId = this.state.currentPageId
         const transition =
-            this.transitions[currentPageId]?.[id] ?? this.getDefaultPageTransition(layerFrom, layerTo, msIn, msOut)
+            this.transitions[currentPageId]?.[id] ?? getDefaultPageTransition(layerFrom, layerTo, msIn, msOut)
 
         if (layerFrom === layerTo) {
-            this.dom.fade(currentPageId, id, transition)
+            this.dom.fade(currentPageId, id, transition, layerFrom, layerTo)
             this.state.goto(id)
             Pages.onTransitionEnd(this)
             return
@@ -153,36 +147,39 @@ export class Pages {
         if (layerFrom < layerTo) {
             this.state.goto(id)
             Pages.onTransitionEnd(this)
-            this.dom.fade(currentPageId, id, transition)
+            this.dom.fade(currentPageId, id, transition, layerFrom, layerTo)
             return
         }
 
         if (!back) throw new Error("下のlayerにback以外でgotoしようとした。")
 
-        this.dom.fade(currentPageId, id, transition)
+        this.dom.fade(currentPageId, id, transition, layerFrom, layerTo)
         this.state.goto(id)
         Pages.onTransitionEnd(this)
     }
+}
 
-    private getDefaultPageTransition(layerFrom: number, layerTo: number, msIn: number, msOut: number): TransitionArgs {
-        if (layerFrom === layerTo) {
-            return {
-                from: [[{ opacity: 1 }, { opacity: 0 }], { duration: msOut, easing: "ease", fill: "forwards" }],
-                to: [[{ opacity: 0 }, { opacity: 1 }], { duration: msIn, easing: "ease", fill: "forwards" }],
-            }
-        }
-
-        if (layerFrom < layerTo) {
-            return {
-                from: [[]],
-                to: [[{ opacity: 0 }, { opacity: 1 }], { duration: msIn, easing: "ease", fill: "forwards" }],
-            }
-        }
-
+function getDefaultPageTransition(layerFrom: number, layerTo: number, msIn: number, msOut: number): TransitionArgs {
+    if (layerFrom === layerTo) {
         return {
             from: [[{ opacity: 1 }, { opacity: 0 }], { duration: msOut, easing: "ease", fill: "forwards" }],
-            to: [[]],
+            to: [[{ opacity: 0 }, { opacity: 1 }], { duration: msIn, easing: "ease", fill: "forwards" }],
+            crossFade: false,
         }
+    }
+
+    if (layerFrom < layerTo) {
+        return {
+            from: [[]],
+            to: [[{ opacity: 0 }, { opacity: 1 }], { duration: msIn, easing: "ease", fill: "forwards" }],
+            crossFade: false,
+        }
+    }
+
+    return {
+        from: [[{ opacity: 1 }, { opacity: 0 }], { duration: msOut, easing: "ease", fill: "forwards" }],
+        to: [[]],
+        crossFade: false,
     }
 }
 

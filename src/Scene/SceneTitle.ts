@@ -26,49 +26,41 @@ export class SceneTitle extends Scene {
     async start(): Promise<void> {
         await this.pages.loadFromFile(Dom.container, "assets/pages/title/index.html")
 
-        this.pages.setTransition(
-            "first",
-            "stages",
-            {
-                from: [
-                    [
-                        { transform: "translateX(0)", opacity: 1 },
-                        { transform: "translateX(-25%)", opacity: 0 },
-                    ],
-                    { duration: 400, easing: "ease", fill: "forwards" },
+        this.pages.setTransition("first", "stages", {
+            from: [
+                [
+                    { transform: "translateX(0)", opacity: 1 },
+                    { transform: "translateX(-25%)", opacity: 0 },
                 ],
-                to: [
-                    [
-                        { transform: "translateX(25%)", opacity: 0 },
-                        { transform: "translateX(0)", opacity: 1 },
-                    ],
-                    { duration: 400, easing: "ease", fill: "forwards" },
+                { duration: 400, easing: "ease", fill: "forwards" },
+            ],
+            to: [
+                [
+                    { transform: "translateX(25%)", opacity: 0 },
+                    { transform: "translateX(0)", opacity: 1 },
                 ],
-            },
-            { crossFade: false },
-        )
+                { duration: 400, easing: "ease", fill: "forwards" },
+            ],
+            crossFade: true,
+        })
 
-        this.pages.setTransition(
-            "stages",
-            "first",
-            {
-                from: [
-                    [
-                        { transform: "translateX(0)", opacity: 1 },
-                        { transform: "translateX(25%)", opacity: 0 },
-                    ],
-                    { duration: 400, easing: "ease", fill: "forwards" },
+        this.pages.setTransition("stages", "first", {
+            from: [
+                [
+                    { transform: "translateX(0)", opacity: 1 },
+                    { transform: "translateX(25%)", opacity: 0 },
                 ],
-                to: [
-                    [
-                        { transform: "translateX(-25%)", opacity: 0 },
-                        { transform: "translateX(0)", opacity: 1 },
-                    ],
-                    { duration: 400, easing: "ease", fill: "forwards" },
+                { duration: 400, easing: "ease", fill: "forwards" },
+            ],
+            to: [
+                [
+                    { transform: "translateX(-25%)", opacity: 0 },
+                    { transform: "translateX(0)", opacity: 1 },
                 ],
-            },
-            { crossFade: true },
-        )
+                { duration: 400, easing: "ease", fill: "forwards" },
+            ],
+            crossFade: true,
+        })
 
         this.selector.load(Dom.container)
         this.selector

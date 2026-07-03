@@ -3,7 +3,7 @@ import { Grid } from "./Focuses"
 export function buildGrid(page: HTMLElement): Grid {
     const containers = Array.from(page.querySelectorAll(".options")).filter((e) => e instanceof HTMLElement)
 
-    console.log("buildGrid", page)
+    // console.log("buildGrid", page)
 
     return containers
         .map((options) => {
