@@ -9,6 +9,35 @@
 
 #stages {
     display: flex;
+    flex-direction: row;
     padding: 1em;
-    gap: 1em;
+
+    #left,
+    #right {
+        flex: 1;
+        height: 100%;
+    }
+
+    #left {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        gap: 1em;
+
+        padding-right: 1em;
+
+        border-right: 0.05em solid #111;
+    }
+
+    #right {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        gap: 1em;
+
+        padding-left: 1em;
+    }
 }

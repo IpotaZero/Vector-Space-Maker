@@ -1,11 +1,6 @@
 @font-face {
     font-family: "normal";
-    src: url("../assets/fonts/PoiretOne-Regular.ttf") format("truetype");
-}
-
-@font-face {
-    font-family: "japanese";
-    src: url("../assets/fonts/KleeOne-Regular.ttf") format("truetype");
+    src: url("../assets/fonts/NagomiGokubosoGothic-ExtraLight.otf") format("truetype");
 }
 
 * {
