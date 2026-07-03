@@ -29,7 +29,7 @@ export class Player {
         this.p = this.p.add(this.v)
 
         // 空気抵抗
-        this.v = this.v.mul(0.99)
+        this.v = this.v.mul(0.97)
 
         this.rotation += this.v.dot(this.g.normal()) / 36
 
@@ -39,10 +39,10 @@ export class Player {
     // 入力
     move(input: DigitalInputReader<"left" | "right" | "jump">): void {
         if (input.isPressed("right")) {
-            this.v = this.v.add(this.g.normal().mul(0.3))
+            this.v = this.v.add(this.g.normal().mul(0.4))
         }
         if (input.isPressed("left")) {
-            this.v = this.v.add(this.g.normal().mul(-0.3))
+            this.v = this.v.add(this.g.normal().mul(-0.4))
         }
 
         if (input.isPressed("jump")) {

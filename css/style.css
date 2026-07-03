@@ -26,7 +26,7 @@ body {
 
     font-size: 24px;
 
-    overflow: hidden;
+    overflow: visible;
 }
 
 #container {
@@ -58,7 +58,7 @@ button {
     border: none;
     background: none;
 
-    width: 6em;
+    width: 12em;
 
     font-size: 1.5em;
 

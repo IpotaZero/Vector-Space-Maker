@@ -1,4 +1,4 @@
-import { Transition } from "../Functions/Transition"
+import { Awaits } from "../Functions/Awaits"
 import { PageDom } from "./PageDom"
 import { PageEventSetter } from "./PageEventSetter"
 import { PageState } from "./PageState"
@@ -44,7 +44,12 @@ export class Pages {
 
     private readonly transitions: Record<string, Record<string, PageTransition>> = {}
 
-    setTransition(from: string, to: string, forward: TransitionArgs) {
+    setTransition(
+        from: string,
+        to: string,
+        forward: TransitionArgs,
+        options: { crossFade: boolean } = { crossFade: false },
+    ) {
         if (!this.transitions[from]) {
             this.transitions[from] = {}
         }
@@ -62,10 +67,20 @@ export class Pages {
     ) {
         const animationId = ++this.animationId
 
+        to.getAnimations().forEach((a) => a.cancel())
+        from.getAnimations().forEach((a) => a.cancel())
+
+        to.style.opacity = "0"
         to.classList.remove("hidden")
+
+        await Awaits.frame()
 
         const fromAnimation = animate(from, ...args.from)
         const toAnimation = animate(to, ...args.to)
+
+        to.style.opacity = ""
+        fromAnimation.play()
+        toAnimation.play()
 
         await Promise.all([fromAnimation.finished, toAnimation.finished])
 
