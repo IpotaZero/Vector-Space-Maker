@@ -22,9 +22,9 @@ export class Transition {
             fill: "forwards",
         })
 
-        await animation.finished
-
         container.style.pointerEvents = ""
+
+        await animation.finished
     }
 
     static async valeOut(container: HTMLElement, ms: number = 200) {

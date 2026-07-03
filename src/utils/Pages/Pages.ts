@@ -64,9 +64,10 @@ export class Pages {
         const toAnimation = animate(to, ...args.to)
 
         await Promise.all([fromAnimation.finished, toAnimation.finished])
-        from.classList.add("hidden")
         fromAnimation.cancel()
         toAnimation.cancel()
+
+        from.classList.add("hidden")
     }
 
     async loadFromFile(container: HTMLElement, path: string, options: LoadOption = {}) {

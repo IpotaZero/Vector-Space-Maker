@@ -27,14 +27,14 @@ export class SceneTitle extends Scene {
                     { transform: "translateX(0)", opacity: 1 },
                     { transform: "translateX(-25%)", opacity: 0 },
                 ],
-                { duration: 400, easing: "ease", fill: "forwards" },
+                { duration: 200, easing: "ease-out", fill: "forwards" },
             ],
             to: [
                 [
                     { transform: "translateX(25%)", opacity: 0 },
                     { transform: "translateX(0)", opacity: 1 },
                 ],
-                { duration: 400, easing: "ease", fill: "forwards" },
+                { duration: 200, easing: "ease-out", fill: "forwards" },
             ],
         })
 
@@ -44,14 +44,14 @@ export class SceneTitle extends Scene {
                     { transform: "translateX(0)", opacity: 1 },
                     { transform: "translateX(25%)", opacity: 0 },
                 ],
-                { duration: 400, easing: "ease", fill: "forwards" },
+                { duration: 200, easing: "ease", fill: "forwards" },
             ],
             to: [
                 [
                     { transform: "translateX(-25%)", opacity: 0 },
                     { transform: "translateX(0)", opacity: 1 },
                 ],
-                { duration: 400, easing: "ease", fill: "forwards" },
+                { duration: 200, easing: "ease", fill: "forwards" },
             ],
         })
 
