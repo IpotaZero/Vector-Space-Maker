@@ -1,5 +1,6 @@
 #main {
     box-shadow: 0 0 0.5em 0.5em #00000010;
+    height: 100%;
 }
 
 #clear,
@@ -14,6 +15,16 @@
     background: #ffffff80;
 
     .kakomi {
+        h2 {
+            width: 100%;
+            text-align: center;
+            border-bottom: 0.03em solid #111;
+            padding-bottom: 0.1em;
+            font-weight: 400;
+        }
+
+        border-radius: 0.2em;
+
         display: flex;
         flex-direction: column;
         justify-content: space-between;

@@ -9,7 +9,7 @@ const normalizeAngle = (a: number): number => {
 export class Camera {
     p: Vec2
     angle = 0
-    scale = 1
+    scale = 1.5
 
     constructor(start: Vec2) {
         this.p = start

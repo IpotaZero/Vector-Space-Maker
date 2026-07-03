@@ -1,3 +1,4 @@
+import { Ease } from "../../utils/Functions/Ease"
 import { Game } from "../Game"
 import { Zone } from "./Zone"
 
@@ -16,7 +17,7 @@ export class ScaleZone extends Zone {
         const diffScale = this.scale - startScale
 
         for (let i = 0; i < frame; i++) {
-            camera.scale = startScale + (diffScale * (i + 1)) / frame
+            camera.scale = startScale + diffScale * Ease.Out((i + 1) / frame)
             yield
         }
     }

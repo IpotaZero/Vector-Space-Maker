@@ -5,8 +5,8 @@ import { Stage } from "./Stage"
 import { vec } from "../utils/Vec"
 import { DigitalInputReader } from "../utils/Input/DigitalInput"
 
-const WIDTH = 900
-const HEIGHT = 600
+const WIDTH = 1600
+const HEIGHT = 900
 
 /**
  * ゲーム本体をカプセル化したクラス。
@@ -46,7 +46,7 @@ export class Game {
 
     private reset(): void {
         this.player = new Player(vec(this.stage.start.x, this.stage.start.y))
-        this.camera.scale = 1
+        this.camera.scale = 1.5
         this.gens = []
     }
 

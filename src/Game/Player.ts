@@ -79,7 +79,7 @@ export class Player {
         // 床がどれだけ垂直か(重力方向に対して)
         const verticality = floor.vec().normalized().cross(this.g.normalized())
 
-        if (verticality >= 0.1 && floor.jumpable) {
+        if (verticality >= 0.2 && floor.jumpable) {
             this.onFloor.push(true)
         }
 
