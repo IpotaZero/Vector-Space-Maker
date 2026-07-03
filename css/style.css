@@ -65,6 +65,8 @@ button {
     font-family: "normal", sans-serif;
 
     pointer-events: auto;
+
+    padding-bottom: 0.17em;
 }
 
 .options {

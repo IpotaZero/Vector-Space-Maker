@@ -5,7 +5,7 @@ import { Stage } from "./Stage"
 import { vec } from "../utils/Vec"
 import { DigitalInputReader } from "../utils/Input/DigitalInput"
 
-const WIDTH = 1600
+const WIDTH = 1200
 const HEIGHT = 900
 
 /**

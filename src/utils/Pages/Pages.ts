@@ -69,14 +69,6 @@ export class Pages {
         toAnimation.cancel()
     }
 
-    private reverseAnimateArgs([keyframes, options]: AnimateArgs): AnimateArgs {
-        if (typeof options === "number") {
-            return [keyframes, options]
-        }
-
-        return [keyframes, { ...(options ?? {}), direction: "reverse" }]
-    }
-
     async loadFromFile(container: HTMLElement, path: string, options: LoadOption = {}) {
         if (!Pages.cache.has(path)) {
             const html = await fetch(path).then((res) => res.text())
