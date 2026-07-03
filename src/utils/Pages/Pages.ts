@@ -9,17 +9,11 @@ export type GotoOption = FadeOption & {
     back?: boolean
 }
 
-type AnimateArgs = Parameters<HTMLElement["animate"]>
-type TransitionArgs = {
+export type AnimateArgs = Parameters<HTMLElement["animate"]>
+export type TransitionArgs = {
     from: AnimateArgs
     to: AnimateArgs
 }
-
-export type PageTransition = (
-    animate: (element: HTMLElement, ...args: AnimateArgs) => Animation,
-    from: HTMLElement,
-    to: HTMLElement,
-) => Promise<void>
 
 type LoadOption = Partial<{ history: readonly string[]; override: boolean }>
 
@@ -42,7 +36,7 @@ export class Pages {
         return this.state.getHistory()
     }
 
-    private readonly transitions: Record<string, Record<string, PageTransition>> = {}
+    private readonly transitions: Record<string, Record<string, TransitionArgs>> = {}
 
     setTransition(
         from: string,
@@ -54,9 +48,7 @@ export class Pages {
             this.transitions[from] = {}
         }
 
-        this.transitions[from][to] = async (animate, fromPage, toPage) => {
-            await this.animatePair(animate, fromPage, toPage, forward)
-        }
+        this.transitions[from][to] = forward
     }
 
     private async animatePair(
@@ -207,28 +199,25 @@ export class Pages {
         Pages.onTransitionEnd(this)
     }
 
-    private getDefaultPageTransition(layerFrom: number, layerTo: number, msIn: number, msOut: number): PageTransition {
+    private getDefaultPageTransition(layerFrom: number, layerTo: number, msIn: number, msOut: number): TransitionArgs {
         if (layerFrom === layerTo) {
-            return async (_animate, from, to) =>
-                this.animatePair(_animate, from, to, {
-                    from: [[{ opacity: 1 }, { opacity: 0 }], { duration: msOut, easing: "ease", fill: "forwards" }],
-                    to: [[{ opacity: 0 }, { opacity: 1 }], { duration: msIn, easing: "ease", fill: "forwards" }],
-                })
+            return {
+                from: [[{ opacity: 1 }, { opacity: 0 }], { duration: msOut, easing: "ease", fill: "forwards" }],
+                to: [[{ opacity: 0 }, { opacity: 1 }], { duration: msIn, easing: "ease", fill: "forwards" }],
+            }
         }
 
         if (layerFrom < layerTo) {
-            return async (_animate, _from, to) =>
-                this.animatePair(_animate, _from, to, {
-                    from: [[{ opacity: 0 }, { opacity: 0 }], { duration: msOut, easing: "ease", fill: "forwards" }],
-                    to: [[{ opacity: 0 }, { opacity: 1 }], { duration: msIn, easing: "ease", fill: "forwards" }],
-                })
+            return {
+                from: [[]],
+                to: [[{ opacity: 0 }, { opacity: 1 }], { duration: msIn, easing: "ease", fill: "forwards" }],
+            }
         }
 
-        return async (_animate, from, _to) =>
-            this.animatePair(_animate, from, _to, {
-                from: [[{ opacity: 1 }, { opacity: 0 }], { duration: msOut, easing: "ease", fill: "forwards" }],
-                to: [[{ opacity: 0 }, { opacity: 0 }], { duration: msIn, easing: "ease", fill: "forwards" }],
-            })
+        return {
+            from: [[{ opacity: 1 }, { opacity: 0 }], { duration: msOut, easing: "ease", fill: "forwards" }],
+            to: [[]],
+        }
     }
 }
 

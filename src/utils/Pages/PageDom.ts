@@ -1,6 +1,6 @@
 import { Awaits } from "../Functions/Awaits"
 import { RegExpDict } from "../RegExpDict"
-import { PageTransition } from "./Pages"
+import { AnimateArgs, TransitionArgs } from "./Pages"
 
 /**
  * domのセットアップ、保持、フェードを行う。
@@ -17,11 +17,14 @@ export class PageDom {
         this.ready = this.setup(html, override)
     }
 
-    async fade(currentPageId: string, nextPageId: string, pageTransition: PageTransition) {
+    async fade(currentPageId: string, nextPageId: string, transition: TransitionArgs) {
         const from = this.getPage(currentPageId)
         const to = this.getPage(nextPageId)
 
-        await pageTransition((element, keyframes, options) => element.animate(keyframes, options), from, to)
+        const animationFrom = from.animate(transition.from[0], transition.from[1])
+        const animationTo = to.animate(transition.to[0], transition.to[1])
+
+        await Promise.all([animationFrom.finished, animationTo.finished])
     }
 
     getPage(pageId: string, option: { noError: true }): HTMLElement | undefined
