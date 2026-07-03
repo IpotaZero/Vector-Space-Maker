@@ -36,6 +36,8 @@ export class Pages {
     static onTransitionStart = (pages: Pages) => {}
     static onTransitionEnd = (pages: Pages) => {}
 
+    private animationId = 0
+
     getHistory() {
         return this.state.getHistory()
     }
@@ -58,16 +60,21 @@ export class Pages {
         to: HTMLElement,
         args: TransitionArgs,
     ) {
+        const animationId = ++this.animationId
+
         to.classList.remove("hidden")
 
         const fromAnimation = animate(from, ...args.from)
         const toAnimation = animate(to, ...args.to)
 
         await Promise.all([fromAnimation.finished, toAnimation.finished])
-        fromAnimation.cancel()
-        toAnimation.cancel()
 
+        if (animationId !== this.animationId) return
         from.classList.add("hidden")
+        to.classList.remove("hidden")
+
+        // fromAnimation.cancel()
+        // toAnimation.cancel()
     }
 
     async loadFromFile(container: HTMLElement, path: string, options: LoadOption = {}) {
@@ -148,6 +155,8 @@ export class Pages {
 
         await this.transition(layerFrom, layerTo, id, option)
 
+        this.getCurrentPage().classList.remove("hidden")
+
         // 5. 遷移完了
         this.state.endTransition()
     }
@@ -163,7 +172,7 @@ export class Pages {
             this.transitions[currentPageId]?.[id] ?? this.getDefaultPageTransition(layerFrom, layerTo, msIn, msOut)
 
         if (layerFrom === layerTo) {
-            await this.dom.fade(currentPageId, id, transition)
+            this.dom.fade(currentPageId, id, transition)
             this.state.goto(id)
             Pages.onTransitionEnd(this)
             return
@@ -172,38 +181,39 @@ export class Pages {
         if (layerFrom < layerTo) {
             this.state.goto(id)
             Pages.onTransitionEnd(this)
-            await this.dom.fade(currentPageId, id, transition)
+            this.dom.fade(currentPageId, id, transition)
             return
         }
 
         if (!back) throw new Error("下のlayerにback以外でgotoしようとした。")
 
-        await this.dom.fade(currentPageId, id, transition)
+        this.dom.fade(currentPageId, id, transition)
         this.state.goto(id)
         Pages.onTransitionEnd(this)
     }
 
     private getDefaultPageTransition(layerFrom: number, layerTo: number, msIn: number, msOut: number): PageTransition {
         if (layerFrom === layerTo) {
-            return async (_animate, from, to) => {
-                await Transition.fadeOut(from, msIn)
-                from.classList.add("hidden")
-                await Transition.fadeIn(to, msOut)
-                to.classList.remove("hidden")
-            }
+            return async (_animate, from, to) =>
+                this.animatePair(_animate, from, to, {
+                    from: [[{ opacity: 1 }, { opacity: 0 }], { duration: msOut, easing: "ease", fill: "forwards" }],
+                    to: [[{ opacity: 0 }, { opacity: 1 }], { duration: msIn, easing: "ease", fill: "forwards" }],
+                })
         }
 
         if (layerFrom < layerTo) {
-            return async (_animate, _from, to) => {
-                to.classList.remove("hidden")
-                await Transition.fadeIn(to, msOut)
-            }
+            return async (_animate, _from, to) =>
+                this.animatePair(_animate, _from, to, {
+                    from: [[{ opacity: 0 }, { opacity: 0 }], { duration: msOut, easing: "ease", fill: "forwards" }],
+                    to: [[{ opacity: 0 }, { opacity: 1 }], { duration: msIn, easing: "ease", fill: "forwards" }],
+                })
         }
 
-        return async (_animate, from, _to) => {
-            await Transition.fadeOut(from, msIn)
-            from.classList.add("hidden")
-        }
+        return async (_animate, from, _to) =>
+            this.animatePair(_animate, from, _to, {
+                from: [[{ opacity: 1 }, { opacity: 0 }], { duration: msOut, easing: "ease", fill: "forwards" }],
+                to: [[{ opacity: 0 }, { opacity: 0 }], { duration: msIn, easing: "ease", fill: "forwards" }],
+            })
     }
 }
 

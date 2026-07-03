@@ -37,6 +37,8 @@ body {
     align-items: center;
 
     overflow: hidden;
+
+    position: relative;
 }
 
 .hidden {
