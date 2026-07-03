@@ -3,40 +3,32 @@ import { DigitalInputReader } from "../utils/Input/DigitalInput"
 import { vec, Vec2 } from "../utils/Vec"
 import { Edge } from "./Edge.js"
 
-// player.js を忠実に再現した自機(点)
+const SKIN = 0.01 // 数値誤差対策のごく小さい押し戻し量
+const MAX_SLIDE_ITER = 4 // 1フレームあたりの最大スライド回数
+
 export class Player {
     p: Vec2
     v: Vec2 = vec(0, 0)
     g: Vec2 = vec(0, 0.4)
 
-    // 床に触れているか?(直近6フレームぶんのバッファ。ジャンプ入力猶予)
     private onFloor: boolean[] = []
-
     private rotation = 0
-
-    // ジャンプ上昇中（ボタン離しによる減衰が有効な状態）かどうかのフラグ
-    private isJumping: boolean = false
+    private isJumping = false
 
     constructor(start: Vec2) {
         this.p = start
     }
 
-    // メインループ(重力・移動の更新)
     update(): void {
         this.onFloor = this.onFloor.slice(-6)
-
         this.v = this.v.add(this.g)
-        this.p = this.p.add(this.v)
-
-        // 空気抵抗
-        this.v = this.v.mul(0.97)
-
         this.rotation += this.v.dot(this.g.normal()) / 36
-
         this.onFloor.push(false)
+        // ここでは this.p を直接動かさない。目標位置は resolveCollisions で決める。
+
+        this.v = this.v.mul(0.98) // 空気抵抗
     }
 
-    // 入力
     move(input: DigitalInputReader<"left" | "right" | "jump">): void {
         if (input.isPressed("right")) {
             this.v = this.v.add(this.g.normal().mul(0.4))
@@ -47,55 +39,85 @@ export class Player {
 
         if (input.isPressed("jump")) {
             if (this.onFloor.includes(true)) {
-                // 初速（大ジャンプの高さ）
                 this.v = this.v.add(this.g.normalized().mul(-48 * 0.3))
                 this.onFloor = []
-                this.isJumping = true // ジャンプ開始
+                this.isJumping = true
             }
         } else {
-            // ボタンを離した時、かつジャンプ上昇中（速度ベクトルが重力と逆方向）の場合
             if (this.isJumping && this.v.dot(this.g) < 0) {
                 const gDir = this.g.normalized()
-
-                // 速度ベクトルを「重力方向(上下)」と「それ以外(左右)」に分解
                 const vUp = gDir.mul(this.v.dot(gDir))
                 const vHorizontal = this.v.sub(vUp)
-
-                // 上昇速度のみを減衰させる（0.5の値を小さくすると小ジャンプがより低くなります）
                 this.v = vHorizontal.add(vUp.mul(0.5))
             }
-            // 減衰処理は1回のジャンプにつき1度だけ行うため、フラグを折る
             this.isJumping = false
         }
     }
+    /**
+     * 現在の速度をもとに、衝突を解決しながら実際に this.p を進める。
+     * 1フレーム内で複数回当たっても、常に「最も早い衝突」だけを採用し、
+     * 残りの移動量でスライドを続けることで、引っかかりを防ぐ。
+     */
+    resolveCollisions(floors: Edge[]): void {
+        let start = this.p
+        let remaining = this.v // このフレームで進むべき残り移動量
 
-    // 床との衝突判定(floor.js の F を1つ渡す。左側からのみ当たる)
-    touchWith(floor: Edge): void {
-        const f = this.getArrow()
+        for (let i = 0; i < MAX_SLIDE_ITER; i++) {
+            const end = start.add(remaining)
 
-        const p = floor.getIntersectionPoint(f)
-        if (!p) return
+            let closest: { t: number; point: Vec2; floor: Edge } | null = null
 
-        // 床がどれだけ垂直か(重力方向に対して)
-        const verticality = floor.vec().normalized().cross(this.g.normalized())
+            for (const floor of floors) {
+                const hit = floor.getSweepHit(start, end)
+                if (!hit) continue
+                if (!closest || hit.t < closest.t) {
+                    closest = { ...hit, floor }
+                }
+            }
 
-        if (verticality >= 0.2 && floor.jumpable) {
-            this.onFloor.push(true)
+            if (!closest) {
+                start = end
+                break
+            }
+
+            const { point, floor } = closest
+            const normal = floor.vec().normal() // 常にEdgeの左側（表側）を向く法線
+
+            // 移動開始地点がEdgeの右側(裏側)だったか判定
+            // (法線は左側を向いているため、内積が負なら右側にいたことになる)
+            const q = start.sub(floor.start)
+            const isFromRightSide = q.dot(normal) < 0
+
+            // 床判定
+            const verticality = floor.vec().normalized().cross(this.g.normalized())
+            if (verticality >= 0.2 && floor.jumpable) {
+                this.onFloor.push(true)
+            }
+
+            // 速度成分の打ち消し（速度を殺す）
+            const vn = this.v.dot(normal)
+            // 左からの衝突(vn < 0)、または右からのすり抜け吸着(isFromRightSide && vn > 0)の場合
+            if (vn < 0 || (isFromRightSide && vn > 0)) {
+                this.v = this.v.sub(normal.mul(vn))
+            }
+
+            // 残り移動量からも成分を除去(スライド または 吸着)
+            // ※元コードの斜め衝突時のバグを修正するため、残りの移動量(unconsumed)を基に再計算しています
+            const unconsumed = end.sub(point)
+            const un = unconsumed.dot(normal)
+            if (un < 0 || (isFromRightSide && un > 0)) {
+                remaining = unconsumed.sub(normal.mul(un))
+            } else {
+                remaining = unconsumed
+            }
+
+            // 常にEdgeの左側(表側)へSKIN分押し戻す
+            // 左からぶつかった場合は「めり込み防止」として機能し、
+            // 右から接触した場合は「すり抜けた直後に表側に吸着」として機能する
+            start = point.add(normal.mul(SKIN))
         }
 
-        // 垂直抗力
-        const normal = floor.vec().normal()
-
-        this.v = this.v.sub(normal.mul(this.v.dot(normal) - 1))
-
-        this.p = p
-    }
-
-    // 現在位置を中心に -v 〜 +v まで伸ばした自機の軌跡(スイープ用線分)
-    private getArrow(): Edge {
-        const start = this.p.add(this.v.mul(-1))
-        const end = this.p.add(this.v)
-        return new Edge(start.x, start.y, end.x, end.y)
+        this.p = start
     }
 
     draw(ctx: CanvasRenderingContext2D): void {

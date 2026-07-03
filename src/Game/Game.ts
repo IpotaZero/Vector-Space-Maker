@@ -63,7 +63,7 @@ export class Game {
 
         this.player.update()
 
-        for (const e of stage.edges) this.player.touchWith(e)
+        this.player.resolveCollisions(stage.edges)
 
         this.player.move(this.input)
 
