@@ -6,7 +6,13 @@ export type DigitalInputReader<Action extends string> = {
 }
 
 export class DigitalInput<Action extends string> {
-    private readonly pressed = new Set<Action>()
+    // 実際に押されているキーコード/ゲームパッドコードの集合
+    // （アクション単位ではなくコード単位で保持することで、
+    //   同じアクションに複数のコードが割り当てられているときに
+    //   片方を離しただけでアクション全体がOFFになるのを防ぐ）
+    private readonly pressedCodes = new Set<string>()
+
+    // こちらは従来通りアクション単位の「今フレームで新たに押された/離された」エッジ集合
     private readonly released = new Set<Action>()
     private readonly pushed = new Set<Action>()
 
@@ -57,44 +63,30 @@ export class DigitalInput<Action extends string> {
             if (!gamepad) return
 
             gamepad.buttons.forEach((button, index) => {
-                const actions = this.codeToActions.get(`gamepad-button-${index}`)
-                if (!actions) return
+                const code = `gamepad-button-${index}`
+                if (!this.codeToActions.has(code)) return
 
                 if (button.pressed) {
-                    this.press(actions)
+                    this.press(code)
                 } else {
-                    this.release(actions)
+                    this.release(code)
                 }
             })
 
             gamepad.axes.forEach((axis, index) => {
-                const actionPositive = this.codeToActions.get(`gamepad-axis-${index}-positive`)
-                const actionNegative = this.codeToActions.get(`gamepad-axis-${index}-negative`)
-                if (!actionPositive && !actionNegative) return
+                const positiveCode = `gamepad-axis-${index}-positive`
+                const negativeCode = `gamepad-axis-${index}-negative`
+                if (!this.codeToActions.has(positiveCode) && !this.codeToActions.has(negativeCode)) return
 
                 if (axis > 0.5) {
-                    if (actionPositive) {
-                        this.press(actionPositive)
-                    }
-
-                    if (actionNegative) {
-                        this.release(actionNegative)
-                    }
+                    this.press(positiveCode)
+                    this.release(negativeCode)
                 } else if (axis < -0.5) {
-                    if (actionNegative) {
-                        this.press(actionNegative)
-                    }
-
-                    if (actionPositive) {
-                        this.release(actionPositive)
-                    }
+                    this.press(negativeCode)
+                    this.release(positiveCode)
                 } else {
-                    if (actionPositive) {
-                        this.release(actionPositive)
-                    }
-                    if (actionNegative) {
-                        this.release(actionNegative)
-                    }
+                    this.release(positiveCode)
+                    this.release(negativeCode)
                 }
             })
         })
@@ -105,7 +97,7 @@ export class DigitalInput<Action extends string> {
     isPressed(action: Action): boolean {
         if (this.isPaused()) return false
 
-        return this.pressed.has(action)
+        return this.isActionPressed(action)
     }
 
     isReleased(action: Action): boolean {
@@ -123,42 +115,61 @@ export class DigitalInput<Action extends string> {
     isSomethingPressed(): boolean {
         if (this.isPaused()) return false
 
-        return this.pressed.size > 0
+        return this.pressedCodes.size > 0
+    }
+
+    // アクションに割り当てられたコードのうち、どれか一つでも
+    // 押されていればそのアクションは「押されている」とみなす
+    private isActionPressed(action: Action): boolean {
+        const codes = this.config.get(action)
+        if (!codes) return false
+
+        return codes.some((code) => this.pressedCodes.has(code))
     }
 
     private onKeyDown = (e: KeyboardEvent) => {
         if (this.isPaused()) return
+        if (!this.codeToActions.has(e.code)) return
 
-        const actions = this.codeToActions.get(e.code)
-        if (!actions) return
-
-        this.press(actions)
+        this.press(e.code)
     }
 
     private onKeyUp = (e: KeyboardEvent) => {
         if (this.isPaused()) return
+        if (!this.codeToActions.has(e.code)) return
 
-        const actions = this.codeToActions.get(e.code)
-        if (!actions) return
-
-        this.release(actions)
+        this.release(e.code)
     }
 
-    private press(actions: Action[]) {
-        actions.forEach((action) => {
-            if (!this.pressed.has(action)) {
-                this.pushed.add(action)
+    private press(code: string) {
+        if (this.pressedCodes.has(code)) return
+
+        const actions = this.codeToActions.get(code)
+        if (actions) {
+            for (const action of actions) {
+                // 他のコード経由で既に押されている場合は「新規に押された」扱いにしない
+                if (!this.isActionPressed(action)) {
+                    this.pushed.add(action)
+                }
             }
-            this.pressed.add(action)
-        })
+        }
+
+        this.pressedCodes.add(code)
     }
 
-    private release(actions: Action[]) {
-        actions.forEach((action) => {
-            if (this.pressed.has(action)) {
-                this.released.add(action)
+    private release(code: string) {
+        if (!this.pressedCodes.has(code)) return
+
+        this.pressedCodes.delete(code)
+
+        const actions = this.codeToActions.get(code)
+        if (actions) {
+            for (const action of actions) {
+                // 他のコードがまだ押されている場合はアクションとしてはまだ押された状態を維持する
+                if (!this.isActionPressed(action)) {
+                    this.released.add(action)
+                }
             }
-            this.pressed.delete(action)
-        })
+        }
     }
 }
