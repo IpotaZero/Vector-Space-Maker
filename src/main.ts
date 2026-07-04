@@ -30,6 +30,8 @@ sc.onTransitionStart = () => {
 
 sc.onTransitionEnd = () => {
     input.resume("scene-transition")
+    input.clear()
+    focuses.clearMemory()
 }
 
 Pages.onTransitionStart = () => {

@@ -40,10 +40,9 @@ export class PageDom {
             await animationFrom.finished
         }
 
-        to.classList.remove("hidden")
-
         to.style.opacity = "0"
         await Awaits.frame()
+        to.classList.remove("hidden")
         to.style.opacity = ""
 
         const animationTo = to.animate(transition.to[0], transition.to[1])

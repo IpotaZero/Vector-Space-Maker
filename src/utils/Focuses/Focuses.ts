@@ -20,9 +20,13 @@ export class Focuses {
         window.addEventListener("pointerover", this.onPointerOver, { signal: this.ac.signal })
     }
 
+    clearMemory() {
+        this.pageFocusMemory.clear()
+    }
+
     /** ページ遷移時に呼ぶ。新しいページのDOMからグリッドを再構築する。 */
     setPage(page: HTMLElement): void {
-        this.rememberCurrentPageFocus()
+        this.saveCurrentPageFocus()
 
         this.blur()
         this.gridHandler.setGrid(buildGrid(page))
@@ -116,14 +120,14 @@ export class Focuses {
         current.focus({ preventScroll: true })
         current.classList.add(Focuses.FOCUS_CLASS)
 
-        this.rememberFocusedElement(current)
+        this.saveFocusedElement(current)
 
         if (!noScroll) {
             current.scrollIntoView({ behavior: "smooth", block: "center" })
         }
     }
 
-    private rememberCurrentPageFocus(): void {
+    private saveCurrentPageFocus(): void {
         if (!this.currentPageId) return
 
         const current = this.gridHandler.getFocusedElement()
@@ -136,7 +140,7 @@ export class Focuses {
         this.pageFocusMemory.set(this.currentPageId, key)
     }
 
-    private rememberFocusedElement(element: HTMLElement): void {
+    private saveFocusedElement(element: HTMLElement): void {
         if (!this.currentPageId) return
         if (!(element instanceof HTMLButtonElement)) return
         if (isCancelButton(element)) return

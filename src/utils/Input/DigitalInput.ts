@@ -90,8 +90,6 @@ export class DigitalInput<Action extends string> {
                 }
             })
         })
-
-        console.log(this.pushed)
     }
 
     isPressed(action: Action): boolean {
@@ -116,6 +114,12 @@ export class DigitalInput<Action extends string> {
         if (this.isPaused()) return false
 
         return this.pressedCodes.size > 0
+    }
+
+    clear(): void {
+        this.pressedCodes.clear()
+        this.released.clear()
+        this.pushed.clear()
     }
 
     // アクションに割り当てられたコードのうち、どれか一つでも
@@ -155,6 +159,8 @@ export class DigitalInput<Action extends string> {
         }
 
         this.pressedCodes.add(code)
+
+        console.log(this.pushed)
     }
 
     private release(code: string) {
