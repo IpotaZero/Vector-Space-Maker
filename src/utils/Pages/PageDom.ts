@@ -49,7 +49,7 @@ export class PageDom {
         const animationTo = to.animate(transition.to[0], transition.to[1])
 
         await Promise.all([animationFrom.finished, animationTo.finished]).catch((e) => {
-            console.error(e)
+            console.error("ページ遷移が速すぎて前のアニメーションがキャンセルされました。", e)
         })
 
         if (animationId !== this.animationId) return

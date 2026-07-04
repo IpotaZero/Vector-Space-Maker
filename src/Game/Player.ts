@@ -67,6 +67,7 @@ export class Player {
 
             let closest: { t: number; point: Vec2; floor: Edge } | null = null
 
+            // 最も早く衝突する床を探す
             for (const floor of floors) {
                 const hit = floor.getSweepHit(start, end)
                 if (!hit) continue
@@ -75,6 +76,7 @@ export class Player {
                 }
             }
 
+            // 衝突がなければ残り移動量をそのまま適用して終了
             if (!closest) {
                 start = end
                 break

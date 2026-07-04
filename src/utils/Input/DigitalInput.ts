@@ -6,9 +6,9 @@ export type DigitalInputReader<Action extends string> = {
 }
 
 export class DigitalInput<Action extends string> {
-    readonly pressed = new Set<Action>()
-    readonly released = new Set<Action>()
-    readonly pushed = new Set<Action>()
+    private readonly pressed = new Set<Action>()
+    private readonly released = new Set<Action>()
+    private readonly pushed = new Set<Action>()
 
     private readonly ac = new AbortController()
 
@@ -16,11 +16,12 @@ export class DigitalInput<Action extends string> {
     private readonly config = new Map<Action, string[]>()
     private readonly codeToActions = new Map<string, Action[]>()
 
+    private isPaused(): boolean {
+        return this.disableReasons.size > 0
+    }
+
     pause(reason: string): void {
         this.disableReasons.add(reason)
-        this.pressed.clear()
-        this.released.clear()
-        this.pushed.clear()
     }
 
     resume(reason: string): void {
@@ -48,7 +49,7 @@ export class DigitalInput<Action extends string> {
         this.pushed.clear()
         this.released.clear()
 
-        if (this.disableReasons.size > 0) {
+        if (this.isPaused()) {
             return
         }
 
@@ -97,26 +98,36 @@ export class DigitalInput<Action extends string> {
                 }
             })
         })
+
+        console.log(this.pushed)
     }
 
     isPressed(action: Action): boolean {
+        if (this.isPaused()) return false
+
         return this.pressed.has(action)
     }
 
     isReleased(action: Action): boolean {
+        if (this.isPaused()) return false
+
         return this.released.has(action)
     }
 
     isPushed(action: Action): boolean {
+        if (this.isPaused()) return false
+
         return this.pushed.has(action)
     }
 
     isSomethingPressed(): boolean {
+        if (this.isPaused()) return false
+
         return this.pressed.size > 0
     }
 
     private onKeyDown = (e: KeyboardEvent) => {
-        if (this.disableReasons.size > 0) return
+        if (this.isPaused()) return
 
         const actions = this.codeToActions.get(e.code)
         if (!actions) return
@@ -125,7 +136,7 @@ export class DigitalInput<Action extends string> {
     }
 
     private onKeyUp = (e: KeyboardEvent) => {
-        if (this.disableReasons.size > 0) return
+        if (this.isPaused()) return
 
         const actions = this.codeToActions.get(e.code)
         if (!actions) return

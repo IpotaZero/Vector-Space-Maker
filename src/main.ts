@@ -6,15 +6,15 @@ import { DigitalInput } from "./utils/Input/DigitalInput.js"
 import { Pages } from "./utils/Pages/Pages.js"
 
 export const input = new DigitalInput({
-    up: ["ArrowUp", "KeyW"],
-    down: ["ArrowDown", "KeyS"],
-    left: ["ArrowLeft", "KeyA"],
-    right: ["ArrowRight", "KeyD"],
-    jump: ["ArrowUp", "KeyW", "Space"],
+    up: ["ArrowUp", "KeyW", "gamepad-axis-1-negative"],
+    down: ["ArrowDown", "KeyS", "gamepad-axis-1-positive"],
+    left: ["ArrowLeft", "KeyA", "gamepad-axis-0-negative"],
+    right: ["ArrowRight", "KeyD", "gamepad-axis-0-positive"],
+    jump: ["ArrowUp", "KeyW", "Space", "gamepad-button-0"],
 
-    ok: ["Enter", "KeyZ", "Space"],
-    cancel: ["KeyX", "Escape", "Backspace"],
-    pause: ["Escape", "KeyP"],
+    ok: ["Enter", "KeyZ", "Space", "gamepad-button-0"],
+    cancel: ["KeyX", "Escape", "Backspace", "gamepad-button-1"],
+    pause: ["Escape", "KeyP", "gamepad-button-9"],
 })
 
 Dom.init()

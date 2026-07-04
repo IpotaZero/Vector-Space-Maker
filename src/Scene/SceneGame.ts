@@ -12,8 +12,6 @@ export class SceneGame extends Scene {
     private pages = new Pages()
     private selector
 
-    private readonly ac = new AbortController()
-
     constructor(private readonly mapData: tiled.Map) {
         super()
 
@@ -63,7 +61,5 @@ export class SceneGame extends Scene {
         }
     }
 
-    async end(): Promise<void> {
-        this.ac.abort()
-    }
+    async end(): Promise<void> {}
 }
