@@ -199,12 +199,12 @@
                         {
                          "name":"gx",
                          "type":"float",
-                         "value":0
+                         "value":0.4
                         }, 
                         {
                          "name":"gy",
                          "type":"float",
-                         "value":-0.4
+                         "value":0
                         }],
                  "rotation":0,
                  "type":"",

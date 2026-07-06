@@ -54,8 +54,8 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
             // カスタムプロパティを持つオブジェクト
             if (obj.name === "Gravity") {
                 // properties から値を取り出す際も型推論が効く
-                const gx = (obj.properties?.find((p) => p.name === "gx")?.value as number) || 0
-                const gy = (obj.properties?.find((p) => p.name === "gy")?.value as number) || 1
+                const gx = (obj.properties?.find((p) => p.name === "gx")?.value as number) ?? 0
+                const gy = (obj.properties?.find((p) => p.name === "gy")?.value as number) ?? 1
                 zones.push(
                     new GravityZone(
                         obj.x + obj.width! / 2,
