@@ -5,6 +5,7 @@ export abstract class Movable {
     private readonly cycle: number
 
     p = vec(0, 0)
+    dp = vec(0, 0) // 【追加】前フレームからの移動量
 
     private gens: Generator[] = []
 
@@ -18,7 +19,9 @@ export abstract class Movable {
     }
 
     update(): void {
+        const oldP = this.p // 【追加】移動前の位置を保存
         this.gens = this.gens.filter((gen) => !gen.next().done)
+        this.dp = this.p.sub(oldP) // 【追加】移動量を計算
     }
 
     abstract draw(ctx: CanvasRenderingContext2D): void

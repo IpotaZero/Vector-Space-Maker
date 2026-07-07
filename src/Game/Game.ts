@@ -56,6 +56,9 @@ export class Game {
     update(): void {
         const stage = this.stage
 
+        // 【変更】先に movable を update して、今フレームの位置と移動量(dp)を確定させる
+        stage.movables.forEach((movable) => movable.update())
+
         stage.movables
             .filter((obj) => obj instanceof Zone)
             .forEach((zone) => {
@@ -80,8 +83,6 @@ export class Game {
         ) {
             this.reset()
         }
-
-        stage.movables.forEach((movable) => movable.update())
 
         this.gens = this.gens.filter((gen) => {
             const result = gen.next()

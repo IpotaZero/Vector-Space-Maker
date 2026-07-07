@@ -69,7 +69,9 @@ export class Player {
 
             // 最も早く衝突する床を探す
             for (const floor of floors) {
-                const hit = floor.getSweepHit(start, end)
+                // 【変更】床の移動量(dp)を考慮し、相対的な移動開始位置を計算して判定する
+                const relStart = start.add(floor.dp)
+                const hit = floor.getSweepHit(relStart, end)
                 if (!hit) continue
                 if (!closest || hit.t < closest.t) {
                     closest = { ...hit, floor }
