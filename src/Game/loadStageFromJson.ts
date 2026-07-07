@@ -37,6 +37,14 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
                 }
             }
 
+            if (obj.polygon) {
+                for (let i = 0; i < obj.polygon.length; i++) {
+                    const p1 = obj.polygon[i]
+                    const p2 = obj.polygon[(i + 1) % obj.polygon.length]
+                    edges.push(edge(obj.x + p1.x, obj.y + p1.y, obj.x + p2.x, obj.y + p2.y))
+                }
+            }
+
             if (obj.text) {
                 texts.push(
                     new Text(
