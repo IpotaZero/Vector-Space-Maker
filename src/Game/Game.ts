@@ -6,6 +6,7 @@ import { vec } from "../utils/Vec"
 import { DigitalInputReader } from "../utils/Input/DigitalInput"
 import * as tiled from "@kayahr/tiled"
 import { Zone } from "./movable/zone/Zone"
+import { Edge } from "./movable/Edge"
 
 const WIDTH = 1200
 const HEIGHT = 900
@@ -65,7 +66,7 @@ export class Game {
             })
 
         this.player.update()
-        this.player.resolveCollisions(stage.edges)
+        this.player.resolveCollisions(stage.movables.filter((obj) => obj instanceof Edge))
         this.player.move(this.input)
 
         this.camera.update(this.player.p, this.player.g)
@@ -97,7 +98,6 @@ export class Game {
         this.camera.apply(ctx, WIDTH, HEIGHT)
 
         for (const t of stage.movables) t.draw(ctx)
-        for (const e of stage.edges) e.draw(ctx)
         this.player.draw(ctx)
 
         ctx.restore()

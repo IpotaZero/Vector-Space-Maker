@@ -18,7 +18,6 @@ export async function loadStageFromUrl(url: string): Promise<Stage> {
 
 export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
     const movables: Movable[] = []
-    const edges: Edge[] = []
     let start = { x: 0, y: 0 }
 
     // "joints" (object型のlistプロパティ) が参照するオブジェクトの位置を
@@ -65,9 +64,15 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
                 for (let i = 0; i < obj.polyline.length - 1; i++) {
                     const p1 = obj.polyline[i]
                     const p2 = obj.polyline[i + 1]
-                    edges.push(
+                    // joints は obj原点(obj.x, obj.y)の軌跡なので、
+                    // このセグメントの始点(obj原点からp1だけずれた位置)が
+                    // 同じように動くよう、joints も p1 分だけ平行移動させる。
+                    // これをしないと全セグメントが同じ絶対座標に向かって動いてしまい、
+                    // ポリラインの形が崩れて連続しなくなる。
+                    const segmentJoints = joints.map((j) => j.add(vec(p1.x, p1.y)))
+                    movables.push(
                         new Edge(obj.x + p1.x, obj.y + p1.y, obj.x + p2.x, obj.y + p2.y, {
-                            joints,
+                            joints: segmentJoints,
                             cycle,
                         }),
                     )
@@ -78,9 +83,11 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
                 for (let i = 0; i < obj.polygon.length; i++) {
                     const p1 = obj.polygon[i]
                     const p2 = obj.polygon[(i + 1) % obj.polygon.length]
-                    edges.push(
+                    // polylineと同様、セグメントの始点オフセット(p1)分だけ joints をずらす
+                    const segmentJoints = joints.map((j) => j.add(vec(p1.x, p1.y)))
+                    movables.push(
                         new Edge(obj.x + p1.x, obj.y + p1.y, obj.x + p2.x, obj.y + p2.y, {
-                            joints,
+                            joints: segmentJoints,
                             cycle,
                         }),
                     )
@@ -159,5 +166,5 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
         }
     }
 
-    return new Stage(mapData.width * mapData.tilewidth, mapData.height * mapData.tileheight, edges, movables, start)
+    return new Stage(mapData.width * mapData.tilewidth, mapData.height * mapData.tileheight, movables, start)
 }

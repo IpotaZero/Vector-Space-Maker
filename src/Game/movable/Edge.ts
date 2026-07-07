@@ -1,18 +1,29 @@
 import { vec, Vec2 } from "../../utils/Vec.js"
+import { Movable } from "./Movable.js"
 
 const COLLISION_MARGIN = 0
 
-export class Edge {
-    readonly start: Vec2
-    readonly end: Vec2
+export class Edge extends Movable {
+    // 最初の向きと長さを維持するため、start→end の相対ベクトル(オフセット)を固定で保持する。
+    // Movable の p (基準点) が joints/cycle に従って動いても、offset は変わらないので
+    // 向きと長さは常に一定に保たれる。
+    private readonly offset: Vec2
 
     constructor(x0: number, y0: number, x1: number, y1: number, config: { joints?: Vec2[]; cycle?: number } = {}) {
-        this.start = vec(x0, y0)
-        this.end = vec(x1, y1)
+        super(vec(x0, y0), config)
+        this.offset = vec(x1 - x0, y1 - y0)
+    }
+
+    get start(): Vec2 {
+        return this.p
+    }
+
+    get end(): Vec2 {
+        return this.p.add(this.offset)
     }
 
     vec(): Vec2 {
-        return this.end.sub(this.start)
+        return this.offset
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
@@ -49,6 +60,9 @@ export class Edge {
      * cross積ベースなので垂直・水平を含めどんな向きでも特別扱い不要。
      * 戻り値の t は sweep 上の位置(0=開始点, 1=終了点)。
      * 移動するEdgeの場合は、現在のフレームでの位置(currentStart/currentEnd)を用いる。
+     *
+     * ※当たり判定ロジックは一旦そのまま。start/end が Movable の p に連動する
+     *   getter になったため、Edge が移動していれば現在位置に対して判定される。
      */
     getSweepHit(sweepStart: Vec2, sweepEnd: Vec2): { t: number; point: Vec2 } | null {
         const start = this.start
