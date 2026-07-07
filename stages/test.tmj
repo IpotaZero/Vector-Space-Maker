@@ -197,6 +197,11 @@
                  "opacity":1,
                  "properties":[
                         {
+                         "name":"cycle",
+                         "type":"float",
+                         "value":30
+                        }, 
+                        {
                          "name":"gx",
                          "type":"float",
                          "value":0
@@ -205,6 +210,19 @@
                          "name":"gy",
                          "type":"float",
                          "value":-0.4
+                        }, 
+                        {
+                         "name":"joints",
+                         "type":"list",
+                         "value":[
+                                {
+                                 "type":"object",
+                                 "value":36
+                                }, 
+                                {
+                                 "type":"object",
+                                 "value":33
+                                }]
                         }],
                  "rotation":0,
                  "type":"",
@@ -433,38 +451,7 @@
                 }, 
                 {
                  "height":0,
-                 "id":34,
-                 "name":"",
-                 "opacity":1,
-                 "polyline":[
-                        {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":150.666666666667,
-                         "y":0
-                        }],
-                 "properties":[
-                        {
-                         "name":"joint",
-                         "type":"list",
-                         "value":[
-                                {
-                                 "type":"object",
-                                 "value":35
-                                }]
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":969.333333333333,
-                 "y":544
-                }, 
-                {
-                 "height":0,
-                 "id":35,
+                 "id":36,
                  "name":"",
                  "opacity":1,
                  "point":true,
@@ -472,8 +459,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":1082.66666666667,
-                 "y":193.333333333333
+                 "x":329.333333333333,
+                 "y":521.333333333333
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -482,7 +469,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":36,
+ "nextobjectid":37,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

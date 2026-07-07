@@ -14,7 +14,10 @@ export abstract class Zone extends Movable {
     }
 
     contains(p: Vec2): boolean {
-        return Math.abs(p.x - this.p.x) <= this.width / 2 && Math.abs(p.y - this.p.y) <= this.height / 2
+        return (
+            Math.abs(p.x - this.p.x - this.width / 2) <= this.width / 2 &&
+            Math.abs(p.y - this.p.y - this.height / 2) <= this.height / 2
+        )
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
@@ -22,7 +25,15 @@ export abstract class Zone extends Movable {
         ctx.lineWidth = 1.5
         ctx.setLineDash([6, 6])
         ctx.beginPath()
-        ctx.ellipse(this.p.x, this.p.y, this.width / 2, this.height / 2, 0, 0, Math.PI * 2)
+        ctx.ellipse(
+            this.p.x + this.width / 2,
+            this.p.y + this.height / 2,
+            this.width / 2,
+            this.height / 2,
+            0,
+            0,
+            Math.PI * 2,
+        )
         ctx.stroke()
         ctx.setLineDash([])
     }

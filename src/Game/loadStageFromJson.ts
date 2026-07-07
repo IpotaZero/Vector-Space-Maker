@@ -5,8 +5,8 @@ import { Edge } from "./movable/Edge.js"
 import { GoalZone } from "./movable/zone/GoalZone.js"
 import { GravityZone } from "./movable/zone/GravityZone.js"
 import { ScaleZone } from "./movable/zone/ScaleZone.js"
-import { Zone } from "./movable/zone/Zone.js"
 import { TextObject } from "./movable/TextObject.js"
+import { Movable } from "./movable/Movable.js"
 
 export async function loadStageFromUrl(url: string): Promise<Stage> {
     const response = await fetch(url)
@@ -17,9 +17,8 @@ export async function loadStageFromUrl(url: string): Promise<Stage> {
 }
 
 export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
-    const texts: TextObject[] = []
+    const movables: Movable[] = []
     const edges: Edge[] = []
-    const zones: Zone[] = []
     let start = { x: 0, y: 0 }
 
     // "joints" (object型のlistプロパティ) が参照するオブジェクトの位置を
@@ -58,6 +57,9 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
                     .map((position) => vec(position.x, position.y))
             }
 
+            joints.unshift(vec(obj.x, obj.y)) // 最後にオブジェクト自身の位置を追加
+            joints.push(vec(obj.x, obj.y)) // 最後にオブジェクト自身の位置を追加
+
             // ポリラインを持つオブジェクト
             if (obj.polyline) {
                 for (let i = 0; i < obj.polyline.length - 1; i++) {
@@ -86,7 +88,7 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
             }
 
             if (obj.text) {
-                texts.push(
+                movables.push(
                     new TextObject(
                         vec(obj.x, obj.y),
                         obj.width!,
@@ -107,7 +109,7 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
                 // properties から値を取り出す際も型推論が効く
                 const gx = (obj.properties?.find((p) => p.name === "gx")?.value as number) ?? 0
                 const gy = (obj.properties?.find((p) => p.name === "gy")?.value as number) ?? 0
-                zones.push(
+                movables.push(
                     new GravityZone(
                         vec(obj.x + obj.width! / 2, obj.y + obj.height! / 2),
                         obj.width!,
@@ -123,11 +125,17 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
 
             if (obj.name === "Scale") {
                 const gx = (obj.properties?.find((p) => p.name === "scale")?.value as number) || 1
-                zones.push(
-                    new ScaleZone(vec(obj.x + obj.width! / 2, obj.y + obj.height! / 2), obj.width!, obj.height!, gx, {
-                        joints,
-                        cycle,
-                    }),
+                movables.push(
+                    new ScaleZone(
+                        vec(obj.x, obj.y), // ← 中心座標に変換
+                        obj.width!,
+                        obj.height!,
+                        gx,
+                        {
+                            joints,
+                            cycle,
+                        },
+                    ),
                 )
             }
 
@@ -136,15 +144,20 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
             }
 
             if (obj.name === "Goal") {
-                zones.push(
-                    new GoalZone(vec(obj.x + obj.width! / 2, obj.y + obj.height! / 2), obj.width!, obj.height!, {
-                        joints,
-                        cycle,
-                    }),
+                movables.push(
+                    new GoalZone(
+                        vec(obj.x, obj.y), // ← 中心座標に変換
+                        obj.width!,
+                        obj.height!,
+                        {
+                            joints,
+                            cycle,
+                        },
+                    ),
                 )
             }
         }
     }
 
-    return new Stage(mapData.width * mapData.tilewidth, mapData.height * mapData.tileheight, texts, edges, zones, start)
+    return new Stage(mapData.width * mapData.tilewidth, mapData.height * mapData.tileheight, edges, movables, start)
 }

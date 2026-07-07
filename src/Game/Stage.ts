@@ -1,14 +1,12 @@
-import { Edge } from "./Edge.js"
-import { Text } from "./Text.js"
-import { Zone } from "./zone/Zone.js"
+import { Edge } from "./movable/Edge"
+import { Movable } from "./movable/Movable"
 
 export class Stage {
     constructor(
         public width: number,
         public height: number,
-        public texts: Text[],
         public edges: Edge[],
-        public zones: Zone[],
+        public movables: Movable[],
         public start: { x: number; y: number },
     ) {}
 }

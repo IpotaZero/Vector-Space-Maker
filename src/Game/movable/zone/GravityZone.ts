@@ -1,4 +1,4 @@
-import { Vec2 } from "../../../utils/Vec"
+import { vec, Vec2 } from "../../../utils/Vec"
 import { Game } from "../../Game"
 import { Zone } from "./Zone"
 
@@ -27,11 +27,11 @@ export class GravityZone extends Zone {
         // 中心から重力方向への矢印
         const dir = this.gravity.normalized()
         const len = 30
-        const tip = this.p.add(dir.mul(len))
+        const tip = this.p.add(dir.mul(len)).add(vec(this.width / 2, this.height / 2))
         ctx.strokeStyle = "#888"
         ctx.lineWidth = 2
         ctx.beginPath()
-        ctx.moveTo(this.p.x, this.p.y)
+        ctx.moveTo(this.p.x + this.width / 2, this.p.y + this.height / 2)
         ctx.lineTo(tip.x, tip.y)
         ctx.stroke()
 

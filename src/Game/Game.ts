@@ -5,6 +5,7 @@ import { Stage } from "./Stage"
 import { vec } from "../utils/Vec"
 import { DigitalInputReader } from "../utils/Input/DigitalInput"
 import * as tiled from "@kayahr/tiled"
+import { Zone } from "./movable/zone/Zone"
 
 const WIDTH = 1200
 const HEIGHT = 900
@@ -22,7 +23,7 @@ export class Game {
     player!: Player
     camera!: Camera
 
-    private gens: Generator<void, void, unknown>[] = []
+    private gens: Generator[] = []
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -54,17 +55,17 @@ export class Game {
     update(): void {
         const stage = this.stage
 
-        stage.zones.forEach((zone) => {
-            if (zone.contains(this.player.p)) {
-                const gen = zone.onEnter(this)
-                this.gens.push(gen)
-            }
-        })
+        stage.movables
+            .filter((obj) => obj instanceof Zone)
+            .forEach((zone) => {
+                if (zone.contains(this.player.p)) {
+                    const gen = zone.onEnter(this)
+                    this.gens.push(gen)
+                }
+            })
 
         this.player.update()
-
         this.player.resolveCollisions(stage.edges)
-
         this.player.move(this.input)
 
         this.camera.update(this.player.p, this.player.g)
@@ -78,6 +79,8 @@ export class Game {
         ) {
             this.reset()
         }
+
+        stage.movables.forEach((movable) => movable.update())
 
         this.gens = this.gens.filter((gen) => {
             const result = gen.next()
@@ -93,8 +96,7 @@ export class Game {
         ctx.save()
         this.camera.apply(ctx, WIDTH, HEIGHT)
 
-        for (const t of stage.texts) t.draw(ctx)
-        for (const z of stage.zones) z.draw(ctx)
+        for (const t of stage.movables) t.draw(ctx)
         for (const e of stage.edges) e.draw(ctx)
         this.player.draw(ctx)
 

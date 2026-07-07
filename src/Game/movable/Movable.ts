@@ -17,10 +17,6 @@ export abstract class Movable {
         this.gens.push(this.move())
     }
 
-    /**
-     * 経過フレームを進める。ゲームループから毎フレーム呼び出すことを想定。
-     * @param delta 進めるフレーム数(デフォルト1)
-     */
     update(): void {
         this.gens = this.gens.filter((gen) => !gen.next().done)
     }
@@ -31,7 +27,7 @@ export abstract class Movable {
         if (this.joints.length === 0) return
 
         while (1) {
-            for (let i = 0; i < this.joints.length; i++) {
+            for (let i = 0; i < this.joints.length - 1; i++) {
                 const from = this.joints[i]
                 const to = this.joints[i + 1]
 
@@ -42,6 +38,8 @@ export abstract class Movable {
                     yield
                 }
             }
+
+            yield
         }
     }
 }
