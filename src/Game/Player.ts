@@ -1,7 +1,7 @@
 import { Ctx } from "../utils/Functions/Ctx"
 import { DigitalInputReader } from "../utils/Input/DigitalInput"
 import { vec, Vec2 } from "../utils/Vec"
-import { Edge } from "./Edge.js"
+import { Edge } from "./movable/Edge"
 
 const SKIN = 0.01 // 数値誤差対策のごく小さい押し戻し量
 const MAX_SLIDE_ITER = 4 // 1フレームあたりの最大スライド回数
@@ -92,7 +92,7 @@ export class Player {
 
             // 床判定
             const verticality = floor.vec().normalized().cross(this.g.normalized())
-            if (verticality >= 0.2 && floor.jumpable) {
+            if (verticality >= 0.2) {
                 this.onFloor.push(true)
             }
 

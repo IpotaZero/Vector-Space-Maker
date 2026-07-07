@@ -1,0 +1,31 @@
+import { Vec2 } from "../../../utils/Vec.js"
+import { Game } from "../../Game.js"
+import { Movable } from "../Movable.js"
+
+// 触れると何かが起こる円形のゾーン
+export abstract class Zone extends Movable {
+    readonly width: number
+    readonly height: number
+
+    constructor(p: Vec2, width: number, height: number, config: { joints?: Vec2[]; cycle?: number } = {}) {
+        super(p, config)
+        this.width = width
+        this.height = height
+    }
+
+    contains(p: Vec2): boolean {
+        return Math.abs(p.x - this.p.x) <= this.width / 2 && Math.abs(p.y - this.p.y) <= this.height / 2
+    }
+
+    draw(ctx: CanvasRenderingContext2D): void {
+        ctx.strokeStyle = "#888"
+        ctx.lineWidth = 1.5
+        ctx.setLineDash([6, 6])
+        ctx.beginPath()
+        ctx.ellipse(this.p.x, this.p.y, this.width / 2, this.height / 2, 0, 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.setLineDash([])
+    }
+
+    abstract onEnter(obj: Game): Generator<void, void, unknown>
+}

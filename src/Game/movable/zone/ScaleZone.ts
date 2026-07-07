@@ -1,12 +1,19 @@
-import { Ease } from "../../utils/Functions/Ease"
-import { Game } from "../Game"
+import { Ease } from "../../../utils/Functions/Ease"
+import { Vec2 } from "../../../utils/Vec"
+import { Game } from "../../Game"
 import { Zone } from "./Zone"
 
 export class ScaleZone extends Zone {
     readonly scale: number
 
-    constructor(x: number, y: number, width: number, height: number, scale: number) {
-        super(x, y, width, height)
+    constructor(
+        p: Vec2,
+        width: number,
+        height: number,
+        scale: number,
+        config: { joints?: Vec2[]; cycle?: number } = {},
+    ) {
+        super(p, width, height, config)
         this.scale = scale
     }
 

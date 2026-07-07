@@ -1,17 +1,22 @@
-export class Text {
+import { vec, Vec2 } from "../../utils/Vec.js"
+import { Movable } from "./Movable.js"
+
+export class TextObject extends Movable {
     constructor(
-        public x: number,
-        public y: number,
+        p: Vec2,
         public width: number,
         public height: number,
         public rotation: number,
         public text: string,
         public fontSize: number = 16,
-    ) {}
+        config: { joints?: Vec2[]; cycle?: number } = {},
+    ) {
+        super(p, config)
+    }
 
     draw(ctx: CanvasRenderingContext2D): void {
         ctx.save()
-        ctx.translate(this.x, this.y)
+        ctx.translate(this.p.x, this.p.y)
         ctx.rotate(this.rotation)
         ctx.fillStyle = "#000"
         ctx.font = `${this.fontSize}px normal, japanese`

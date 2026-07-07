@@ -1,13 +1,19 @@
-import { Vec2 } from "../../utils/Vec.js"
-import { Zone } from "./Zone.js"
-import { Game } from "../Game.js"
+import { Vec2 } from "../../../utils/Vec"
+import { Game } from "../../Game"
+import { Zone } from "./Zone"
 
 // 触れると重力の向き・強さが変わる円形のゾーン
 export class GravityZone extends Zone {
     readonly gravity: Vec2
 
-    constructor(x: number, y: number, width: number, height: number, gravity: Vec2) {
-        super(x, y, width, height)
+    constructor(
+        p: Vec2,
+        width: number,
+        height: number,
+        gravity: Vec2,
+        config: { joints?: Vec2[]; cycle?: number } = {},
+    ) {
+        super(p, width, height, config)
         this.gravity = gravity
     }
 
@@ -21,11 +27,11 @@ export class GravityZone extends Zone {
         // 中心から重力方向への矢印
         const dir = this.gravity.normalized()
         const len = 30
-        const tip = this.center.add(dir.mul(len))
+        const tip = this.p.add(dir.mul(len))
         ctx.strokeStyle = "#888"
         ctx.lineWidth = 2
         ctx.beginPath()
-        ctx.moveTo(this.center.x, this.center.y)
+        ctx.moveTo(this.p.x, this.p.y)
         ctx.lineTo(tip.x, tip.y)
         ctx.stroke()
 

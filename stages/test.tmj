@@ -430,6 +430,50 @@
                  "width":0,
                  "x":534.666666666667,
                  "y":541.333333333333
+                }, 
+                {
+                 "height":0,
+                 "id":34,
+                 "name":"",
+                 "opacity":1,
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":150.666666666667,
+                         "y":0
+                        }],
+                 "properties":[
+                        {
+                         "name":"joint",
+                         "type":"list",
+                         "value":[
+                                {
+                                 "type":"object",
+                                 "value":35
+                                }]
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":969.333333333333,
+                 "y":544
+                }, 
+                {
+                 "height":0,
+                 "id":35,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":1082.66666666667,
+                 "y":193.333333333333
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -438,7 +482,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":34,
+ "nextobjectid":36,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",
