@@ -1,4 +1,9 @@
-import { FadeOption, GotoOption, parseToNumber } from "./Pages"
+import { FadeOption } from "./Pages"
+import { parseToNumber } from "./parseToNumber"
+
+export type GotoOption = FadeOption & {
+    isBack?: boolean
+}
 
 type OnclickHandlers = {
     enter: (id: string, option: GotoOption) => void
@@ -20,7 +25,7 @@ export class PageEventSetter {
                 const msIn = parseToNumber(button.dataset["msIn"], this.DEFAULT_IN_MS)
                 const msOut = parseToNumber(button.dataset["msOut"], this.DEFAULT_OUT_MS)
 
-                button.addEventListener("click", () => enter(id, { button, msIn, msOut }))
+                button.addEventListener("click", () => enter(id, { msIn, msOut }))
             })
 
         Array.from(container.querySelectorAll("[data-back]"))
@@ -30,7 +35,7 @@ export class PageEventSetter {
                 const msIn = parseToNumber(button.dataset["msIn"], this.DEFAULT_IN_MS)
                 const msOut = parseToNumber(button.dataset["msOut"], this.DEFAULT_OUT_MS)
 
-                button.addEventListener("click", () => back(depth, { button, msIn, msOut }))
+                button.addEventListener("click", () => back(depth, { msIn, msOut }))
             })
     }
 }

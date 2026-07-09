@@ -1,13 +1,9 @@
-import { Awaits } from "../Functions/Awaits"
 import { PageDom } from "./PageDom"
-import { PageEventSetter } from "./PageEventSetter"
+import { GotoOption, PageEventSetter } from "./PageEventSetter"
 import { PageState } from "./PageState"
+import { parseToNumber } from "./parseToNumber"
 
 export type FadeOption = Partial<{ msIn: number; msOut: number }>
-export type GotoOption = FadeOption & {
-    button?: HTMLButtonElement
-    back?: boolean
-}
 
 export type AnimateArgs = Parameters<HTMLElement["animate"]>
 export type TransitionArgs = {
@@ -16,7 +12,7 @@ export type TransitionArgs = {
     crossFade?: boolean
 }
 
-type LoadOption = Partial<{ history: readonly string[]; override: boolean }>
+export type LoadOption = Partial<{ history: readonly string[]; override: boolean }>
 
 /**
  * Pages <- Dom, Run, State, EventSetter
@@ -70,7 +66,7 @@ export class Pages {
 
         this.state = new PageState(history)
 
-        await this.goto(this.state.currentPageId, { msIn: 0, msOut: 0 })
+        await this.goto(this.state.getCurrentPageId(), { msIn: 0, msOut: 0 })
     }
 
     getPage(pageId: string, option: { noError: true }): HTMLElement | undefined
@@ -88,73 +84,54 @@ export class Pages {
     }
 
     getCurrentPage() {
-        return this.dom.getPage(this.state.currentPageId)
+        return this.dom.getPage(this.state.getCurrentPageId())
     }
 
     getCurrentPageId(): string {
-        return this.state.currentPageId
-    }
-
-    isTransitioning(): boolean {
-        return this.state.isTransitioning()
+        return this.state.getCurrentPageId()
     }
 
     async back(depth: number, option: FadeOption = {}) {
-        await this.goto(this.state.back(depth), Object.assign(option, { back: true }))
+        await this.goto(this.state.back(depth), Object.assign(option, { isBack: true }))
     }
 
     async enter(id: string, option: FadeOption = {}) {
-        await this.goto(id, Object.assign(option, { back: false }))
+        await this.goto(id, Object.assign(option, { isBack: false }))
     }
 
     private async goto(id: string, option: GotoOption) {
-        // 0. 遷移中に別の遷移が発生しないように
-        if (this.state.isTransitioning()) return
-
-        this.state.startTransition()
-        Pages.onTransitionStart(this)
-
         // layerに応じて場合分け
         const layerFrom = parseToNumber(
-            this.dom.getPage(this.state.currentPageId, { noError: true })?.dataset["layer"],
+            this.dom.getPage(this.state.getCurrentPageId(), { noError: true })?.dataset["layer"],
             0,
         )
         const layerTo = parseToNumber(this.dom.getPage(id, { noError: true })?.dataset["layer"], 0)
 
-        await this.transition(layerFrom, layerTo, id, option)
-
-        // 5. 遷移完了
-        this.state.endTransition()
+        this.transition(layerFrom, layerTo, id, option)
     }
 
-    private async transition(
+    private transition(
         layerFrom: number,
         layerTo: number,
-        id: string,
-        { button, back, msIn = 200, msOut = 200 }: GotoOption,
+        nextPageId: string,
+        { isBack, msIn = 200, msOut = 200 }: GotoOption,
     ) {
-        const currentPageId = this.state.currentPageId
+        Pages.onTransitionStart(this)
+
+        const currentPageId = this.state.getCurrentPageId()
         const transition =
-            this.transitions[currentPageId]?.[id] ?? getDefaultPageTransition(layerFrom, layerTo, msIn, msOut)
+            this.transitions[currentPageId]?.[nextPageId] ?? getDefaultPageTransition(layerFrom, layerTo, msIn, msOut)
 
-        if (layerFrom === layerTo) {
-            this.dom.fade(currentPageId, id, transition, layerFrom, layerTo)
-            this.state.goto(id)
+        if (layerFrom > layerTo && !isBack) {
+            console.error(`下のlayerにback以外でgotoしようとした。from: ${layerFrom}, to: ${layerTo}`)
             Pages.onTransitionEnd(this)
             return
         }
 
-        if (layerFrom < layerTo) {
-            this.state.goto(id)
-            Pages.onTransitionEnd(this)
-            this.dom.fade(currentPageId, id, transition, layerFrom, layerTo)
-            return
-        }
+        this.dom.transition(currentPageId, nextPageId, transition, layerFrom, layerTo)
 
-        if (!back) throw new Error("下のlayerにback以外でgotoしようとした。")
+        this.state.goto(nextPageId)
 
-        this.dom.fade(currentPageId, id, transition, layerFrom, layerTo)
-        this.state.goto(id)
         Pages.onTransitionEnd(this)
     }
 }
@@ -181,12 +158,4 @@ function getDefaultPageTransition(layerFrom: number, layerTo: number, msIn: numb
         to: [[]],
         crossFade: false,
     }
-}
-
-export function parseToNumber(str: string | undefined | null, defaultValue: number) {
-    if (!str) return defaultValue
-
-    if (Number.isNaN(Number(str))) return defaultValue
-
-    return Number(str)
 }

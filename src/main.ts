@@ -1,8 +1,8 @@
 import { Dom } from "./Dom.js"
 import { SceneChanger } from "./utils/Scene/SceneChanger.js"
 import { SceneTitle } from "./Scene/SceneTitle.js"
-import { Focuses } from "./utils/Focuses/Focuses.js"
-import { DigitalInput } from "./utils/Input/DigitalInput.js"
+import { Focuses } from "@ipota/focuses"
+import { DigitalInput } from "@ipota/input"
 import { Pages } from "./utils/Pages/Pages.js"
 
 export const input = new DigitalInput({

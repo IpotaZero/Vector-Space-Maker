@@ -1,4 +1,4 @@
-import { Transition } from "../Functions/Transition"
+import { Transition } from "@ipota/functions"
 import { Scene } from "./Scene"
 
 export class SceneChanger {

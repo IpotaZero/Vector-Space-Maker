@@ -4,7 +4,7 @@ import { Selector } from "../utils/Selector"
 import { Scene } from "../utils/Scene/Scene"
 import { focuses, sc } from "../main"
 import { SceneGame } from "./SceneGame"
-import { Awaits } from "../utils/Functions/Awaits"
+import { Awaits } from "@ipota/functions"
 import * as tiled from "@kayahr/tiled"
 import { downLoadString } from "../utils/Functions/downLoadString"
 

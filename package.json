@@ -1,5 +1,8 @@
 {
     "dependencies": {
+        "@ipota/focuses": "^1.0.1",
+        "@ipota/functions": "^1.0.0",
+        "@ipota/input": "^1.0.1",
         "@kayahr/tiled": "^0.0.1",
         "jszip": "^3.10.1",
         "vite": "^8.1.2"

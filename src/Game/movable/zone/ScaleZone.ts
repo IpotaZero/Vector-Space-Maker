@@ -1,4 +1,4 @@
-import { Ease } from "../../../utils/Functions/Ease"
+import { Ease } from "@ipota/functions"
 import { Vec2 } from "../../../utils/Vec"
 import { Game } from "../../Game"
 import { Zone } from "./Zone"

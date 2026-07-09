@@ -1,6 +1,6 @@
-import { Awaits } from "../Functions/Awaits"
+import { Awaits } from "@ipota/functions"
 import { RegExpDict } from "../RegExpDict"
-import { AnimateArgs, TransitionArgs } from "./Pages"
+import { TransitionArgs } from "./Pages"
 
 /**
  * domのセットアップ、保持、フェードを行う。
@@ -19,7 +19,7 @@ export class PageDom {
         this.ready = this.setup(html, override)
     }
 
-    async fade(
+    async transition(
         currentPageId: string,
         nextPageId: string,
         transition: TransitionArgs,
@@ -37,7 +37,9 @@ export class PageDom {
         const animationFrom = from.animate(transition.from[0], transition.from[1])
 
         if (!transition.crossFade) {
-            await animationFrom.finished
+            await this.waitAnimation(animationFrom, animationId)
+
+            if (animationId !== this.animationId) return
         }
 
         to.style.opacity = "0"
@@ -47,9 +49,10 @@ export class PageDom {
 
         const animationTo = to.animate(transition.to[0], transition.to[1])
 
-        await Promise.all([animationFrom.finished, animationTo.finished]).catch((e) => {
-            console.error("ページ遷移が速すぎて前のアニメーションがキャンセルされました。", e)
-        })
+        await Promise.all([
+            this.waitAnimation(animationFrom, animationId),
+            this.waitAnimation(animationTo, animationId),
+        ])
 
         if (animationId !== this.animationId) return
 
@@ -84,7 +87,7 @@ export class PageDom {
     }
 
     private async setup(html: string, override: boolean) {
-        this.container.style.display = "none"
+        this.container.classList.add("hidden")
 
         if (override) {
             this.container.innerHTML = html
@@ -111,6 +114,22 @@ export class PageDom {
             console.warn("pageの読み込みに時間掛かり過ぎ! スキップしました。")
         }
 
-        this.container.style.display = ""
+        this.container.classList.remove("hidden")
+    }
+
+    private isCanceledAnimationError(error: unknown) {
+        return error instanceof DOMException && error.name === "AbortError"
+    }
+
+    private async waitAnimation(animation: Animation, animationId: number) {
+        try {
+            await animation.finished
+        } catch (error) {
+            if (animationId !== this.animationId && this.isCanceledAnimationError(error)) {
+                return
+            }
+
+            throw error
+        }
     }
 }
