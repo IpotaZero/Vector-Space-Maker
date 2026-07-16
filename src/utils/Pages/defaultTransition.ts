@@ -1,4 +1,4 @@
-import { TransitionArgs } from "./Pages"
+import { Pages, TransitionArgs } from "./Pages"
 
 export function defaultTransition(layerFrom: number, layerTo: number, msIn: number, msOut: number): TransitionArgs {
     if (layerFrom === layerTo) {
@@ -11,7 +11,7 @@ export function defaultTransition(layerFrom: number, layerTo: number, msIn: numb
                 await fromAnimation.finished
             },
             to: async ({ to }) => {
-                to.classList.remove("hidden")
+                to.classList.remove(Pages.hiddenClass)
                 const toAnimation = to.animate([{ opacity: 0 }, { opacity: 1 }], {
                     duration: msIn,
                     fill: "forwards",
@@ -19,15 +19,15 @@ export function defaultTransition(layerFrom: number, layerTo: number, msIn: numb
                 await toAnimation.finished
             },
             last: async ({ from, to }) => {
-                from.classList.add("hidden")
-                to.classList.remove("hidden")
+                from.classList.add(Pages.hiddenClass)
+                to.classList.remove(Pages.hiddenClass)
             },
         }
     } else if (layerFrom < layerTo) {
         return {
             from: async () => {},
             to: async ({ to }) => {
-                to.classList.remove("hidden")
+                to.classList.remove(Pages.hiddenClass)
                 const toAnimation = to.animate([{ opacity: 0 }, { opacity: 1 }], {
                     duration: msIn,
                     fill: "forwards",
@@ -35,7 +35,7 @@ export function defaultTransition(layerFrom: number, layerTo: number, msIn: numb
                 await toAnimation.finished
             },
             last: async ({ to }) => {
-                to.classList.remove("hidden")
+                to.classList.remove(Pages.hiddenClass)
             },
         }
     } else {
@@ -48,10 +48,10 @@ export function defaultTransition(layerFrom: number, layerTo: number, msIn: numb
                 await fromAnimation.finished
             },
             to: async ({ to }) => {
-                to.classList.remove("hidden")
+                to.classList.remove(Pages.hiddenClass)
             },
             last: async ({ from }) => {
-                from.classList.add("hidden")
+                from.classList.add(Pages.hiddenClass)
             },
         }
     }
