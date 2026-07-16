@@ -46,7 +46,7 @@ export class PageDom {
         to.getAnimations().forEach((a) => a.cancel())
 
         const fromAnimation = transition.from({ from, to })
-        // if (!transition.crossfade) await fromAnimation
+        if (!transition.crossfade) await fromAnimation
 
         if (animationId !== this.animationId) return
 
@@ -59,7 +59,7 @@ export class PageDom {
 
         const toAnimation = transition.to({ from, to })
 
-        await Promise.all([fromAnimation, toAnimation])
+        await this.waitAnimation(Promise.all([fromAnimation, toAnimation]), animationId)
 
         if (animationId !== this.animationId) return
 
@@ -95,5 +95,21 @@ export class PageDom {
         }
 
         this.container.classList.remove(Pages.hiddenClass)
+    }
+
+    private isCanceledAnimationError(error: unknown) {
+        return error instanceof DOMException && error.name === "AbortError"
+    }
+
+    private async waitAnimation(promise: Promise<unknown>, animationId: number) {
+        try {
+            await promise
+        } catch (error) {
+            if (animationId !== this.animationId && this.isCanceledAnimationError(error)) {
+                return
+            }
+
+            throw error
+        }
     }
 }
