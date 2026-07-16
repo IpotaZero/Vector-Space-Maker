@@ -22,39 +22,47 @@ export class SceneTitle extends Scene {
         await this.pages.loadFromFile(Dom.container, "assets/pages/title/index.html")
 
         this.pages.setTransition("first", "stages", {
-            from: [
-                [
-                    { transform: "translateX(0)", opacity: 1 },
-                    { transform: "translateX(-25%)", opacity: 0 },
-                ],
-                { duration: 400, easing: "ease", fill: "forwards" },
-            ],
-            to: [
-                [
-                    { transform: "translateX(25%)", opacity: 0 },
-                    { transform: "translateX(0)", opacity: 1 },
-                ],
-                { duration: 400, easing: "ease", fill: "forwards" },
-            ],
-            crossFade: true,
+            from: async ({ from }) => {
+                from!.animate(
+                    [
+                        { transform: "translateX(0)", opacity: 1 },
+                        { transform: "translateX(-25%)", opacity: 0 },
+                    ],
+                    { duration: 400, easing: "ease", fill: "forwards" },
+                ).finished
+            },
+            to: async ({ to }) => {
+                to!.animate(
+                    [
+                        { transform: "translateX(25%)", opacity: 0 },
+                        { transform: "translateX(0)", opacity: 1 },
+                    ],
+                    { duration: 400, easing: "ease", fill: "forwards" },
+                ).finished
+            },
+            crossfade: true,
         })
 
         this.pages.setTransition("stages", "first", {
-            from: [
-                [
-                    { transform: "translateX(0)", opacity: 1 },
-                    { transform: "translateX(25%)", opacity: 0 },
-                ],
-                { duration: 400, easing: "ease", fill: "forwards" },
-            ],
-            to: [
-                [
-                    { transform: "translateX(-25%)", opacity: 0 },
-                    { transform: "translateX(0)", opacity: 1 },
-                ],
-                { duration: 400, easing: "ease", fill: "forwards" },
-            ],
-            crossFade: true,
+            from: async ({ from }) => {
+                from!.animate(
+                    [
+                        { transform: "translateX(0)", opacity: 1 },
+                        { transform: "translateX(25%)", opacity: 0 },
+                    ],
+                    { duration: 400, easing: "ease", fill: "forwards" },
+                ).finished
+            },
+            to: async ({ to }) => {
+                to!.animate(
+                    [
+                        { transform: "translateX(-25%)", opacity: 0 },
+                        { transform: "translateX(0)", opacity: 1 },
+                    ],
+                    { duration: 400, easing: "ease", fill: "forwards" },
+                ).finished
+            },
+            crossfade: true,
         })
 
         this.pages
@@ -64,7 +72,6 @@ export class SceneTitle extends Scene {
         focuses.setPage(this.pages.getCurrentPage())
 
         this.pages.beforeEnter("stage-test", async () => {
-            console.log("iiii")
             const mapData = (await fetch(`stages/test.tmj`).then((res) => res.json())) as tiled.Map
             console.log(mapData)
             sc.goto(new SceneGame(mapData))

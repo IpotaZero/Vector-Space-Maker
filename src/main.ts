@@ -5,6 +5,7 @@ import { Focuses } from "@ipota/focuses"
 import { DigitalInput } from "@ipota/input"
 import { Pages } from "./utils/Pages/Pages.js"
 import { Scene } from "./utils/Scene/Scene.js"
+import { Awaits } from "@ipota/functions"
 
 export const input = new DigitalInput({
     up: ["ArrowUp", "KeyW", "gamepad-axis-1-negative"],
@@ -54,7 +55,7 @@ export function focusesUpdater(pages: Pages) {
         input.pause("page-transition")
     })
 
-    pages.onTransitionEnd((pages) => {
+    pages.onTransitionEnd(async (pages) => {
         input.resume("page-transition")
         focuses.setPage(pages.getCurrentPage())
     })
