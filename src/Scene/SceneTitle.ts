@@ -3,9 +3,8 @@ import { Pages } from "../utils/Pages/Pages"
 import { Scene } from "../utils/Scene/Scene"
 import { focuses, focusesUpdater, input, sc } from "../main"
 import { SceneGame } from "./SceneGame"
-import { Awaits } from "@ipota/functions"
+import { Files } from "@ipota/functions"
 import * as tiled from "@kayahr/tiled"
-import { downLoadString } from "../utils/Functions/downLoadString"
 
 export class SceneTitle extends Scene {
     private pages = new Pages()
@@ -90,11 +89,11 @@ export class SceneTitle extends Scene {
 
         this.pages.beforeEnter("download", async () => {
             const mapData = await fetch(`stages/test.tmj`).then((res) => res.text())
-            downLoadString(mapData, "test", "tmj")
+            Files.downLoadString(mapData, "test", "tmj")
         })
 
         this.pages.beforeEnter("load", async () => {
-            const file = await Awaits.inputFile("json")
+            const file = await Files.inputFile("json")
             if (!file) return
 
             const text = await file.text()
