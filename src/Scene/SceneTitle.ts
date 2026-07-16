@@ -32,6 +32,7 @@ export class SceneTitle extends Scene {
                 ).finished
             },
             to: async ({ to }) => {
+                to.classList.remove("hidden")
                 await to.animate(
                     [
                         { transform: "translateX(25%)", opacity: 0 },
@@ -39,6 +40,10 @@ export class SceneTitle extends Scene {
                     ],
                     { duration: 400, easing: "ease", fill: "forwards" },
                 ).finished
+            },
+            last: async ({ from, to }) => {
+                from.classList.add("hidden")
+                to.classList.remove("hidden")
             },
             crossfade: true,
         })
@@ -54,6 +59,7 @@ export class SceneTitle extends Scene {
                 ).finished
             },
             to: async ({ to }) => {
+                to.classList.remove("hidden")
                 await to.animate(
                     [
                         { transform: "translateX(-25%)", opacity: 0 },
@@ -61,6 +67,10 @@ export class SceneTitle extends Scene {
                     ],
                     { duration: 400, easing: "ease", fill: "forwards" },
                 ).finished
+            },
+            last: async ({ from, to }) => {
+                from.classList.add("hidden")
+                to.classList.remove("hidden")
             },
             crossfade: true,
         })

@@ -13,6 +13,7 @@ export type GotoOption = FadeOption & {
 export type TransitionArgs = {
     from: (args: { from: HTMLElement; to: HTMLElement }) => Promise<void>
     to: (args: { from: HTMLElement; to: HTMLElement }) => Promise<void>
+    last: (args: { from: HTMLElement; to: HTMLElement }) => Promise<void>
     crossfade?: boolean
 }
 
@@ -23,6 +24,8 @@ export type LoadOption = Partial<{ history: readonly string[]; override: boolean
  */
 
 export class Pages {
+    static hiddenClass = "hidden"
+
     private static cache = new Map<string, string>()
 
     private dom!: PageDom
@@ -158,7 +161,8 @@ export class Pages {
         this.ch.run("transition-start", this)
 
         const currentPageId = this.state.getCurrentPageId()
-        const transition = this.transitions[currentPageId]?.[nextPageId] ?? defaultTransition(from, to, msIn, msOut)
+        const transition =
+            this.transitions[currentPageId]?.[nextPageId] ?? defaultTransition(layerFrom, layerTo, msIn, msOut)
 
         this.state.goto(nextPageId)
         this.dom.animate(from, to, layerFrom, layerTo, transition)

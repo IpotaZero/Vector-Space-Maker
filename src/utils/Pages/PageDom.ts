@@ -1,6 +1,6 @@
 import { Awaits } from "@ipota/functions"
 import { RegExpDict } from "../RegExpDict"
-import type { TransitionArgs } from "./Pages"
+import { Pages, type TransitionArgs } from "./Pages"
 
 /**
  * domのセットアップ、保持、フェードを行う。
@@ -54,7 +54,6 @@ export class PageDom {
         if (layerFrom <= layerTo) {
             to.style.opacity = "0"
             await Awaits.frame()
-            to.classList.remove("hidden")
             to.style.opacity = ""
         }
 
@@ -64,18 +63,11 @@ export class PageDom {
 
         if (animationId !== this.animationId) return
 
-        if (layerFrom > layerTo) {
-            from.classList.add("hidden")
-        } else if (layerFrom < layerTo) {
-            to.classList.remove("hidden")
-        } else {
-            from.classList.add("hidden")
-            to.classList.remove("hidden")
-        }
+        transition.last({ from, to })
     }
 
     private async setup(html: string, override: boolean) {
-        this.container.classList.add("hidden")
+        this.container.classList.add(Pages.hiddenClass)
 
         if (override) {
             this.container.innerHTML = html
@@ -88,7 +80,7 @@ export class PageDom {
             .filter((e) => e instanceof HTMLElement)
             .forEach((page) => {
                 this.pages.add(page.id, page)
-                page.classList.add("hidden")
+                page.classList.add(Pages.hiddenClass)
             })
 
         const load = Promise.all([
@@ -102,6 +94,6 @@ export class PageDom {
             console.warn("pageの読み込みに時間掛かり過ぎ! スキップしました。")
         }
 
-        this.container.classList.remove("hidden")
+        this.container.classList.remove(Pages.hiddenClass)
     }
 }
