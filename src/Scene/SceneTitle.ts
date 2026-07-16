@@ -23,7 +23,7 @@ export class SceneTitle extends Scene {
 
         this.pages.setTransition("first", "stages", {
             from: async ({ from }) => {
-                from!.animate(
+                await from.animate(
                     [
                         { transform: "translateX(0)", opacity: 1 },
                         { transform: "translateX(-25%)", opacity: 0 },
@@ -32,7 +32,7 @@ export class SceneTitle extends Scene {
                 ).finished
             },
             to: async ({ to }) => {
-                to!.animate(
+                await to.animate(
                     [
                         { transform: "translateX(25%)", opacity: 0 },
                         { transform: "translateX(0)", opacity: 1 },
@@ -45,7 +45,7 @@ export class SceneTitle extends Scene {
 
         this.pages.setTransition("stages", "first", {
             from: async ({ from }) => {
-                from!.animate(
+                await from.animate(
                     [
                         { transform: "translateX(0)", opacity: 1 },
                         { transform: "translateX(25%)", opacity: 0 },
@@ -54,7 +54,7 @@ export class SceneTitle extends Scene {
                 ).finished
             },
             to: async ({ to }) => {
-                to!.animate(
+                await to.animate(
                     [
                         { transform: "translateX(-25%)", opacity: 0 },
                         { transform: "translateX(0)", opacity: 1 },

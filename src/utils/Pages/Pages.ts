@@ -174,17 +174,19 @@ export class Pages {
     ) {
         let animationId = ++this.animationId
 
-        // ちらつき防止
-        to.style.opacity = "0"
         from.getAnimations().forEach((a) => a.cancel())
         to.getAnimations().forEach((a) => a.cancel())
-        await Awaits.frame()
-        to.style.opacity = ""
 
         const fromAnimation = transition.from({ from, to })
-        if (!transition.crossfade) await fromAnimation
+        // if (!transition.crossfade) await fromAnimation
 
         if (animationId !== this.animationId) return
+
+        // ちらつき防止
+        to.style.opacity = "0"
+        await Awaits.frame()
+        to.classList.remove("hidden")
+        to.style.opacity = ""
 
         const toAnimation = transition.to({ from, to })
 
