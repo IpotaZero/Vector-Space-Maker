@@ -1,6 +1,6 @@
 import { Awaits } from "@ipota/functions"
 import { RegExpDict } from "../RegExpDict"
-import { Pages, type TransitionArgs } from "./Pages"
+import { Pages, type PagesTransitionArgs } from "./Pages"
 
 /**
  * domのセットアップ、保持、フェードを行う。
@@ -39,7 +39,13 @@ export class PageDom {
         return this.pages.getAll(pageId)
     }
 
-    async animate(from: HTMLElement, to: HTMLElement, layerFrom: number, layerTo: number, transition: TransitionArgs) {
+    async animate(
+        from: HTMLElement,
+        to: HTMLElement,
+        layerFrom: number,
+        layerTo: number,
+        transition: PagesTransitionArgs,
+    ) {
         const animationId = ++this.animationId
 
         from.getAnimations().forEach((a) => a.cancel())

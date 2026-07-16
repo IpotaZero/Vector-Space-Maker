@@ -4,20 +4,20 @@ import { PageState } from "./PageState"
 import { parseToNumber } from "./parseToNumber"
 import { defaultTransition } from "./defaultTransition"
 
-export type FadeOption = { msIn: number; msOut: number }
+export type PagesFadeOption = { msIn: number; msOut: number }
 
-export type GotoOption = FadeOption & {
+type PagesGotoOption = PagesFadeOption & {
     isBack: boolean
 }
 
-export type TransitionArgs = {
+export type PagesTransitionArgs = {
     from: (args: { from: HTMLElement; to: HTMLElement }) => Promise<void>
     to: (args: { from: HTMLElement; to: HTMLElement }) => Promise<void>
     last: (args: { from: HTMLElement; to: HTMLElement }) => Promise<void>
     crossfade?: boolean
 }
 
-export type LoadOption = Partial<{ history: readonly string[]; override: boolean }>
+export type PagesLoadOption = Partial<{ history: readonly string[]; override: boolean }>
 
 /**
  * Pages <- Dom, Run, State, EventSetter
@@ -52,9 +52,9 @@ export class Pages {
         return this.state.getHistory()
     }
 
-    private readonly transitions: Record<string, Record<string, TransitionArgs>> = {}
+    private readonly transitions: Record<string, Record<string, PagesTransitionArgs>> = {}
 
-    setTransition(from: string, to: string, forward: TransitionArgs) {
+    setTransition(from: string, to: string, forward: PagesTransitionArgs) {
         if (!this.transitions[from]) {
             this.transitions[from] = {}
         }
@@ -62,7 +62,7 @@ export class Pages {
         this.transitions[from][to] = forward
     }
 
-    async loadFromFile(container: HTMLElement, path: string, options: LoadOption = {}) {
+    async loadFromFile(container: HTMLElement, path: string, options: PagesLoadOption = {}) {
         if (!Pages.cache.has(path)) {
             const html = await fetch(path).then((res) => res.text())
             Pages.cache.set(path, html)
@@ -71,7 +71,7 @@ export class Pages {
         await this.load(container, Pages.cache.get(path)!, options)
     }
 
-    async load(container: HTMLElement, html: string, { history, override = true }: LoadOption = {}) {
+    async load(container: HTMLElement, html: string, { history, override = true }: PagesLoadOption = {}) {
         if (this.dom) {
             throw new Error("Pages have already been loaded")
         }
@@ -122,15 +122,15 @@ export class Pages {
         return this.state.getCurrentPageId()
     }
 
-    async back(depth: number, option: Partial<FadeOption> = {}) {
+    async back(depth: number, option: Partial<PagesFadeOption> = {}) {
         await this.goto(this.state.back(depth), Object.assign(option, { msIn: 100, msOut: 100, isBack: true }))
     }
 
-    async enter(id: string, option: Partial<FadeOption> = {}) {
+    async enter(id: string, option: Partial<PagesFadeOption> = {}) {
         await this.goto(id, Object.assign(option, { msIn: 100, msOut: 100, isBack: false }))
     }
 
-    private async goto(nextPageId: string, option: GotoOption) {
+    private async goto(nextPageId: string, option: PagesGotoOption) {
         this.transition(this.getCurrentPage(), this.dom.getPage(nextPageId, { noError: true }), nextPageId, option)
     }
 
@@ -138,7 +138,7 @@ export class Pages {
         from: HTMLElement,
         to: HTMLElement | undefined,
         nextPageId: string,
-        { isBack, msIn, msOut }: GotoOption,
+        { isBack, msIn, msOut }: PagesGotoOption,
     ) {
         const result = await this.ch.run(`before-enter-${nextPageId}`, this)
         if (!result) return

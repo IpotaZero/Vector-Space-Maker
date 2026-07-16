@@ -1,6 +1,11 @@
-import { Pages, TransitionArgs } from "./Pages"
+import { Pages, PagesTransitionArgs } from "./Pages"
 
-export function defaultTransition(layerFrom: number, layerTo: number, msIn: number, msOut: number): TransitionArgs {
+export function defaultTransition(
+    layerFrom: number,
+    layerTo: number,
+    msIn: number,
+    msOut: number,
+): PagesTransitionArgs {
     if (layerFrom === layerTo) {
         return {
             from: async ({ from }) => {
