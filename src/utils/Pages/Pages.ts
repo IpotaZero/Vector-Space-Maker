@@ -1,8 +1,8 @@
-import { Awaits } from "@ipota/functions"
 import { CallbackHandler } from "../CallbackHandler"
 import { PageDom } from "./PageDom"
 import { PageState } from "./PageState"
 import { parseToNumber } from "./parseToNumber"
+import { defaultTransition } from "./defaultTransition"
 
 export type FadeOption = { msIn: number; msOut: number }
 
@@ -10,7 +10,7 @@ export type GotoOption = FadeOption & {
     isBack: boolean
 }
 
-type TransitionArgs = {
+export type TransitionArgs = {
     from: (args: { from: HTMLElement; to: HTMLElement }) => Promise<void>
     to: (args: { from: HTMLElement; to: HTMLElement }) => Promise<void>
     crossfade?: boolean
@@ -32,8 +32,6 @@ export class Pages {
         "transition-start" | "transition-end" | `before-enter-${string}` | `on-enter-${string}` | `on-exit-${string}`,
         Pages
     >()
-
-    private animationId = 0
 
     onTransitionStart = this.ch.on.bind(this.ch, "transition-start")
     onTransitionEnd = this.ch.on.bind(this.ch, "transition-end")
@@ -157,51 +155,12 @@ export class Pages {
         const transition = this.transitions[currentPageId]?.[nextPageId] ?? defaultTransition(from, to, msIn, msOut)
 
         this.state.goto(nextPageId)
-        this.animate(from, to, layerFrom, layerTo, transition)
+        this.dom.animate(from, to, layerFrom, layerTo, transition)
 
         this.ch.run(`on-exit-${currentPageId}`, this)
         this.ch.run(`on-enter-${nextPageId}`, this)
 
         this.ch.run("transition-end", this)
-    }
-
-    private async animate(
-        from: HTMLElement,
-        to: HTMLElement,
-        layerFrom: number,
-        layerTo: number,
-        transition: TransitionArgs,
-    ) {
-        let animationId = ++this.animationId
-
-        from.getAnimations().forEach((a) => a.cancel())
-        to.getAnimations().forEach((a) => a.cancel())
-
-        const fromAnimation = transition.from({ from, to })
-        // if (!transition.crossfade) await fromAnimation
-
-        if (animationId !== this.animationId) return
-
-        // ちらつき防止
-        to.style.opacity = "0"
-        await Awaits.frame()
-        to.classList.remove("hidden")
-        to.style.opacity = ""
-
-        const toAnimation = transition.to({ from, to })
-
-        await Promise.all([fromAnimation, toAnimation])
-
-        if (animationId !== this.animationId) return
-
-        if (layerFrom > layerTo) {
-            from.classList.add("hidden")
-        } else if (layerFrom < layerTo) {
-            to.classList.remove("hidden")
-        } else {
-            from.classList.add("hidden")
-            to.classList.remove("hidden")
-        }
     }
 
     private readonly DEFAULT_IN_MS = 100
@@ -225,51 +184,5 @@ export class Pages {
                 this.back(depth, { msIn, msOut })
             }
         })
-    }
-}
-
-function defaultTransition(from: HTMLElement, to: HTMLElement, msIn: number, msOut: number): TransitionArgs {
-    const layerFrom = parseToNumber(from?.dataset.layer, 0)
-    const layerTo = parseToNumber(to?.dataset.layer, 0)
-
-    if (layerFrom === layerTo) {
-        return {
-            from: async () => {
-                const fromAnimation = from.animate([{ opacity: 1 }, { opacity: 0 }], {
-                    duration: msOut,
-                    fill: "forwards",
-                })
-                await fromAnimation.finished
-            },
-            to: async () => {
-                const toAnimation = to.animate([{ opacity: 0 }, { opacity: 1 }], {
-                    duration: msIn,
-                    fill: "forwards",
-                })
-                await toAnimation.finished
-            },
-        }
-    } else if (layerFrom < layerTo) {
-        return {
-            from: async () => {},
-            to: async () => {
-                const toAnimation = to.animate([{ opacity: 0 }, { opacity: 1 }], {
-                    duration: msIn,
-                    fill: "forwards",
-                })
-                await toAnimation.finished
-            },
-        }
-    } else {
-        return {
-            from: async () => {
-                const fromAnimation = from.animate([{ opacity: 1 }, { opacity: 0 }], {
-                    duration: msOut,
-                    fill: "forwards",
-                })
-                await fromAnimation.finished
-            },
-            to: async () => {},
-        }
     }
 }

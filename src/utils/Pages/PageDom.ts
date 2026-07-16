@@ -1,5 +1,6 @@
 import { Awaits } from "@ipota/functions"
 import { RegExpDict } from "../RegExpDict"
+import type { TransitionArgs } from "./Pages"
 
 /**
  * domのセットアップ、保持、フェードを行う。
@@ -36,6 +37,39 @@ export class PageDom {
 
     getAllPages(pageId: string) {
         return this.pages.getAll(pageId)
+    }
+
+    async animate(from: HTMLElement, to: HTMLElement, layerFrom: number, layerTo: number, transition: TransitionArgs) {
+        const animationId = ++this.animationId
+
+        from.getAnimations().forEach((a) => a.cancel())
+        to.getAnimations().forEach((a) => a.cancel())
+
+        const fromAnimation = transition.from({ from, to })
+        // if (!transition.crossfade) await fromAnimation
+
+        if (animationId !== this.animationId) return
+
+        // ちらつき防止
+        to.style.opacity = "0"
+        await Awaits.frame()
+        to.classList.remove("hidden")
+        to.style.opacity = ""
+
+        const toAnimation = transition.to({ from, to })
+
+        await Promise.all([fromAnimation, toAnimation])
+
+        if (animationId !== this.animationId) return
+
+        if (layerFrom > layerTo) {
+            from.classList.add("hidden")
+        } else if (layerFrom < layerTo) {
+            to.classList.remove("hidden")
+        } else {
+            from.classList.add("hidden")
+            to.classList.remove("hidden")
+        }
     }
 
     private async setup(html: string, override: boolean) {
