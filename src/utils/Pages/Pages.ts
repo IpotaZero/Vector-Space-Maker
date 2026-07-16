@@ -33,6 +33,12 @@ export class Pages {
         Pages
     >()
 
+    private ac = new AbortController()
+
+    dispose() {
+        this.ac.abort()
+    }
+
     onTransitionStart = this.ch.on.bind(this.ch, "transition-start")
     onTransitionEnd = this.ch.on.bind(this.ch, "transition-end")
     beforeEnter = (pageId: string, callback: (pages: Pages) => void) => this.ch.on(`before-enter-${pageId}`, callback)
@@ -87,18 +93,18 @@ export class Pages {
         return this.dom.getPage(pageId)
     }
 
-    getElement(query: string, cls = HTMLElement) {
+    getElement<Class extends typeof HTMLElement>(query: string, cls?: Class): InstanceType<Class> {
         const element = this.dom.container.querySelector(query)
 
         if (element === null) {
             throw new Error("そんな要素はない。")
         }
 
-        if (!(element instanceof cls)) {
+        if (cls && !(element instanceof cls)) {
             throw new Error(`${cls.name}でなかった。`)
         }
 
-        return element
+        return element as InstanceType<Class>
     }
 
     getAllPages(pageId: string) {
@@ -167,22 +173,26 @@ export class Pages {
     private readonly DEFAULT_OUT_MS = 100
 
     private setOnclick(container: HTMLElement) {
-        container.addEventListener("click", (e) => {
-            const target = e.target
-            if (!target || !(target instanceof HTMLButtonElement)) return
+        container.addEventListener(
+            "click",
+            (e) => {
+                const target = e.target
+                if (!target || !(target instanceof HTMLButtonElement)) return
 
-            if (target.hasAttribute("data-link")) {
-                const id = target.dataset["link"] || "first"
-                const msIn = parseToNumber(target.dataset["msIn"], this.DEFAULT_IN_MS)
-                const msOut = parseToNumber(target.dataset["msOut"], this.DEFAULT_OUT_MS)
-                this.enter(id, { msIn, msOut })
-            } else if (target.hasAttribute("data-back")) {
-                const depth = parseToNumber(target.dataset["back"], 1)
-                const msIn = parseToNumber(target.dataset["msIn"], this.DEFAULT_IN_MS)
-                const msOut = parseToNumber(target.dataset["msOut"], this.DEFAULT_OUT_MS)
+                if (target.hasAttribute("data-link")) {
+                    const id = target.dataset["link"] || "first"
+                    const msIn = parseToNumber(target.dataset["msIn"], this.DEFAULT_IN_MS)
+                    const msOut = parseToNumber(target.dataset["msOut"], this.DEFAULT_OUT_MS)
+                    this.enter(id, { msIn, msOut })
+                } else if (target.hasAttribute("data-back")) {
+                    const depth = parseToNumber(target.dataset["back"], 1)
+                    const msIn = parseToNumber(target.dataset["msIn"], this.DEFAULT_IN_MS)
+                    const msOut = parseToNumber(target.dataset["msOut"], this.DEFAULT_OUT_MS)
 
-                this.back(depth, { msIn, msOut })
-            }
-        })
+                    this.back(depth, { msIn, msOut })
+                }
+            },
+            { signal: this.ac.signal },
+        )
     }
 }

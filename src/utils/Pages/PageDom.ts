@@ -51,10 +51,12 @@ export class PageDom {
         if (animationId !== this.animationId) return
 
         // ちらつき防止
-        to.style.opacity = "0"
-        await Awaits.frame()
-        to.classList.remove("hidden")
-        to.style.opacity = ""
+        if (layerFrom <= layerTo) {
+            to.style.opacity = "0"
+            await Awaits.frame()
+            to.classList.remove("hidden")
+            to.style.opacity = ""
+        }
 
         const toAnimation = transition.to({ from, to })
 

@@ -96,5 +96,7 @@ export class SceneTitle extends Scene {
         })
     }
 
-    async end(): Promise<void> {}
+    async end(): Promise<void> {
+        this.pages.dispose()
+    }
 }
