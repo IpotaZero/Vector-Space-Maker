@@ -4,6 +4,7 @@ import { SceneTitle } from "./Scene/SceneTitle.js"
 import { Focuses } from "@ipota/focuses"
 import { DigitalInput } from "@ipota/input"
 import { Pages } from "./utils/Pages/Pages.js"
+import { Scene } from "./utils/Scene/Scene.js"
 
 export const input = new DigitalInput({
     up: ["ArrowUp", "KeyW", "gamepad-axis-1-negative"],
@@ -34,15 +35,6 @@ sc.onTransitionEnd = () => {
     focuses.clearMemory()
 }
 
-Pages.onTransitionStart = () => {
-    input.pause("page-transition")
-}
-
-Pages.onTransitionEnd = (pages) => {
-    input.resume("page-transition")
-    focuses.setPage(pages.getCurrentPage())
-}
-
 const update = () => {
     sc.update()
     focuses.update()
@@ -56,3 +48,14 @@ requestAnimationFrame(update)
 window.addEventListener("keydown", (e) => {
     if (["Tab", "Enter"].includes(e.code)) e.preventDefault()
 })
+
+export function focusesUpdater(pages: Pages) {
+    pages.onTransitionStart(() => {
+        input.pause("page-transition")
+    })
+
+    pages.onTransitionEnd((pages) => {
+        input.resume("page-transition")
+        focuses.setPage(pages.getCurrentPage())
+    })
+}

@@ -1,5 +1,5 @@
+import { CallbackHandler } from "../CallbackHandler"
 import { PageDom } from "./PageDom"
-import { GotoOption, PageEventSetter } from "./PageEventSetter"
 import { PageState } from "./PageState"
 import { parseToNumber } from "./parseToNumber"
 
@@ -10,6 +10,15 @@ export type TransitionArgs = {
     from: AnimateArgs
     to: AnimateArgs
     crossFade?: boolean
+}
+
+export type GotoOption = FadeOption & {
+    isBack?: boolean
+}
+
+type OnclickHandlers = {
+    enter: (id: string, option: GotoOption) => void
+    back: (depth: number, option: GotoOption) => void
 }
 
 export type LoadOption = Partial<{ history: readonly string[]; override: boolean }>
@@ -24,8 +33,16 @@ export class Pages {
     private dom!: PageDom
     private state!: PageState
 
-    static onTransitionStart = (pages: Pages) => {}
-    static onTransitionEnd = (pages: Pages) => {}
+    private readonly ch = new CallbackHandler<
+        "transition-start" | "transition-end" | `before-enter-${string}` | `on-enter-${string}` | `on-exit-${string}`,
+        Pages
+    >()
+
+    onTransitionStart = this.ch.on.bind(this.ch, "transition-start")
+    onTransitionEnd = this.ch.on.bind(this.ch, "transition-end")
+    beforeEnter = (pageId: string, callback: (pages: Pages) => void) => this.ch.on(`before-enter-${pageId}`, callback)
+    onEnter = (pageId: string, callback: (pages: Pages) => void) => this.ch.on(`on-enter-${pageId}`, callback)
+    onExit = (pageId: string, callback: (pages: Pages) => void) => this.ch.on(`on-exit-${pageId}`, callback)
 
     getHistory() {
         return this.state.getHistory()
@@ -59,10 +76,7 @@ export class Pages {
         await this.dom.ready
 
         // イベントバインドを外部に委譲
-        PageEventSetter.setOnclick(this.dom.container, {
-            enter: this.enter.bind(this),
-            back: this.back.bind(this),
-        })
+        this.setOnclick(this.dom.container)
 
         this.state = new PageState(history)
 
@@ -77,6 +91,20 @@ export class Pages {
         }
 
         return this.dom.getPage(pageId)
+    }
+
+    getElement(query: string, cls = HTMLElement) {
+        const element = this.dom.container.querySelector(query)
+
+        if (element === null) {
+            throw new Error("そんな要素はない。")
+        }
+
+        if (!(element instanceof cls)) {
+            throw new Error(`${cls.name}でなかった。`)
+        }
+
+        return element
     }
 
     getAllPages(pageId: string) {
@@ -110,13 +138,19 @@ export class Pages {
         this.transition(layerFrom, layerTo, id, option)
     }
 
-    private transition(
+    private async transition(
         layerFrom: number,
         layerTo: number,
         nextPageId: string,
         { isBack, msIn = 200, msOut = 200 }: GotoOption,
     ) {
-        Pages.onTransitionStart(this)
+        console.log(nextPageId)
+        const result = await this.ch.run(`before-enter-${nextPageId}`, this)
+        if (!result) {
+            return
+        }
+
+        this.ch.run("transition-start", this)
 
         const currentPageId = this.state.getCurrentPageId()
         const transition =
@@ -124,15 +158,40 @@ export class Pages {
 
         if (layerFrom > layerTo && !isBack) {
             console.error(`下のlayerにback以外でgotoしようとした。from: ${layerFrom}, to: ${layerTo}`)
-            Pages.onTransitionEnd(this)
+            this.ch.run("transition-end", this)
             return
         }
 
         this.dom.transition(currentPageId, nextPageId, transition, layerFrom, layerTo)
 
+        this.ch.run(`on-exit-${currentPageId}`, this)
         this.state.goto(nextPageId)
+        this.ch.run(`on-enter-${nextPageId}`, this)
 
-        Pages.onTransitionEnd(this)
+        this.ch.run("transition-end", this)
+    }
+
+    private readonly DEFAULT_IN_MS = 100
+    private readonly DEFAULT_OUT_MS = 100
+
+    private setOnclick(container: HTMLElement) {
+        container.addEventListener("click", (e) => {
+            const target = e.target
+            if (!target || !(target instanceof HTMLButtonElement)) return
+
+            if (target.hasAttribute("data-link")) {
+                const id = target.dataset["link"] || "first"
+                const msIn = parseToNumber(target.dataset["msin"], this.DEFAULT_IN_MS)
+                const msOut = parseToNumber(target.dataset["msout"], this.DEFAULT_OUT_MS)
+                this.enter(id, { msIn, msOut })
+            } else if (target.hasAttribute("data-back")) {
+                const depth = parseToNumber(target.dataset["back"], 1)
+                const msIn = parseToNumber(target.dataset["msIn"], this.DEFAULT_IN_MS)
+                const msOut = parseToNumber(target.dataset["msOut"], this.DEFAULT_OUT_MS)
+
+                this.back(depth, { msIn, msOut })
+            }
+        })
     }
 }
 

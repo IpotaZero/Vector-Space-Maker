@@ -1,6 +1,6 @@
 import { Dom } from "../Dom"
 import { Game } from "../Game/Game"
-import { input, sc } from "../main"
+import { focuses, focusesUpdater, input, sc } from "../main"
 import { Pages } from "../utils/Pages/Pages"
 import { Selector } from "../utils/Selector"
 import { Scene } from "../utils/Scene/Scene"
@@ -21,6 +21,8 @@ export class SceneGame extends Scene {
             ".next": { alias: "next", expectedCount: 2 },
             ".resume": { alias: "resume", expectedCount: 1 },
         })
+
+        focusesUpdater(this.pages)
     }
 
     async start(): Promise<void> {
