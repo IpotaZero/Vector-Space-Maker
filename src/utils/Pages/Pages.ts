@@ -141,20 +141,14 @@ export class Pages {
         { isBack, msIn, msOut }: GotoOption,
     ) {
         const result = await this.ch.run(`before-enter-${nextPageId}`, this)
-        if (!result) {
-            return
-        }
-
-        if (!to) {
-            throw new Error("止めろ。")
-        }
+        if (!result) return
+        if (!to) throw new Error("止めろ。")
 
         const layerFrom = parseToNumber(from.dataset.layer, 0)
         const layerTo = parseToNumber(to.dataset.layer, 0)
 
         if (layerFrom > layerTo && !isBack) {
             console.error(`下のlayerにback以外でgotoしようとした。from: ${layerFrom}, to: ${layerTo}`)
-            this.ch.run("transition-end", this)
             return
         }
 
