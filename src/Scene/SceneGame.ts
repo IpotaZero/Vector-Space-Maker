@@ -1,7 +1,7 @@
 import { Dom } from "../Dom"
 import { Game } from "../Game/Game"
 import { focuses, focusesUpdater, input, sc } from "../main"
-import { Pages } from "../utils/Pages/Pages"
+import { Pages } from "@ipota/pages"
 import { Scene } from "../utils/Scene/Scene"
 import { SceneTitle } from "./SceneTitle"
 import * as tiled from "@kayahr/tiled"

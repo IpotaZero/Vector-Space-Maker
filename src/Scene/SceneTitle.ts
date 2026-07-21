@@ -1,5 +1,5 @@
 import { Dom } from "../Dom"
-import { Pages } from "../utils/Pages/Pages"
+import { Pages } from "@ipota/pages"
 import { Scene } from "../utils/Scene/Scene"
 import { focuses, focusesUpdater, input, sc } from "../main"
 import { SceneGame } from "./SceneGame"

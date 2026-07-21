@@ -1,5 +1,5 @@
 import { Ctx } from "../utils/Functions/Ctx"
-import { DigitalInputReader } from "../utils/Input/DigitalInput"
+import { DigitalInputReader } from "@ipota/input"
 import { vec, Vec2 } from "../utils/Vec"
 import { Edge } from "./movable/Edge"
 
@@ -9,7 +9,7 @@ const MAX_SLIDE_ITER = 4 // 1フレームあたりの最大スライド回数
 export class Player {
     p: Vec2
     v: Vec2 = vec(0, 0)
-    g: Vec2 = vec(0, 0.4)
+    g: Vec2 = vec(0, 0.8)
 
     private onFloor: boolean[] = []
     private rotation = 0
@@ -21,25 +21,38 @@ export class Player {
 
     update(): void {
         this.onFloor = this.onFloor.slice(-6)
-        this.v = this.v.add(this.g)
+        this.v = this.v.add(this.g) // 重力の加算
         this.rotation += this.v.dot(this.g.normal()) / 36
         this.onFloor.push(false)
-        // ここでは this.p を直接動かさない。目標位置は resolveCollisions で決める。
 
-        this.v = this.v.mul(0.98) // 空気抵抗
+        // 重力方向の単位ベクトル
+        const gDir = this.g.normalized()
+        // 垂直方向と水平方向の速度成分に分解
+        const vUp = gDir.mul(this.v.dot(gDir))
+        const vHorizontal = this.v.sub(vUp)
+
+        // 水平方向にのみ強い摩擦（例えば0.7など）をかける
+        // ※onFloor配列を使って空中と地上の摩擦を変えるのも効果的です
+        const newVHorizontal = vHorizontal.mul(0.7)
+
+        // 垂直方向には軽い空気抵抗（終端速度の調整用）をかけるか、そのままにする
+        const newVUp = vUp.mul(0.99)
+
+        // 再合成
+        this.v = newVHorizontal.add(newVUp)
     }
 
     move(input: DigitalInputReader<"left" | "right" | "jump">): void {
         if (input.isPressed("right")) {
-            this.v = this.v.add(this.g.normal().mul(0.4))
+            this.v = this.v.add(this.g.normal().mul(4))
         }
         if (input.isPressed("left")) {
-            this.v = this.v.add(this.g.normal().mul(-0.4))
+            this.v = this.v.add(this.g.normal().mul(-4))
         }
 
         if (input.isPressed("jump")) {
             if (this.onFloor.includes(true)) {
-                this.v = this.v.add(this.g.normalized().mul(-48 * 0.3))
+                this.v = this.v.add(this.g.normalized().mul(-48 * 0.4))
                 this.onFloor = []
                 this.isJumping = true
             }
@@ -125,7 +138,7 @@ export class Player {
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
-        Ctx.polygon(ctx, 8, 2, this.p.l, 32, "#111", { theta: this.rotation, lineWidth: 0.5 })
+        Ctx.polygon(ctx, 8, 2, this.p.l, 32, "#111", { theta: 0, lineWidth: 0.5 })
         Ctx.arc(ctx, this.p.l, 12, "#111", { lineWidth: 0.5 })
         Ctx.text(ctx, this.p.l, "#111", "罪", {
             align: "center",

@@ -204,7 +204,7 @@
                         {
                          "name":"gy",
                          "type":"float",
-                         "value":-0.4
+                         "value":-1
                         }],
                  "rotation":0,
                  "type":"",
@@ -469,7 +469,7 @@
  "nextobjectid":38,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.12.1",
+ "tiledversion":"1.12.2",
  "tileheight":32,
  "tilesets":[],
  "tilewidth":32,

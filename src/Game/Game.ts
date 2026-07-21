@@ -68,9 +68,9 @@ export class Game {
                 }
             })
 
+        this.player.move(this.input)
         this.player.update()
         this.player.resolveCollisions(stage.movables.filter((obj) => obj instanceof Edge))
-        this.player.move(this.input)
 
         this.camera.update(this.player.p, this.player.g)
 

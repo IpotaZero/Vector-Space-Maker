@@ -3,7 +3,7 @@ import { SceneChanger } from "./utils/Scene/SceneChanger.js"
 import { SceneTitle } from "./Scene/SceneTitle.js"
 import { Focuses } from "@ipota/focuses"
 import { DigitalInput } from "@ipota/input"
-import { Pages } from "./utils/Pages/Pages.js"
+import { Pages } from "@ipota/pages"
 
 export const input = new DigitalInput({
     up: ["ArrowUp", "KeyW", "gamepad-axis-1-negative"],
