@@ -1,4 +1,4 @@
-import { Vec2 } from "../utils/Vec.js"
+import { Vec } from "@ipota/vec"
 
 const normalizeAngle = (a: number): number => {
     while (a > Math.PI) a -= Math.PI * 2
@@ -7,34 +7,34 @@ const normalizeAngle = (a: number): number => {
 }
 
 export class Camera {
-    p: Vec2
+    p: Vec
     angle = 0
     scale = 1.5
 
-    constructor(start: Vec2) {
+    constructor(start: Vec) {
         this.p = start
     }
 
-    update(target: Vec2, gravity: Vec2): void {
+    update(target: Vec, gravity: Vec): void {
         // ターゲットへのベクトルを計算
-        const diff = target.sub(this.p)
+        const diff = target.minus(this.p)
 
         // 重力方向（画面の垂直方向）の単位ベクトル
         const gDir = gravity.normalized()
 
         // 垂直方向と水平方向の追従成分に分解
-        const diffVertical = gDir.mul(diff.dot(gDir))
-        const diffHorizontal = diff.sub(diffVertical)
+        const diffVertical = gDir.scaled(diff.dot(gDir))
+        const diffHorizontal = diff.minus(diffVertical)
 
         // 水平方向は元のまま機敏に（0.1）、垂直方向は緩やかに（0.03程度）追従させる
-        const moveHorizontal = diffHorizontal.mul(0.1)
-        const moveVertical = diffVertical.mul(0.03)
+        const moveHorizontal = diffHorizontal.scaled(0.1)
+        const moveVertical = diffVertical.scaled(0.03)
 
         // 分解した移動量を加算してカメラ位置を更新
-        this.p = this.p.add(moveHorizontal).add(moveVertical)
+        this.p = this.p.plus(moveHorizontal).plus(moveVertical)
 
         // 重力方向が常に画面の「下」を向くように回転させる（既存の処理）
-        const targetAngle = Math.PI / 2 - gravity.angle()
+        const targetAngle = Math.PI / 2 - gravity.radian()
         const diffAngle = normalizeAngle(targetAngle - this.angle)
         this.angle += diffAngle * 0.1
     }

@@ -1,0 +1,38 @@
+import { vec, Vec } from "@ipota/vec"
+import { Enemy } from "./Enemy"
+import { Bullet } from "./Bullet"
+import { Player } from "./Player"
+export type GameLike = {
+    player: Player
+    enemies: Enemy[]
+    bullets: Bullet[]
+}
+
+export abstract class Actor {
+    p: Vec = vec(0, 0)
+    r: number = 8
+    life = 1
+
+    private gens: Generator[] = []
+
+    update(game: GameLike) {
+        const finished = this.gens.filter((g) => g.next().done)
+        this.gens = this.gens.filter((g) => !finished.includes(g))
+    }
+
+    abstract draw(ctx: CanvasRenderingContext2D): void
+
+    protected addScript(g: (me: this) => Generator, { loop = 1, margin = 0 }: { loop?: number; margin?: number } = {}) {
+        const me = this
+
+        this.gens.push(
+            function* () {
+                yield* Array(margin)
+
+                while (loop--) {
+                    yield* g(me)
+                }
+            }.bind(this)(),
+        )
+    }
+}

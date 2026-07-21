@@ -1,12 +1,14 @@
 import { Camera } from "./Camera"
 import { loadStageFromMapData, loadStageFromUrl } from "./loadStageFromJson"
-import { Player } from "./Player"
 import { Stage } from "./Stage"
-import { vec } from "../utils/Vec"
-import { DigitalInputReader } from "@ipota/input"
+import { DigitalInput } from "@ipota/input"
 import * as tiled from "@kayahr/tiled"
 import { Zone } from "./movable/zone/Zone"
 import { Edge } from "./movable/Edge"
+import { vec } from "@ipota/vec"
+import { Player } from "./Actor/Player"
+import { Enemy } from "./Actor/Enemy"
+import { Bullet } from "./Actor/Bullet"
 
 const WIDTH = 1200
 const HEIGHT = 900
@@ -26,9 +28,12 @@ export class Game {
 
     private gens: Generator[] = []
 
+    enemies: Enemy[] = []
+    bullets: Bullet[] = []
+
     constructor(
         canvas: HTMLCanvasElement,
-        private readonly input: DigitalInputReader<"right" | "left" | "jump">,
+        private readonly input: DigitalInput.Reader<"right" | "left" | "jump">,
         readonly onFinish: () => void,
     ) {
         this.canvas = canvas
@@ -54,10 +59,24 @@ export class Game {
     }
 
     update(): void {
+        this.updateMovables()
+        this.handleZoneEnter()
+        this.updatePlayer()
+        this.updateCamera()
+        this.restartIfOutOfBounds()
+        this.updateGenerators()
+        this.draw()
+    }
+
+    private updateMovables(): void {
         const stage = this.stage
 
         // 【変更】先に movable を update して、今フレームの位置と移動量(dp)を確定させる
         stage.movables.forEach((movable) => movable.update())
+    }
+
+    private handleZoneEnter(): void {
+        const stage = this.stage
 
         stage.movables
             .filter((obj) => obj instanceof Zone)
@@ -67,12 +86,22 @@ export class Game {
                     this.gens.push(gen)
                 }
             })
+    }
+
+    private updatePlayer(): void {
+        const stage = this.stage
 
         this.player.move(this.input)
-        this.player.update()
+        this.player.update(this)
         this.player.resolveCollisions(stage.movables.filter((obj) => obj instanceof Edge))
+    }
 
+    private updateCamera(): void {
         this.camera.update(this.player.p, this.player.g)
+    }
+
+    private restartIfOutOfBounds(): void {
+        const stage = this.stage
 
         // ステージ外に落ちたらリスタート
         if (
@@ -83,14 +112,20 @@ export class Game {
         ) {
             this.reset()
         }
+    }
 
+    private updateGenerators(): void {
         this.gens = this.gens.filter((gen) => {
             const result = gen.next()
 
             return !result.done
         })
+    }
 
+    private draw(): void {
+        const stage = this.stage
         const ctx = this.ctx
+
         ctx.clearRect(0, 0, WIDTH, HEIGHT)
         ctx.fillStyle = "#fcfcfc"
         ctx.fillRect(0, 0, WIDTH, HEIGHT)

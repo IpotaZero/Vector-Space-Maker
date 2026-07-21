@@ -1,15 +1,15 @@
-import { vec, Vec2 } from "../../utils/Vec.js"
+import { vec, Vec } from "../../utils/Vec.js"
 import { Movable } from "./Movable.js"
 
 export class TextObject extends Movable {
     constructor(
-        p: Vec2,
+        p: Vec,
         public width: number,
         public height: number,
         public rotation: number,
         public text: string,
         public fontSize: number = 16,
-        config: { joints?: Vec2[]; cycle?: number } = {},
+        config: { joints?: Vec[]; cycle?: number } = {},
     ) {
         super(p, config)
     }

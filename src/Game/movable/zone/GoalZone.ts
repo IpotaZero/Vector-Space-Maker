@@ -1,9 +1,9 @@
-import { Vec2 } from "../../../utils/Vec"
+import { Vec } from "@ipota/vec"
 import { Game } from "../../Game"
 import { Zone } from "./Zone"
 
 export class GoalZone extends Zone {
-    constructor(p: Vec2, width: number, height: number, config: { joints?: Vec2[]; cycle?: number } = {}) {
+    constructor(p: Vec, width: number, height: number, config: { joints?: Vec[]; cycle?: number } = {}) {
         super(p, width, height, config)
     }
 

@@ -1,52 +1,55 @@
-import { Ctx } from "../utils/Functions/Ctx"
-import { DigitalInputReader } from "@ipota/input"
-import { vec, Vec2 } from "../utils/Vec"
-import { Edge } from "./movable/Edge"
+import { Ctx } from "../../utils/Functions/Ctx"
+import { DigitalInput } from "@ipota/input"
+import { vec, Vec } from "@ipota/vec"
+import { Edge } from "../movable/Edge"
+import { Actor, GameLike } from "./Actor"
 
 const SKIN = 0.01 // 数値誤差対策のごく小さい押し戻し量
 const MAX_SLIDE_ITER = 4 // 1フレームあたりの最大スライド回数
 const SPEED = 4
-const JUMP = 48 * 0.33
+const JUMP = 48 * 0.3
 
-export class Player {
-    p: Vec2
-    v: Vec2 = vec(0, 0)
-    g: Vec2 = vec(0, 0.7)
+export class Player extends Actor {
+    v: Vec = vec(0, 0)
+    g: Vec = vec(0, 0.7)
 
     private onFloor: boolean[] = []
     private rotation = 0
     private isJumping = false
     private canDoubleJump = true // 2段ジャンプの権利
 
-    constructor(start: Vec2) {
+    constructor(start: Vec) {
+        super()
         this.p = start
     }
 
-    update(): void {
+    update(game: GameLike): void {
+        super.update(game)
+
         this.onFloor = this.onFloor.slice(-6)
-        this.v = this.v.add(this.g) // 重力の加算
+        this.v = this.v.plus(this.g) // 重力の加算
         this.rotation += this.v.dot(this.g.normal()) / 36
         this.onFloor.push(false)
 
         // 重力方向の単位ベクトル
         const gDir = this.g.normalized()
         // 垂直方向と水平方向の速度成分に分解
-        const vUp = gDir.mul(this.v.dot(gDir))
-        const vHorizontal = this.v.sub(vUp)
+        const vUp = gDir.scaled(this.v.dot(gDir))
+        const vHorizontal = this.v.minus(vUp)
 
         // 水平方向にのみ強い摩擦（例えば0.7など）をかける
         // ※onFloor配列を使って空中と地上の摩擦を変えるのも効果的です
-        const newVHorizontal = vHorizontal.mul(0.7)
+        const newVHorizontal = vHorizontal.scaled(0.7)
 
         // 垂直方向には軽い空気抵抗（終端速度の調整用）をかけるか、そのままにする
-        const newVUp = vUp.mul(0.99)
+        const newVUp = vUp.scaled(0.99)
 
         // 再合成
-        this.v = newVHorizontal.add(newVUp)
+        this.v = newVHorizontal.plus(newVUp)
     }
-    move(input: DigitalInputReader<"left" | "right" | "jump">): void {
-        if (input.isPressed("right")) this.v = this.v.add(this.g.normal().mul(SPEED))
-        if (input.isPressed("left")) this.v = this.v.add(this.g.normal().mul(-SPEED))
+    move(input: DigitalInput.Reader<"left" | "right" | "jump">): void {
+        if (input.isPressed("right")) this.v = this.v.plus(this.g.normal().scaled(SPEED))
+        if (input.isPressed("left")) this.v = this.v.plus(this.g.normal().scaled(-SPEED))
 
         if (input.isPressed("jump")) {
             if (this.onFloor.includes(true)) {
@@ -59,8 +62,8 @@ export class Player {
         } else {
             // ジャンプキャンセル（小ジャンプ）の計算を簡略化
             if (this.isJumping && this.v.dot(this.g) < 0) {
-                const vUp = this.g.normalized().mul(this.v.dot(this.g.normalized()))
-                this.v = this.v.sub(vUp.mul(0.5))
+                const vUp = this.g.normalized().scaled(this.v.dot(this.g.normalized()))
+                this.v = this.v.minus(vUp.scaled(0.5))
             }
             this.isJumping = false
         }
@@ -69,7 +72,7 @@ export class Player {
     private jump(): void {
         const gDir = this.g.normalized()
         // 現在の垂直速度を消去してからジャンプ力を加える（落下中の2段ジャンプ対策）
-        this.v = this.v.sub(gDir.mul(this.v.dot(gDir))).add(gDir.mul(-JUMP))
+        this.v = this.v.minus(gDir.scaled(this.v.dot(gDir))).plus(gDir.scaled(-JUMP))
         this.isJumping = true
     }
 
@@ -83,14 +86,14 @@ export class Player {
         let remaining = this.v // このフレームで進むべき残り移動量
 
         for (let i = 0; i < MAX_SLIDE_ITER; i++) {
-            const end = start.add(remaining)
+            const end = start.plus(remaining)
 
-            let closest: { t: number; point: Vec2; floor: Edge } | null = null
+            let closest: { t: number; point: Vec; floor: Edge } | null = null
 
             // 最も早く衝突する床を探す
             for (const floor of floors) {
                 // 【変更】床の移動量(dp)を考慮し、相対的な移動開始位置を計算して判定する
-                const relStart = start.add(floor.dp)
+                const relStart = start.plus(floor.dp)
                 const hit = floor.getSweepHit(relStart, end)
                 if (!hit) continue
                 if (!closest || hit.t < closest.t) {
@@ -109,7 +112,7 @@ export class Player {
 
             // 移動開始地点がEdgeの右側(裏側)だったか判定
             // (法線は左側を向いているため、内積が負なら右側にいたことになる)
-            const q = start.sub(floor.start)
+            const q = start.minus(floor.start)
             const isFromRightSide = q.dot(normal) < 0
 
             // 床判定
@@ -123,15 +126,15 @@ export class Player {
             const vn = this.v.dot(normal)
             // 左からの衝突(vn < 0)、または右からのすり抜け吸着(isFromRightSide && vn > 0)の場合
             if (vn < 0 || (isFromRightSide && vn > 0)) {
-                this.v = this.v.sub(normal.mul(vn))
+                this.v = this.v.minus(normal.scaled(vn))
             }
 
             // 残り移動量からも成分を除去(スライド または 吸着)
             // ※元コードの斜め衝突時のバグを修正するため、残りの移動量(unconsumed)を基に再計算しています
-            const unconsumed = end.sub(point)
+            const unconsumed = end.minus(point)
             const un = unconsumed.dot(normal)
             if (un < 0 || (isFromRightSide && un > 0)) {
-                remaining = unconsumed.sub(normal.mul(un))
+                remaining = unconsumed.minus(normal.scaled(un))
             } else {
                 remaining = unconsumed
             }
@@ -139,15 +142,15 @@ export class Player {
             // 常にEdgeの左側(表側)へSKIN分押し戻す
             // 左からぶつかった場合は「めり込み防止」として機能し、
             // 右から接触した場合は「すり抜けた直後に表側に吸着」として機能する
-            start = point.add(normal.mul(SKIN))
+            start = point.plus(normal.scaled(SKIN))
         }
 
         this.p = start
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
-        Ctx.polygon(ctx, 8, 2, this.p.l, 28, "#111", { theta: 0, lineWidth: 0.5 })
-        Ctx.arc(ctx, this.p.l, 10, "#111", { lineWidth: 0.5 })
+        Ctx.polygon(ctx, 8, 2, this.p.l, 24, "#111", { theta: this.rotation / 2, lineWidth: 0.5 })
+        Ctx.arc(ctx, this.p.l, 8, "#111", { lineWidth: 0.5 })
         Ctx.text(ctx, this.p.l, "#111", "罪", {
             align: "center",
             baseline: "middle",

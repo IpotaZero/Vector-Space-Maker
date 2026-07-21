@@ -1,4 +1,4 @@
-import { vec, Vec2 } from "../../utils/Vec.js"
+import { vec, Vec } from "@ipota/vec"
 import { Movable } from "./Movable.js"
 
 const COLLISION_MARGIN = 0
@@ -7,22 +7,22 @@ export class Edge extends Movable {
     // 最初の向きと長さを維持するため、start→end の相対ベクトル(オフセット)を固定で保持する。
     // Movable の p (基準点) が joints/cycle に従って動いても、offset は変わらないので
     // 向きと長さは常に一定に保たれる。
-    private readonly offset: Vec2
+    private readonly offset: Vec
 
-    constructor(x0: number, y0: number, x1: number, y1: number, config: { joints?: Vec2[]; cycle?: number } = {}) {
+    constructor(x0: number, y0: number, x1: number, y1: number, config: { joints?: Vec[]; cycle?: number } = {}) {
         super(vec(x0, y0), config)
         this.offset = vec(x1 - x0, y1 - y0)
     }
 
-    get start(): Vec2 {
+    get start(): Vec {
         return this.p
     }
 
-    get end(): Vec2 {
-        return this.p.add(this.offset)
+    get end(): Vec {
+        return this.p.plus(this.offset)
     }
 
-    vec(): Vec2 {
+    vec(): Vec {
         return this.offset
     }
 
@@ -38,9 +38,9 @@ export class Edge extends Movable {
         ctx.lineTo(end.x, end.y)
         ctx.stroke()
 
-        const dir = end.sub(start).normalized()
-        const end0 = end.add(dir.rotate((Math.PI * 4) / 5).mul(24))
-        const end1 = end.add(dir.rotate((-Math.PI * 4) / 5).mul(24))
+        const dir = end.minus(start).normalized()
+        const end0 = end.plus(dir.rotated((Math.PI * 4) / 5).scaled(24))
+        const end1 = end.plus(dir.rotated((-Math.PI * 4) / 5).scaled(24))
 
         ctx.beginPath()
         ctx.moveTo(end.x, end.y)
@@ -64,17 +64,17 @@ export class Edge extends Movable {
      * ※当たり判定ロジックは一旦そのまま。start/end が Movable の p に連動する
      *   getter になったため、Edge が移動していれば現在位置に対して判定される。
      */
-    getSweepHit(sweepStart: Vec2, sweepEnd: Vec2): { t: number; point: Vec2 } | null {
+    getSweepHit(sweepStart: Vec, sweepEnd: Vec): { t: number; point: Vec } | null {
         const start = this.start
         const end = this.end
 
-        const r = end.sub(start) // このEdgeの方向ベクトル
-        const s = sweepEnd.sub(sweepStart) // 移動方向ベクトル
+        const r = end.minus(start) // このEdgeの方向ベクトル
+        const s = sweepEnd.minus(sweepStart) // 移動方向ベクトル
 
         const denom = r.cross(s)
         if (Math.abs(denom) < 1e-9) return null // 平行 or 移動量ゼロ
 
-        const qp = sweepStart.sub(start)
+        const qp = sweepStart.minus(start)
 
         const t = qp.cross(s) / denom // このEdge上のどこで交わるか(0〜1)
         const u = qp.cross(r) / denom // sweep上のどこで交わるか(0〜1)
@@ -84,6 +84,6 @@ export class Edge extends Movable {
 
         if (!isHit) return null
 
-        return { t: u, point: sweepStart.add(s.mul(u)) }
+        return { t: u, point: sweepStart.plus(s.scaled(u)) }
     }
 }

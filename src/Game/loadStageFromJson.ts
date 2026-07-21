@@ -1,12 +1,12 @@
 import * as tiled from "@kayahr/tiled"
 import { Stage } from "./Stage.js"
-import { vec, Vec2 } from "../utils/Vec"
 import { Edge } from "./movable/Edge.js"
 import { GoalZone } from "./movable/zone/GoalZone.js"
 import { GravityZone } from "./movable/zone/GravityZone.js"
 import { ScaleZone } from "./movable/zone/ScaleZone.js"
 import { TextObject } from "./movable/TextObject.js"
 import { Movable } from "./movable/Movable.js"
+import { Vec, vec } from "@ipota/vec"
 
 export async function loadStageFromUrl(url: string): Promise<Stage> {
     const response = await fetch(url)
@@ -42,7 +42,7 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
             // @kayahr/tiled の型定義がまだ list 型に対応していないため、
             // ここだけ型を無しにして緩く扱う。
             const moveJoints = obj.properties?.find((p) => p.name === "joints") as any
-            let joints: Vec2[] = []
+            let joints: Vec[] = []
 
             if (moveJoints?.type === "list") {
                 // list の各要素は、object 型プロパティ相当の値(参照先オブジェクトのid)、
@@ -69,7 +69,7 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
                     // 同じように動くよう、joints も p1 分だけ平行移動させる。
                     // これをしないと全セグメントが同じ絶対座標に向かって動いてしまい、
                     // ポリラインの形が崩れて連続しなくなる。
-                    const segmentJoints = joints.map((j) => j.add(vec(p1.x, p1.y)))
+                    const segmentJoints = joints.map((j) => j.plus(vec(p1.x, p1.y)))
                     movables.push(
                         new Edge(obj.x + p1.x, obj.y + p1.y, obj.x + p2.x, obj.y + p2.y, {
                             joints: segmentJoints,
@@ -84,7 +84,7 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
                     const p1 = obj.polygon[i]
                     const p2 = obj.polygon[(i + 1) % obj.polygon.length]
                     // polylineと同様、セグメントの始点オフセット(p1)分だけ joints をずらす
-                    const segmentJoints = joints.map((j) => j.add(vec(p1.x, p1.y)))
+                    const segmentJoints = joints.map((j) => j.plus(vec(p1.x, p1.y)))
                     movables.push(
                         new Edge(obj.x + p1.x, obj.y + p1.y, obj.x + p2.x, obj.y + p2.y, {
                             joints: segmentJoints,

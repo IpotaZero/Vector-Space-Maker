@@ -1,7 +1,7 @@
-import { Vec2, vec } from "../../utils/Vec"
+import { Vec, vec } from "@ipota/vec"
 
 export abstract class Movable {
-    private readonly joints: Vec2[]
+    private readonly joints: Vec[]
     private readonly cycle: number
 
     p = vec(0, 0)
@@ -9,7 +9,7 @@ export abstract class Movable {
 
     private gens: Generator[] = []
 
-    protected constructor(p: Vec2, { joints = [], cycle = 1 }: { joints?: Vec2[]; cycle?: number } = {}) {
+    protected constructor(p: Vec, { joints = [], cycle = 1 }: { joints?: Vec[]; cycle?: number } = {}) {
         this.p = p
 
         this.joints = joints
@@ -21,7 +21,7 @@ export abstract class Movable {
     update(): void {
         const oldP = this.p // 【追加】移動前の位置を保存
         this.gens = this.gens.filter((gen) => !gen.next().done)
-        this.dp = this.p.sub(oldP) // 【追加】移動量を計算
+        this.dp = this.p.minus(oldP) // 【追加】移動量を計算
     }
 
     abstract draw(ctx: CanvasRenderingContext2D): void
@@ -36,7 +36,7 @@ export abstract class Movable {
 
                 for (let t = 0; t < this.cycle; t++) {
                     const ratio = t / this.cycle
-                    const offset = from.mul(1 - ratio).add(to.mul(ratio))
+                    const offset = from.scaled(1 - ratio).plus(to.scaled(ratio))
                     this.p = offset
                     yield
                 }

@@ -1,18 +1,12 @@
 import { Ease } from "@ipota/functions"
-import { Vec2 } from "../../../utils/Vec"
+import { Vec } from "@ipota/vec"
 import { Game } from "../../Game"
 import { Zone } from "./Zone"
 
 export class ScaleZone extends Zone {
     readonly scale: number
 
-    constructor(
-        p: Vec2,
-        width: number,
-        height: number,
-        scale: number,
-        config: { joints?: Vec2[]; cycle?: number } = {},
-    ) {
+    constructor(p: Vec, width: number, height: number, scale: number, config: { joints?: Vec[]; cycle?: number } = {}) {
         super(p, width, height, config)
         this.scale = scale
     }
