@@ -5,15 +5,18 @@ import { Edge } from "./movable/Edge"
 
 const SKIN = 0.01 // 数値誤差対策のごく小さい押し戻し量
 const MAX_SLIDE_ITER = 4 // 1フレームあたりの最大スライド回数
+const SPEED = 4
+const JUMP = 48 * 0.33
 
 export class Player {
     p: Vec2
     v: Vec2 = vec(0, 0)
-    g: Vec2 = vec(0, 0.8)
+    g: Vec2 = vec(0, 0.7)
 
     private onFloor: boolean[] = []
     private rotation = 0
     private isJumping = false
+    private canDoubleJump = true // 2段ジャンプの権利
 
     constructor(start: Vec2) {
         this.p = start
@@ -41,31 +44,35 @@ export class Player {
         // 再合成
         this.v = newVHorizontal.add(newVUp)
     }
-
     move(input: DigitalInputReader<"left" | "right" | "jump">): void {
-        if (input.isPressed("right")) {
-            this.v = this.v.add(this.g.normal().mul(4))
-        }
-        if (input.isPressed("left")) {
-            this.v = this.v.add(this.g.normal().mul(-4))
-        }
+        if (input.isPressed("right")) this.v = this.v.add(this.g.normal().mul(SPEED))
+        if (input.isPressed("left")) this.v = this.v.add(this.g.normal().mul(-SPEED))
 
         if (input.isPressed("jump")) {
             if (this.onFloor.includes(true)) {
-                this.v = this.v.add(this.g.normalized().mul(-48 * 0.4))
+                this.jump()
                 this.onFloor = []
-                this.isJumping = true
+            } else if (this.canDoubleJump && !this.isJumping) {
+                this.jump()
+                this.canDoubleJump = false
             }
         } else {
+            // ジャンプキャンセル（小ジャンプ）の計算を簡略化
             if (this.isJumping && this.v.dot(this.g) < 0) {
-                const gDir = this.g.normalized()
-                const vUp = gDir.mul(this.v.dot(gDir))
-                const vHorizontal = this.v.sub(vUp)
-                this.v = vHorizontal.add(vUp.mul(0.5))
+                const vUp = this.g.normalized().mul(this.v.dot(this.g.normalized()))
+                this.v = this.v.sub(vUp.mul(0.5))
             }
             this.isJumping = false
         }
     }
+
+    private jump(): void {
+        const gDir = this.g.normalized()
+        // 現在の垂直速度を消去してからジャンプ力を加える（落下中の2段ジャンプ対策）
+        this.v = this.v.sub(gDir.mul(this.v.dot(gDir))).add(gDir.mul(-JUMP))
+        this.isJumping = true
+    }
+
     /**
      * 現在の速度をもとに、衝突を解決しながら実際に this.p を進める。
      * 1フレーム内で複数回当たっても、常に「最も早い衝突」だけを採用し、
@@ -109,6 +116,7 @@ export class Player {
             const verticality = floor.vec().normalized().cross(this.g.normalized())
             if (verticality >= 0.2) {
                 this.onFloor.push(true)
+                this.canDoubleJump = true // 着地時に2段ジャンプを回復
             }
 
             // 速度成分の打ち消し（速度を殺す）
@@ -138,8 +146,8 @@ export class Player {
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
-        Ctx.polygon(ctx, 8, 2, this.p.l, 32, "#111", { theta: 0, lineWidth: 0.5 })
-        Ctx.arc(ctx, this.p.l, 12, "#111", { lineWidth: 0.5 })
+        Ctx.polygon(ctx, 8, 2, this.p.l, 28, "#111", { theta: 0, lineWidth: 0.5 })
+        Ctx.arc(ctx, this.p.l, 10, "#111", { lineWidth: 0.5 })
         Ctx.text(ctx, this.p.l, "#111", "罪", {
             align: "center",
             baseline: "middle",
