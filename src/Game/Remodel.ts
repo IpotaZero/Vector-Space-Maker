@@ -214,12 +214,15 @@ export class Remodel<Parent extends Actor> {
         })
     }
 
-    beam(e: Enemy, length: number) {
+    beam(length: number) {
+        const e = this.e
+
         return (this as unknown as Mod<Parent>)
             .length(length)
             .speed(0)
             .r(12)
-            .color("cyan")
+            .appearance("laser")
+            .collision("laser")
             .g(function* (me) {
                 let i = 0
 
@@ -246,8 +249,9 @@ export class Remodel<Parent extends Actor> {
             .speed(0)
             .type("neutral")
             .alpha(0)
+            .appearance("laser")
+            .collision("laser")
             .r(2)
-            .color("yellow")
             .g(function* (me) {
                 yield* Remodel.ease(me, "alpha", 0.1, 30, Ease.Out)
                 yield* Array(waitFrame)

@@ -35,6 +35,8 @@ export class SceneGame extends Scene {
             this.pages.back(1)
         })
 
+        Dom.container.appendChild(this.game.textBox.element)
+
         await this.game.loadFromMapData(this.mapData)
     }
 

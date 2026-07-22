@@ -3,14 +3,16 @@ import { Enemy } from "./Enemy"
 import { Bullet } from "./Bullet"
 import { Player } from "./Player"
 import { DigitalInput } from "@ipota/input"
+import { TextBox } from "../../utils/TextBox"
 
 export type GameLike = {
     player: Player
     enemies: Enemy[]
     bullets: Bullet[]
-    input: DigitalInput.Reader<"jump" | "left" | "right" | "fire" | "slash">
+    input: DigitalInput.Reader<"jump" | "left" | "right" | "fire" | "slash" | "ok" | "cancel">
     width: number
     height: number
+    textBox: TextBox
 }
 
 export abstract class Actor {

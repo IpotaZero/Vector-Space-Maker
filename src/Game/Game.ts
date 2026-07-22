@@ -13,9 +13,10 @@ import { BulletDrawer } from "./BulletDrawer"
 import { BulletCollision } from "./BulletCollision"
 import { EnemyTest } from "../Enemy/EnemyTest"
 import { Ctx } from "../utils/Functions/Ctx"
+import { TextBox } from "../utils/TextBox"
 
-const WIDTH = 1024
-const HEIGHT = 768
+const WIDTH = 32 * 40
+const HEIGHT = 32 * 24
 
 /**
  * ゲーム本体をカプセル化したクラス。
@@ -34,12 +35,14 @@ export class Game {
     enemies: Enemy[] = []
     bullets: Bullet[] = []
 
+    readonly textBox
+
     private bulletDrawer = new BulletDrawer()
     private bulletCollision = new BulletCollision()
 
     constructor(
         canvas: HTMLCanvasElement,
-        readonly input: DigitalInput.Reader<"right" | "left" | "jump" | "fire">,
+        readonly input: DigitalInput.Reader<"right" | "left" | "jump" | "fire" | "ok" | "cancel">,
         readonly onFinish: () => void,
     ) {
         this.canvas = canvas
@@ -49,6 +52,8 @@ export class Game {
 
         this.canvas.width = WIDTH
         this.canvas.height = HEIGHT
+
+        this.textBox = new TextBox(this.input)
     }
 
     /** ステージを読み込み、初期状態をセットアップする */
@@ -84,7 +89,35 @@ export class Game {
 
         this.updateMovables()
         this.handleZoneEnter()
+        this.updateBulletAndEnemy()
+        this.updatePlayer()
+        this.updateCamera()
+        this.restartIfOutOfBounds()
+        this.updateGenerators()
+        this.draw()
+    }
 
+    private updateMovables(): void {
+        const stage = this.stage
+
+        // 【変更】先に movable を update して、今フレームの位置と移動量(dp)を確定させる
+        stage.movables.forEach((movable) => movable.update())
+    }
+
+    private handleZoneEnter(): void {
+        const stage = this.stage
+
+        stage.movables
+            .filter((obj) => obj instanceof Zone)
+            .forEach((zone) => {
+                if (zone.contains(this.player.p)) {
+                    const gen = zone.onEnter(this)
+                    this.gens.push(gen)
+                }
+            })
+    }
+
+    private updateBulletAndEnemy() {
         this.bullets.forEach((b) => b.update(this))
         this.enemies.forEach((e) => e.update(this))
 
@@ -117,32 +150,6 @@ export class Game {
         const aliveEnemies = this.enemies.filter((e) => e.life > 0)
         this.enemies.length = 0
         this.enemies.push(...aliveEnemies)
-
-        this.updatePlayer()
-        this.updateCamera()
-        this.restartIfOutOfBounds()
-        this.updateGenerators()
-        this.draw()
-    }
-
-    private updateMovables(): void {
-        const stage = this.stage
-
-        // 【変更】先に movable を update して、今フレームの位置と移動量(dp)を確定させる
-        stage.movables.forEach((movable) => movable.update())
-    }
-
-    private handleZoneEnter(): void {
-        const stage = this.stage
-
-        stage.movables
-            .filter((obj) => obj instanceof Zone)
-            .forEach((zone) => {
-                if (zone.contains(this.player.p)) {
-                    const gen = zone.onEnter(this)
-                    this.gens.push(gen)
-                }
-            })
     }
 
     private updatePlayer(): void {

@@ -92,3 +92,43 @@ button {
     background: #00000020;
     border-radius: 0.1em;
 }
+
+.text-box {
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+    width: calc(100% - 2em);
+    height: 8em;
+    background: #00000020;
+    border-radius: 0.1em;
+    border: 0.1em solid #00000020;
+    padding: 0.5em;
+    pointer-events: none;
+
+    font-size: 1.2em;
+
+    &::after {
+        content: "/";
+        animation: blink 1s infinite;
+    }
+}
+
+.fade {
+    opacity: 0;
+    transform: translateY(1em);
+    transition:
+        opacity 0.2s ease-in-out,
+        transform 0.2s ease-in-out;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}

@@ -22,27 +22,6 @@
                 }, 
                 {
                  "height":0,
-                 "id":40,
-                 "name":"",
-                 "opacity":1,
-                 "polyline":[
-                        {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":256,
-                         "y":0
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":64,
-                 "y":672
-                }, 
-                {
-                 "height":0,
                  "id":44,
                  "name":"",
                  "opacity":1,
@@ -186,30 +165,30 @@
                  "polygon":[
                         {
                          "x":0,
-                         "y":0
+                         "y":-100.571428571429
                         }, 
                         {
-                         "x":1024,
-                         "y":0
+                         "x":1216,
+                         "y":-100.571428571429
                         }, 
                         {
-                         "x":1024,
-                         "y":-768
+                         "x":1216,
+                         "y":-804.571428571429
                         }, 
                         {
                          "x":0,
-                         "y":-768
+                         "y":-804.571428571429
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":0,
-                 "y":768
+                 "x":32,
+                 "y":836.571428571429
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],
@@ -223,5 +202,5 @@
  "tilewidth":32,
  "type":"map",
  "version":"1.10",
- "width":32
+ "width":40
 }
