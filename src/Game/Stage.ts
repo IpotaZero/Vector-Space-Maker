@@ -1,4 +1,3 @@
-import { Edge } from "./movable/Edge"
 import { Movable } from "./movable/Movable"
 
 export class Stage {

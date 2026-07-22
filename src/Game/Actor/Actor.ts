@@ -1,45 +1,13 @@
 import { vec, Vec } from "@ipota/vec"
-import { Enemy } from "./Enemy"
-import { Bullet } from "./Bullet"
-import { Player } from "./Player"
-import { DigitalInput } from "@ipota/input"
-import { TextBox } from "../../utils/TextBox"
+import { GameNode } from "../GameNode"
+import { GameLike } from "../Game"
 
-export type GameLike = {
-    player: Player
-    enemies: Enemy[]
-    bullets: Bullet[]
-    input: DigitalInput.Reader<"jump" | "left" | "right" | "fire" | "slash" | "ok" | "cancel">
-    width: number
-    height: number
-    textBox: TextBox
-}
-
-export abstract class Actor {
+export abstract class Actor extends GameNode {
     p: Vec = vec(0, 0)
     r: number = 8
     life = 1
 
-    protected gens: Generator[] = []
-
-    constructor(readonly game: GameLike) {}
-
-    update(game: GameLike) {
-        const finished = this.gens.filter((g) => g.next().done)
-        this.gens = this.gens.filter((g) => !finished.includes(g))
-    }
-
-    protected addScript(g: (me: this) => Generator, { loop = 1, margin = 0 }: { loop?: number; margin?: number } = {}) {
-        const me = this
-
-        this.gens.push(
-            (function* () {
-                yield* Array(margin)
-
-                while (loop--) {
-                    yield* g(me)
-                }
-            })(),
-        )
+    constructor(readonly game: GameLike) {
+        super()
     }
 }

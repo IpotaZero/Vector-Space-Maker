@@ -2,9 +2,10 @@ import { Ctx } from "../../utils/Functions/Ctx"
 import { DigitalInput } from "@ipota/input"
 import { vec, Vec } from "@ipota/vec"
 import { Edge } from "../movable/Edge"
-import { Actor, GameLike } from "./Actor"
+import { Actor } from "./Actor"
 import { T } from "../../T"
 import { remodel } from "../Remodel"
+import { GameLike } from "../Game"
 
 const SKIN = 0.01 // 数値誤差対策のごく小さい押し戻し量
 const MAX_SLIDE_ITER = 4 // 1フレームあたりの最大スライド回数
@@ -31,8 +32,8 @@ export class Player extends Actor {
         this.addScript(this.attack.bind(this), { loop: Infinity })
     }
 
-    update(game: GameLike): void {
-        super.update(game)
+    update(): void {
+        super.update()
 
         this.onFloor = this.onFloor.slice(-6)
         this.v = this.v.add(this.g) // 重力の加算

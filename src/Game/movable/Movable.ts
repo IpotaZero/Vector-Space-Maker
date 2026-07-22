@@ -1,15 +1,16 @@
 import { Vec, vec } from "@ipota/vec"
+import { GameNode } from "../GameNode"
 
-export abstract class Movable {
+export abstract class Movable extends GameNode {
     private readonly joints: Vec[]
     private readonly cycle: number
 
     p = vec(0, 0)
     dp = vec(0, 0) // 【追加】前フレームからの移動量
 
-    private gens: Generator[] = []
-
     protected constructor(p: Vec, { joints = [], cycle = 1 }: { joints?: Vec[]; cycle?: number } = {}) {
+        super()
+
         this.p = p
 
         this.joints = joints
@@ -20,7 +21,7 @@ export abstract class Movable {
 
     update(): void {
         const oldP = this.p // 【追加】移動前の位置を保存
-        this.gens = this.gens.filter((gen) => !gen.next().done)
+        super.update()
         this.dp = this.p.sub(oldP) // 【追加】移動量を計算
     }
 

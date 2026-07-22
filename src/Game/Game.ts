@@ -14,16 +14,25 @@ import { BulletCollision } from "./BulletCollision"
 import { EnemyTest } from "../Enemy/EnemyTest"
 import { Ctx } from "../utils/Functions/Ctx"
 import { TextBox } from "../utils/TextBox"
+import { GameNode } from "./GameNode"
 
 const WIDTH = 32 * 40
 const HEIGHT = 32 * 24
 
+export type GameLike = {
+    player: Player
+    enemies: Enemy[]
+    bullets: Bullet[]
+    input: DigitalInput.Reader<"jump" | "left" | "right" | "fire" | "slash" | "ok" | "cancel">
+    width: number
+    height: number
+    textBox: TextBox
+}
+
 /**
  * ゲーム本体をカプセル化したクラス。
- * attach() / detach() でイベントリスナーの登録・解除とループの開始・停止を切り替えられる。
- * (例: SPAでの画面遷移や、複数キャンバスの切り替えなどに対応するため)
  */
-export class Game {
+export class Game extends GameNode {
     private readonly canvas: HTMLCanvasElement
     private readonly ctx: CanvasRenderingContext2D
 
@@ -31,7 +40,6 @@ export class Game {
     player!: Player
     camera!: Camera
 
-    private gens: Generator[] = []
     enemies: Enemy[] = []
     bullets: Bullet[] = []
 
@@ -45,6 +53,8 @@ export class Game {
         readonly input: DigitalInput.Reader<"right" | "left" | "jump" | "fire" | "ok" | "cancel">,
         readonly onFinish: () => void,
     ) {
+        super()
+
         this.canvas = canvas
         const ctx = canvas.getContext("2d")
         if (!ctx) throw new Error("2D context is not available")
@@ -87,13 +97,14 @@ export class Game {
         this.ctx.fillStyle = "#fcfcfc"
         this.ctx.fillRect(0, 0, WIDTH, HEIGHT)
 
+        super.update()
+
         this.updateMovables()
         this.handleZoneEnter()
         this.updateBulletAndEnemy()
         this.updatePlayer()
         this.updateCamera()
         this.restartIfOutOfBounds()
-        this.updateGenerators()
         this.draw()
     }
 
@@ -118,8 +129,8 @@ export class Game {
     }
 
     private updateBulletAndEnemy() {
-        this.bullets.forEach((b) => b.update(this))
-        this.enemies.forEach((e) => e.update(this))
+        this.bullets.forEach((b) => b.update())
+        this.enemies.forEach((e) => e.update())
 
         this.bullets
             .filter((b) => b.type === "enemy")
@@ -156,7 +167,7 @@ export class Game {
         const stage = this.stage
 
         this.player.move(this.input)
-        this.player.update(this)
+        this.player.update()
         this.player.resolveCollisions(stage.movables.filter((obj) => obj instanceof Edge))
     }
 
@@ -176,13 +187,6 @@ export class Game {
         ) {
             this.reset()
         }
-    }
-
-    private updateGenerators(): void {
-        this.gens = this.gens.filter((gen) => {
-            const result = gen.next()
-            return !result.done
-        })
     }
 
     private draw(): void {

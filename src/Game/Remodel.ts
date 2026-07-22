@@ -1,7 +1,6 @@
 import { Ease } from "@ipota/functions"
 import { Vec, vec } from "@ipota/vec"
 import { Bullet } from "./Actor/Bullet"
-import { Enemy } from "./Actor/Enemy"
 import { T } from "../T"
 import { GenUtils } from "@ipota/functions"
 import { NumberKeys } from "../utils/NumberKeys"
