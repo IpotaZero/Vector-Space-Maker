@@ -1,6 +1,7 @@
 import { vec } from "@ipota/vec"
 import { Enemy } from "../Game/Actor/Enemy"
 import { GameLike } from "../Game/Game"
+import { Remodel, remodel } from "../Game/Remodel"
 
 export class EnemyTest extends Enemy {
     constructor(game: GameLike) {
@@ -8,6 +9,17 @@ export class EnemyTest extends Enemy {
         this.p = this.game.player.p.add(vec(0, -50))
         this.r = 48
         this.life = 1000
+
+        this.addScript(this.text.bind(this))
+    }
+
+    private *text() {
+        yield* this.game.textBox.say([
+            "おい！そこのお前！",
+            "きひひっ、この先は獄卒が見張ってるぜぇ。",
+            "俺様の忠告を無視するのかっ！？<br>生意気なヤツめっ。<br>やっつけてやる！",
+        ])
+
         this.addScript(this.attack.bind(this), { loop: Infinity })
         this.addScript(this.move.bind(this), { loop: Infinity })
     }
@@ -24,7 +36,8 @@ export class EnemyTest extends Enemy {
         //     .g(function* (me, index) {
         //         yield* Remodel.stop(me, 30)
         //         yield* Array(31 - index)
-        //         yield* Remodel.accel(me, 30, 32)
+        //         yield* Remodel.ease(me, "radian", this.game.player.p.sub(me.p).radian(), 30)
+        //         yield* Remodel.accel(me, 30, 48)
         //     })
         //     .fire(this.game.bullets)
 

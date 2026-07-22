@@ -20,13 +20,13 @@ const WIDTH = 32 * 40
 const HEIGHT = 32 * 24
 
 export type GameLike = {
-    player: Player
-    enemies: Enemy[]
-    bullets: Bullet[]
-    input: DigitalInput.Reader<"jump" | "left" | "right" | "fire" | "slash" | "ok" | "cancel">
-    width: number
-    height: number
-    textBox: TextBox
+    readonly player: Player
+    readonly enemies: Enemy[]
+    readonly bullets: Bullet[]
+    readonly input: DigitalInput.Reader<"jump" | "left" | "right" | "fire" | "slash" | "ok" | "cancel">
+    readonly width: number
+    readonly height: number
+    readonly textBox: TextBox
 }
 
 /**
