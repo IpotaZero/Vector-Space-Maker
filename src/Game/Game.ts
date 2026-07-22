@@ -12,6 +12,7 @@ import { Bullet } from "./Actor/Bullet"
 import { BulletDrawer } from "./BulletDrawer"
 import { BulletCollision } from "./BulletCollision"
 import { remodel } from "./Remodel"
+import { T } from "../T"
 
 const WIDTH = 1200
 const HEIGHT = 900
@@ -39,7 +40,7 @@ export class Game {
 
     constructor(
         canvas: HTMLCanvasElement,
-        private readonly input: DigitalInput.Reader<"right" | "left" | "jump" | "fire">,
+        readonly input: DigitalInput.Reader<"right" | "left" | "jump" | "fire">,
         readonly onFinish: () => void,
     ) {
         this.canvas = canvas
@@ -93,6 +94,9 @@ export class Game {
                 })
             })
 
+        this.bullets = this.bullets.filter((b) => b.life > 0)
+        this.enemies = this.enemies.filter((e) => e.life > 0)
+
         this.updatePlayer()
         this.updateCamera()
         this.restartIfOutOfBounds()
@@ -126,10 +130,6 @@ export class Game {
         this.player.move(this.input)
         this.player.update(this)
         this.player.resolveCollisions(stage.movables.filter((obj) => obj instanceof Edge))
-
-        if (this.input.isPushed("fire")) {
-            remodel(this.player).p(this.player.p.clone()).radian(this.player.g.radian()).speed(28).fire(this.bullets)
-        }
     }
 
     private updateCamera(): void {

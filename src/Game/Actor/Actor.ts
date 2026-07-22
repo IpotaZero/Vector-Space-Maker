@@ -2,11 +2,13 @@ import { vec, Vec } from "@ipota/vec"
 import { Enemy } from "./Enemy"
 import { Bullet } from "./Bullet"
 import { Player } from "./Player"
+import { DigitalInput } from "@ipota/input"
 
 export type GameLike = {
     player: Player
     enemies: Enemy[]
     bullets: Bullet[]
+    input: DigitalInput.Reader<"jump" | "left" | "right" | "fire" | "slash">
 }
 
 export abstract class Actor {

@@ -7,32 +7,27 @@ import { GenUtils } from "@ipota/functions"
 import { NumberKeys } from "../utils/NumberKeys"
 import { Actor } from "./Actor/Actor"
 
-export function remodel(e: Actor) {
+export function remodel<Parent extends Actor>(e: Parent) {
     return new Proxy(new Remodel([new Bullet()], e), {
         get(target, key) {
             if (key in target) return (target as any)[key]
 
-            return function (this: Mod, value: any) {
+            return function (this: Mod<Parent>, value: any) {
                 return this.set(key as any, value)
             }
         },
-    }) as Mod
+    }) as Mod<Parent>
 }
 
-type Mod = Remodel & {
-    [key in keyof Bullet]: (value: Bullet[key]) => Mod
+type Mod<Parent extends Actor> = Remodel<Parent> & {
+    [key in keyof Bullet]: (value: Bullet[key]) => Mod<Parent>
 }
 
-export class Remodel {
+export class Remodel<Parent extends Actor> {
     constructor(
         private bullets: Bullet[],
-        private readonly e: Actor,
+        private readonly e: Parent,
     ) {}
-
-    class<Cls extends typeof Bullet>(cls: Cls) {
-        // @ts-ignore
-        this.set("__proto__", cls.prototype)
-    }
 
     fire(bullets: Bullet[]) {
         this.bullets.forEach((b) => {
@@ -138,7 +133,7 @@ export class Remodel {
         })
     }
 
-    duplicate(num: number, map: (me: Bullet, index: number) => Bullet): Mod {
+    duplicate(num: number, map: (me: Bullet, index: number) => Bullet): Mod<Parent> {
         const result: Bullet[] = []
 
         const length = this.bullets.length
@@ -153,7 +148,7 @@ export class Remodel {
 
         this.bullets = result
 
-        return this as unknown as Mod
+        return this as unknown as Mod<Parent>
     }
 
     circle(distance: number, radius: number, { direction = "none" }: { direction?: "inner" | "outer" | "none" } = {}) {
@@ -201,7 +196,7 @@ export class Remodel {
     }
 
     beam(e: Enemy, length: number) {
-        return (this as unknown as Mod)
+        return (this as unknown as Mod<Parent>)
             .length(length)
             .speed(0)
             .r(12)
@@ -226,8 +221,8 @@ export class Remodel {
             })
     }
 
-    laser(e: Enemy, waitFrame: number, existsFrame: number, length: number) {
-        return (this as unknown as Mod)
+    laser(waitFrame: number, existsFrame: number, length: number) {
+        return (this as unknown as Mod<Parent>)
             .length(length)
             .speed(0)
             .type("neutral")
@@ -247,7 +242,7 @@ export class Remodel {
                 yield* Remodel.fadeout(me, 15)
             })
             .g(function* (me) {
-                while (e.life > 0) yield
+                while (this.life > 0) yield
                 yield* Remodel.fadeout(me, 30)
             })
     }
@@ -259,12 +254,12 @@ export class Remodel {
         })
     }
 
-    g(g: (this: Actor, me: Bullet, index: number) => Generator, config: { loop?: number; margin?: number } = {}) {
+    g(g: (this: Parent, me: Bullet, index: number) => Generator, config: { loop?: number; margin?: number } = {}) {
         const e = this.e
 
         this.bullets.forEach((b, index) => {
             b.addScriptBook(function* (me) {
-                yield* g.bind(e)(me, index)
+                yield* g.call(e, me, index)
             }, config)
         })
 

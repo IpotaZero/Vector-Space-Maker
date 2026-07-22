@@ -1,4 +1,4 @@
-import { vec, Vec } from "../../utils/Vec.js"
+import { vec, Vec } from "@ipota/vec"
 import { Movable } from "./Movable.js"
 
 export class TextObject extends Movable {

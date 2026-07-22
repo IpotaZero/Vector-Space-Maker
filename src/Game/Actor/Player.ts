@@ -3,6 +3,8 @@ import { DigitalInput } from "@ipota/input"
 import { vec, Vec } from "@ipota/vec"
 import { Edge } from "../movable/Edge"
 import { Actor, GameLike } from "./Actor"
+import { T } from "../../T"
+import { remodel } from "../Remodel"
 
 const SKIN = 0.01 // 数値誤差対策のごく小さい押し戻し量
 const MAX_SLIDE_ITER = 4 // 1フレームあたりの最大スライド回数
@@ -17,6 +19,9 @@ export class Player extends Actor {
     private rotation = 0
     private isJumping = false
     private canDoubleJump = true // 2段ジャンプの権利
+
+    /**最後に入力した方向 */
+    private direction = 1
 
     constructor(start: Vec) {
         super()
@@ -46,10 +51,19 @@ export class Player extends Actor {
 
         // 再合成
         this.v = newVHorizontal.add(newVUp)
+
+        this.attack(game)
     }
+
     move(input: DigitalInput.Reader<"left" | "right" | "jump">): void {
-        if (input.isPressed("right")) this.v = this.v.add(this.g.normal().scale(SPEED))
-        if (input.isPressed("left")) this.v = this.v.add(this.g.normal().scale(-SPEED))
+        if (input.isPressed("right")) {
+            this.v = this.v.add(this.g.normal().scale(SPEED))
+            this.direction = 1
+        }
+        if (input.isPressed("left")) {
+            this.v = this.v.add(this.g.normal().scale(-SPEED))
+            this.direction = -1
+        }
 
         if (input.isPressed("jump")) {
             if (this.onFloor.includes(true)) {
@@ -157,5 +171,32 @@ export class Player extends Actor {
             fontSize: 0.5,
             fontFamily: "serif",
         })
+    }
+
+    private attack(game: GameLike) {
+        // 遠距離
+        if (game.input.isPushed("fire")) {
+            remodel(this)
+                .p(this.p)
+                .radian(this.g.radian() + (-T / 4) * this.direction)
+                .speed(28)
+                .fire(game.bullets)
+        }
+
+        // 近距離(15frame)
+        if (game.input.isPushed("slash")) {
+            remodel(this)
+                .p(this.p.add(this.g.normal().scale(this.direction * 12)))
+                .speed(0)
+                .r(this.r * 6)
+                .g(function* (me) {
+                    for (let i = 0; i < 15; i++) {
+                        me.p = this.p.add(this.g.normal().scale(this.direction * 12))
+                        yield
+                    }
+                    me.life = 0
+                })
+                .fire(game.bullets)
+        }
     }
 }

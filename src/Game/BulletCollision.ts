@@ -12,6 +12,8 @@ type Line = {
     end: Vec
 }
 
+type Rect = { p: Vec; w: number; h: number; rad: number }
+
 export class BulletCollision {
     isColliding(b: Bullet, e: Circle) {
         if (b.collision === "ball") {
@@ -76,7 +78,7 @@ export class BulletCollision {
     /**
      * 回転した矩形と円の当たり判定
      */
-    private isCollidingRect(circle: Circle, rect: { p: Vec; w: number; h: number; rad: number }) {
+    private isCollidingRect(circle: Circle, rect: Rect) {
         // 円の中心を矩形の中心相対に移動し、逆回転させて矩形のローカル座標（AABB状態）に合わせる
         // Vec.ts の rotate メソッドを使用して逆回転を適用
         const localP = circle.p.sub(rect.p).rotate(-rect.rad)

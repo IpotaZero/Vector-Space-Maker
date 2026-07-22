@@ -11,7 +11,7 @@ export class Bullet extends Actor {
     appearance: "donut" | "ball" | "line" | "arrow" | "laser" | "player" = "donut"
     collision: "ball" | "line" | "arrow" | "laser" = "ball"
     type: "friend" | "enemy" | "neutral" = "enemy"
-    color: Color = "yellow"
+    color: Color = "black"
     alpha: number = 1
 
     private genfs: [g: (me: Bullet) => Generator, config: { loop?: number; margin?: number }][] = []
@@ -29,14 +29,11 @@ export class Bullet extends Actor {
             this.addScript(...g)
         })
 
-        this.addScript(this.move, { loop: Infinity })
-        this.addScript(this.boundary, { loop: Infinity })
+        this.addScript(this.move.bind(this), { loop: Infinity })
+        this.addScript(this.boundary.bind(this), { loop: Infinity })
     }
 
-    addScriptBook(
-        g: (me: Bullet) => Generator,
-        { loop = Infinity, margin = 0 }: { loop?: number; margin?: number } = {},
-    ) {
+    addScriptBook(g: (me: Bullet) => Generator, { loop = 1, margin = 0 }: { loop?: number; margin?: number } = {}) {
         this.genfs.push([g, { loop, margin }])
     }
 
