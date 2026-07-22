@@ -1,4 +1,6 @@
-import { Vec } from "@ipota/vec"
+import { vec, Vec } from "@ipota/vec"
+import { Actor } from "./Actor"
+import { GameLike } from "../Game"
 
 const normalizeAngle = (a: number): number => {
     while (a > Math.PI) a -= Math.PI * 2
@@ -6,16 +8,22 @@ const normalizeAngle = (a: number): number => {
     return a
 }
 
-export class Camera {
+export class Camera extends Actor {
     p: Vec
     angle = 0
     scale = 1.5
 
-    constructor(start: Vec) {
+    constructor(game: GameLike, start: Vec) {
+        super(game)
         this.p = start
     }
 
-    update(target: Vec, gravity: Vec): void {
+    update() {
+        this.updatePosition(this.game.player.g, vec(this.game.width / 2, this.game.height / 2))
+        this.updateRotate(this.game.player.g)
+    }
+
+    private updatePosition(gravity: Vec, target: Vec) {
         // ターゲットへのベクトルを計算
         const diff = target.sub(this.p)
 
@@ -32,7 +40,9 @@ export class Camera {
 
         // 分解した移動量を加算してカメラ位置を更新
         this.p = this.p.add(moveHorizontal).add(moveVertical)
+    }
 
+    private updateRotate(gravity: Vec): void {
         // 重力方向が常に画面の「下」を向くように回転させる（既存の処理）
         const targetAngle = Math.PI / 2 - gravity.radian()
         const diffAngle = normalizeAngle(targetAngle - this.angle)
@@ -45,5 +55,18 @@ export class Camera {
         ctx.rotate(this.angle)
         ctx.scale(this.scale, this.scale)
         ctx.translate(-this.p.x, -this.p.y)
+    }
+
+    scaleTo(scale: number) {
+        this.gens.push(this.scaleToG(scale))
+    }
+
+    private *scaleToG(scale: number) {
+        const s = this.scale
+
+        for (let i = 0; i < 30; i++) {
+            this.scale = s + (scale - s) * (i / 30)
+            yield
+        }
     }
 }

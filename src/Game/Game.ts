@@ -1,4 +1,4 @@
-import { Camera } from "./Camera"
+import { Camera } from "./Actor/Camera"
 import { loadStageFromMapData, loadStageFromUrl } from "./loadStageFromJson"
 import { Stage } from "./Stage"
 import { DigitalInput } from "@ipota/input"
@@ -15,6 +15,7 @@ import { EnemyTest } from "../Enemy/EnemyTest"
 import { Ctx } from "../utils/Functions/Ctx"
 import { TextBox } from "../utils/TextBox"
 import { GameNode } from "./GameNode"
+import { looper } from "../looper"
 
 const WIDTH = 32 * 40
 const HEIGHT = 32 * 24
@@ -43,7 +44,7 @@ export class Game extends GameNode {
     enemies: Enemy[] = []
     bullets: Bullet[] = []
 
-    readonly textBox
+    readonly textBox: TextBox
 
     private bulletDrawer = new BulletDrawer()
     private bulletCollision = new BulletCollision()
@@ -69,7 +70,7 @@ export class Game extends GameNode {
     /** ステージを読み込み、初期状態をセットアップする */
     async loadFromMapData(mapData: tiled.Map): Promise<void> {
         this.stage = await loadStageFromMapData(mapData)
-        this.camera = new Camera(vec(WIDTH / 2, HEIGHT / 2))
+        this.camera = new Camera(this, vec(WIDTH / 2, HEIGHT / 2))
         this.reset()
     }
 
@@ -93,32 +94,26 @@ export class Game extends GameNode {
     }
 
     update(): void {
-        this.ctx.clearRect(0, 0, WIDTH, HEIGHT)
         this.ctx.fillStyle = "#fcfcfc"
         this.ctx.fillRect(0, 0, WIDTH, HEIGHT)
 
         super.update()
-
         this.updateMovables()
         this.handleZoneEnter()
         this.updateBulletAndEnemy()
         this.updatePlayer()
         this.updateCamera()
         this.restartIfOutOfBounds()
+
         this.draw()
     }
 
     private updateMovables(): void {
-        const stage = this.stage
-
-        // 【変更】先に movable を update して、今フレームの位置と移動量(dp)を確定させる
-        stage.movables.forEach((movable) => movable.update())
+        this.stage.movables.forEach((movable) => movable.update())
     }
 
     private handleZoneEnter(): void {
-        const stage = this.stage
-
-        stage.movables
+        this.stage.movables
             .filter((obj) => obj instanceof Zone)
             .forEach((zone) => {
                 if (zone.contains(this.player.p)) {
@@ -150,6 +145,7 @@ export class Game extends GameNode {
                         e.life -= b.damage
                         b.life = 0
                         this.gens.push(this.drawDamage(b.p, b.damage))
+                        this.addScript(() => this.hitStop())
                     }
                 })
             })
@@ -164,15 +160,13 @@ export class Game extends GameNode {
     }
 
     private updatePlayer(): void {
-        const stage = this.stage
-
         this.player.move(this.input)
         this.player.update()
-        this.player.resolveCollisions(stage.movables.filter((obj) => obj instanceof Edge))
+        this.player.resolveCollisions(this.stage.movables.filter((obj) => obj instanceof Edge))
     }
 
     private updateCamera(): void {
-        this.camera.update(vec(WIDTH / 2, HEIGHT / 2), this.player.g)
+        this.camera.update()
     }
 
     private restartIfOutOfBounds(): void {
@@ -215,5 +209,9 @@ export class Game extends GameNode {
             })
             yield
         }
+    }
+
+    private *hitStop() {
+        yield* Array(30)
     }
 }

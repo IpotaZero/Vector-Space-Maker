@@ -4,6 +4,7 @@ import { SceneTitle } from "./Scene/SceneTitle.js"
 import { Focuses } from "@ipota/focuses"
 import { DigitalInput } from "@ipota/input"
 import { Pages } from "@ipota/pages"
+import { looper } from "./looper.js"
 
 export const input = new DigitalInput({
     up: ["ArrowUp", "KeyW", "gamepad-axis-1-negative"],
@@ -36,15 +37,13 @@ sc.onTransitionEnd = () => {
     focuses.clearMemory()
 }
 
-const update = () => {
+looper.addHandler((timeScale) => {
     sc.update()
     focuses.update()
     input.update()
+})
 
-    requestAnimationFrame(update)
-}
-
-requestAnimationFrame(update)
+looper.start()
 
 window.addEventListener("keydown", (e) => {
     if (["Tab", "Enter"].includes(e.code)) e.preventDefault()
