@@ -9,6 +9,9 @@ import { vec } from "@ipota/vec"
 import { Player } from "./Actor/Player"
 import { Enemy } from "./Actor/Enemy"
 import { Bullet } from "./Actor/Bullet"
+import { BulletDrawer } from "./BulletDrawer"
+import { BulletCollision } from "./BulletCollision"
+import { remodel } from "./Remodel"
 
 const WIDTH = 1200
 const HEIGHT = 900
@@ -31,9 +34,12 @@ export class Game {
     enemies: Enemy[] = []
     bullets: Bullet[] = []
 
+    private bulletDrawer = new BulletDrawer()
+    private bulletCollision = new BulletCollision()
+
     constructor(
         canvas: HTMLCanvasElement,
-        private readonly input: DigitalInput.Reader<"right" | "left" | "jump">,
+        private readonly input: DigitalInput.Reader<"right" | "left" | "jump" | "fire">,
         readonly onFinish: () => void,
     ) {
         this.canvas = canvas
@@ -49,18 +55,44 @@ export class Game {
     async loadFromMapData(mapData: tiled.Map): Promise<void> {
         this.stage = await loadStageFromMapData(mapData)
         this.camera = new Camera(vec(this.stage.start.x, this.stage.start.y))
+        Bullet.WIDTH = this.stage.width
+        Bullet.HEIGHT = this.stage.height
         this.reset()
     }
 
     private reset(): void {
         this.player = new Player(vec(this.stage.start.x, this.stage.start.y))
         this.camera.scale = 1.5
+        this.enemies = []
+        this.bullets = []
         this.gens = []
     }
 
     update(): void {
         this.updateMovables()
         this.handleZoneEnter()
+
+        this.bullets.forEach((b) => b.update(this))
+        this.enemies.forEach((e) => e.update(this))
+
+        this.bullets
+            .filter((b) => b.type === "enemy")
+            .forEach((b) => {
+                if (this.bulletCollision.isColliding(b, this.player)) {
+                    this.player.life--
+                }
+            })
+
+        this.bullets
+            .filter((b) => b.type === "friend")
+            .forEach((b) => {
+                this.enemies.forEach((e) => {
+                    if (this.bulletCollision.isColliding(b, e)) {
+                        e.life--
+                    }
+                })
+            })
+
         this.updatePlayer()
         this.updateCamera()
         this.restartIfOutOfBounds()
@@ -94,6 +126,10 @@ export class Game {
         this.player.move(this.input)
         this.player.update(this)
         this.player.resolveCollisions(stage.movables.filter((obj) => obj instanceof Edge))
+
+        if (this.input.isPushed("fire")) {
+            remodel(this.player).p(this.player.p.clone()).radian(this.player.g.radian()).speed(28).fire(this.bullets)
+        }
     }
 
     private updateCamera(): void {
@@ -135,6 +171,9 @@ export class Game {
 
         for (const t of stage.movables) t.draw(ctx)
         this.player.draw(ctx)
+
+        this.enemies.forEach((e) => e.draw(ctx))
+        this.bullets.forEach((b) => this.bulletDrawer.draw(b, ctx))
 
         ctx.restore()
     }

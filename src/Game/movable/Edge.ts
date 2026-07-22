@@ -19,7 +19,7 @@ export class Edge extends Movable {
     }
 
     get end(): Vec {
-        return this.p.plus(this.offset)
+        return this.p.add(this.offset)
     }
 
     vec(): Vec {
@@ -38,9 +38,9 @@ export class Edge extends Movable {
         ctx.lineTo(end.x, end.y)
         ctx.stroke()
 
-        const dir = end.minus(start).normalized()
-        const end0 = end.plus(dir.rotated((Math.PI * 4) / 5).scaled(24))
-        const end1 = end.plus(dir.rotated((-Math.PI * 4) / 5).scaled(24))
+        const dir = end.sub(start).normalize()
+        const end0 = end.add(dir.rotate((Math.PI * 4) / 5).scale(24))
+        const end1 = end.add(dir.rotate((-Math.PI * 4) / 5).scale(24))
 
         ctx.beginPath()
         ctx.moveTo(end.x, end.y)
@@ -68,13 +68,13 @@ export class Edge extends Movable {
         const start = this.start
         const end = this.end
 
-        const r = end.minus(start) // このEdgeの方向ベクトル
-        const s = sweepEnd.minus(sweepStart) // 移動方向ベクトル
+        const r = end.sub(start) // このEdgeの方向ベクトル
+        const s = sweepEnd.sub(sweepStart) // 移動方向ベクトル
 
         const denom = r.cross(s)
         if (Math.abs(denom) < 1e-9) return null // 平行 or 移動量ゼロ
 
-        const qp = sweepStart.minus(start)
+        const qp = sweepStart.sub(start)
 
         const t = qp.cross(s) / denom // このEdge上のどこで交わるか(0〜1)
         const u = qp.cross(r) / denom // sweep上のどこで交わるか(0〜1)
@@ -84,6 +84,6 @@ export class Edge extends Movable {
 
         if (!isHit) return null
 
-        return { t: u, point: sweepStart.plus(s.scaled(u)) }
+        return { t: u, point: sweepStart.add(s.scale(u)) }
     }
 }

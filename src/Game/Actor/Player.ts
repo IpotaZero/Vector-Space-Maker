@@ -27,29 +27,29 @@ export class Player extends Actor {
         super.update(game)
 
         this.onFloor = this.onFloor.slice(-6)
-        this.v = this.v.plus(this.g) // 重力の加算
+        this.v = this.v.add(this.g) // 重力の加算
         this.rotation += this.v.dot(this.g.normal()) / 36
         this.onFloor.push(false)
 
         // 重力方向の単位ベクトル
-        const gDir = this.g.normalized()
+        const gDir = this.g.normalize()
         // 垂直方向と水平方向の速度成分に分解
-        const vUp = gDir.scaled(this.v.dot(gDir))
-        const vHorizontal = this.v.minus(vUp)
+        const vUp = gDir.scale(this.v.dot(gDir))
+        const vHorizontal = this.v.sub(vUp)
 
         // 水平方向にのみ強い摩擦（例えば0.7など）をかける
         // ※onFloor配列を使って空中と地上の摩擦を変えるのも効果的です
-        const newVHorizontal = vHorizontal.scaled(0.7)
+        const newVHorizontal = vHorizontal.scale(0.7)
 
         // 垂直方向には軽い空気抵抗（終端速度の調整用）をかけるか、そのままにする
-        const newVUp = vUp.scaled(0.99)
+        const newVUp = vUp.scale(0.99)
 
         // 再合成
-        this.v = newVHorizontal.plus(newVUp)
+        this.v = newVHorizontal.add(newVUp)
     }
     move(input: DigitalInput.Reader<"left" | "right" | "jump">): void {
-        if (input.isPressed("right")) this.v = this.v.plus(this.g.normal().scaled(SPEED))
-        if (input.isPressed("left")) this.v = this.v.plus(this.g.normal().scaled(-SPEED))
+        if (input.isPressed("right")) this.v = this.v.add(this.g.normal().scale(SPEED))
+        if (input.isPressed("left")) this.v = this.v.add(this.g.normal().scale(-SPEED))
 
         if (input.isPressed("jump")) {
             if (this.onFloor.includes(true)) {
@@ -62,17 +62,17 @@ export class Player extends Actor {
         } else {
             // ジャンプキャンセル（小ジャンプ）の計算を簡略化
             if (this.isJumping && this.v.dot(this.g) < 0) {
-                const vUp = this.g.normalized().scaled(this.v.dot(this.g.normalized()))
-                this.v = this.v.minus(vUp.scaled(0.5))
+                const vUp = this.g.normalize().scale(this.v.dot(this.g.normalize()))
+                this.v = this.v.sub(vUp.scale(0.5))
             }
             this.isJumping = false
         }
     }
 
     private jump(): void {
-        const gDir = this.g.normalized()
+        const gDir = this.g.normalize()
         // 現在の垂直速度を消去してからジャンプ力を加える（落下中の2段ジャンプ対策）
-        this.v = this.v.minus(gDir.scaled(this.v.dot(gDir))).plus(gDir.scaled(-JUMP))
+        this.v = this.v.sub(gDir.scale(this.v.dot(gDir))).add(gDir.scale(-JUMP))
         this.isJumping = true
     }
 
@@ -86,14 +86,14 @@ export class Player extends Actor {
         let remaining = this.v // このフレームで進むべき残り移動量
 
         for (let i = 0; i < MAX_SLIDE_ITER; i++) {
-            const end = start.plus(remaining)
+            const end = start.add(remaining)
 
             let closest: { t: number; point: Vec; floor: Edge } | null = null
 
             // 最も早く衝突する床を探す
             for (const floor of floors) {
                 // 【変更】床の移動量(dp)を考慮し、相対的な移動開始位置を計算して判定する
-                const relStart = start.plus(floor.dp)
+                const relStart = start.add(floor.dp)
                 const hit = floor.getSweepHit(relStart, end)
                 if (!hit) continue
                 if (!closest || hit.t < closest.t) {
@@ -112,11 +112,11 @@ export class Player extends Actor {
 
             // 移動開始地点がEdgeの右側(裏側)だったか判定
             // (法線は左側を向いているため、内積が負なら右側にいたことになる)
-            const q = start.minus(floor.start)
+            const q = start.sub(floor.start)
             const isFromRightSide = q.dot(normal) < 0
 
             // 床判定
-            const verticality = floor.vec().normalized().cross(this.g.normalized())
+            const verticality = floor.vec().normalize().cross(this.g.normalize())
             if (verticality >= 0.2) {
                 this.onFloor.push(true)
                 this.canDoubleJump = true // 着地時に2段ジャンプを回復
@@ -126,15 +126,15 @@ export class Player extends Actor {
             const vn = this.v.dot(normal)
             // 左からの衝突(vn < 0)、または右からのすり抜け吸着(isFromRightSide && vn > 0)の場合
             if (vn < 0 || (isFromRightSide && vn > 0)) {
-                this.v = this.v.minus(normal.scaled(vn))
+                this.v = this.v.sub(normal.scale(vn))
             }
 
             // 残り移動量からも成分を除去(スライド または 吸着)
             // ※元コードの斜め衝突時のバグを修正するため、残りの移動量(unconsumed)を基に再計算しています
-            const unconsumed = end.minus(point)
+            const unconsumed = end.sub(point)
             const un = unconsumed.dot(normal)
             if (un < 0 || (isFromRightSide && un > 0)) {
-                remaining = unconsumed.minus(normal.scaled(un))
+                remaining = unconsumed.sub(normal.scale(un))
             } else {
                 remaining = unconsumed
             }
@@ -142,7 +142,7 @@ export class Player extends Actor {
             // 常にEdgeの左側(表側)へSKIN分押し戻す
             // 左からぶつかった場合は「めり込み防止」として機能し、
             // 右から接触した場合は「すり抜けた直後に表側に吸着」として機能する
-            start = point.plus(normal.scaled(SKIN))
+            start = point.add(normal.scale(SKIN))
         }
 
         this.p = start

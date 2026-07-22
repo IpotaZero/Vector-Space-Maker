@@ -21,7 +21,7 @@ export abstract class Movable {
     update(): void {
         const oldP = this.p // 【追加】移動前の位置を保存
         this.gens = this.gens.filter((gen) => !gen.next().done)
-        this.dp = this.p.minus(oldP) // 【追加】移動量を計算
+        this.dp = this.p.sub(oldP) // 【追加】移動量を計算
     }
 
     abstract draw(ctx: CanvasRenderingContext2D): void
@@ -36,7 +36,7 @@ export abstract class Movable {
 
                 for (let t = 0; t < this.cycle; t++) {
                     const ratio = t / this.cycle
-                    const offset = from.scaled(1 - ratio).plus(to.scaled(ratio))
+                    const offset = from.scale(1 - ratio).add(to.scale(ratio))
                     this.p = offset
                     yield
                 }

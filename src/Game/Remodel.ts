@@ -5,9 +5,10 @@ import { Enemy } from "./Actor/Enemy"
 import { T } from "../T"
 import { GenUtils } from "@ipota/functions"
 import { NumberKeys } from "../utils/NumberKeys"
+import { Actor } from "./Actor/Actor"
 
-export function remodel<Cls extends Bullet>(e: Enemy, model: Cls) {
-    return new Proxy(new Remodel([model], e), {
+export function remodel(e: Actor) {
+    return new Proxy(new Remodel([new Bullet()], e), {
         get(target, key) {
             if (key in target) return (target as any)[key]
 
@@ -25,7 +26,7 @@ type Mod = Remodel & {
 export class Remodel {
     constructor(
         private bullets: Bullet[],
-        private readonly e: Enemy,
+        private readonly e: Actor,
     ) {}
 
     class<Cls extends typeof Bullet>(cls: Cls) {
@@ -43,7 +44,7 @@ export class Remodel {
 
     static *homing(me: Bullet, p: Vec, frame: number) {
         for (let i = 0; i < frame; i++) {
-            me.radian = p.minus(me.p).radian()
+            me.radian = p.sub(me.p).radian()
             yield
         }
     }
@@ -110,7 +111,7 @@ export class Remodel {
 
     aim(target: Vec) {
         return this.forEach((b) => {
-            b.radian = target.minus(b.p).radian()
+            b.radian = target.sub(b.p).radian()
         })
     }
 
@@ -131,8 +132,8 @@ export class Remodel {
 
     shift(num: number, shift: number) {
         return this.duplicate(num, (b, i) => {
-            const shiftVec = vec.arg(b.radian + T / 4).scaled(shift * (i - (num - 1) / 2))
-            b.p = b.p.plus(shiftVec)
+            const shiftVec = vec.arg(b.radian + T / 4).scale(shift * (i - (num - 1) / 2))
+            b.p = b.p.add(shiftVec)
             return b
         })
     }
@@ -159,7 +160,7 @@ export class Remodel {
         const num = Math.ceil((T * radius) / distance)
         return this.duplicate(num, (b, i) => {
             const angle = (T / num) * i
-            b.p = b.p.plus(vec.arg(angle).scaled(radius))
+            b.p = b.p.add(vec.arg(angle).scale(radius))
 
             if (direction === "inner") {
                 b.radian = T * (i / num + 0.5)
@@ -258,7 +259,7 @@ export class Remodel {
         })
     }
 
-    g(g: (this: Enemy, me: Bullet, index: number) => Generator, config: { loop?: number; margin?: number } = {}) {
+    g(g: (this: Actor, me: Bullet, index: number) => Generator, config: { loop?: number; margin?: number } = {}) {
         const e = this.e
 
         this.bullets.forEach((b, index) => {

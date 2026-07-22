@@ -2,6 +2,7 @@ import { vec, Vec } from "@ipota/vec"
 import { Enemy } from "./Enemy"
 import { Bullet } from "./Bullet"
 import { Player } from "./Player"
+
 export type GameLike = {
     player: Player
     enemies: Enemy[]
@@ -20,19 +21,17 @@ export abstract class Actor {
         this.gens = this.gens.filter((g) => !finished.includes(g))
     }
 
-    abstract draw(ctx: CanvasRenderingContext2D): void
-
     protected addScript(g: (me: this) => Generator, { loop = 1, margin = 0 }: { loop?: number; margin?: number } = {}) {
         const me = this
 
         this.gens.push(
-            function* () {
+            (function* () {
                 yield* Array(margin)
 
                 while (loop--) {
                     yield* g(me)
                 }
-            }.bind(this)(),
+            })(),
         )
     }
 }

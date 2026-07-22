@@ -69,7 +69,7 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
                     // 同じように動くよう、joints も p1 分だけ平行移動させる。
                     // これをしないと全セグメントが同じ絶対座標に向かって動いてしまい、
                     // ポリラインの形が崩れて連続しなくなる。
-                    const segmentJoints = joints.map((j) => j.plus(vec(p1.x, p1.y)))
+                    const segmentJoints = joints.map((j) => j.add(vec(p1.x, p1.y)))
                     movables.push(
                         new Edge(obj.x + p1.x, obj.y + p1.y, obj.x + p2.x, obj.y + p2.y, {
                             joints: segmentJoints,
@@ -84,7 +84,7 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
                     const p1 = obj.polygon[i]
                     const p2 = obj.polygon[(i + 1) % obj.polygon.length]
                     // polylineと同様、セグメントの始点オフセット(p1)分だけ joints をずらす
-                    const segmentJoints = joints.map((j) => j.plus(vec(p1.x, p1.y)))
+                    const segmentJoints = joints.map((j) => j.add(vec(p1.x, p1.y)))
                     movables.push(
                         new Edge(obj.x + p1.x, obj.y + p1.y, obj.x + p2.x, obj.y + p2.y, {
                             joints: segmentJoints,
