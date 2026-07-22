@@ -175,6 +175,12 @@ export class Player extends Actor {
         })
     }
 
+    hitSlash() {
+        if (!this.onFloor.includes(true)) {
+            this.v = this.v.add(this.g.scale(-10))
+        }
+    }
+
     private *attack() {
         // 遠距離
         if (this.game.input.isPushed("fire")) {

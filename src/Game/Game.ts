@@ -148,6 +148,7 @@ export class Game extends GameNode {
                         this.gens.push(this.drawDamage(b.p, b.damage))
 
                         if (b.r > 8) {
+                            this.player.hitSlash()
                             this.addScript(() => this.hitStopSlash())
                         } else {
                             this.addScript(() => this.hitStopShot())
