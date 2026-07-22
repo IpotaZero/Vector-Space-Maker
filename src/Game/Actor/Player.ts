@@ -23,9 +23,12 @@ export class Player extends Actor {
     /**最後に入力した方向 */
     private direction = 1
 
-    constructor(start: Vec) {
-        super()
+    constructor(game: GameLike, start: Vec) {
+        super(game)
         this.p = start
+        this.life = 100
+
+        this.addScript(this.attack.bind(this), { loop: Infinity })
     }
 
     update(game: GameLike): void {
@@ -51,8 +54,6 @@ export class Player extends Actor {
 
         // 再合成
         this.v = newVHorizontal.add(newVUp)
-
-        this.attack(game)
     }
 
     move(input: DigitalInput.Reader<"left" | "right" | "jump">): void {
@@ -173,20 +174,23 @@ export class Player extends Actor {
         })
     }
 
-    private attack(game: GameLike) {
+    private *attack() {
         // 遠距離
-        if (game.input.isPushed("fire")) {
-            remodel(this)
+        if (this.game.input.isPushed("fire")) {
+            yield* remodel(this)
                 .p(this.p)
+                .type("friend")
                 .radian(this.g.radian() + (-T / 4) * this.direction)
                 .speed(28)
-                .fire(game.bullets)
+                .fire(this.game.bullets)
         }
 
         // 近距離(15frame)
-        if (game.input.isPushed("slash")) {
-            remodel(this)
+        if (this.game.input.isPushed("slash")) {
+            yield* remodel(this)
+                .damage(5)
                 .p(this.p.add(this.g.normal().scale(this.direction * 12)))
+                .type("friend")
                 .speed(0)
                 .r(this.r * 6)
                 .g(function* (me) {
@@ -196,7 +200,8 @@ export class Player extends Actor {
                     }
                     me.life = 0
                 })
-                .fire(game.bullets)
+                .fire(this.game.bullets)
         }
+        yield
     }
 }

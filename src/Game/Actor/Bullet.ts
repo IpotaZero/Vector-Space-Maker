@@ -1,16 +1,15 @@
 import { Actor } from "./Actor"
 
 export class Bullet extends Actor {
-    static WIDTH: number = 100
-    static HEIGHT: number = 100
-
     radian: number = 0
     speed: number = 14
     length: number = 0
+    damage: number = 1
+    delay: number = 0
 
     appearance: "donut" | "ball" | "line" | "arrow" | "laser" | "player" = "donut"
     collision: "ball" | "line" | "arrow" | "laser" = "ball"
-    type: "friend" | "enemy" | "neutral" = "enemy"
+    type: "friend" | "enemy" | "neutral" | "effect" = "enemy"
     color: Color = "black"
     alpha: number = 1
 
@@ -18,6 +17,10 @@ export class Bullet extends Actor {
 
     clone(): this {
         const b = { ...this }
+
+        b.p = this.p.clone()
+        b.genfs = [...this.genfs]
+        b.gens = [...this.gens]
         // @ts-ignore
         b.__proto__ = this.__proto__
 
@@ -44,7 +47,7 @@ export class Bullet extends Actor {
     }
 
     private *boundary() {
-        if (this.p.x < 0 || Bullet.WIDTH < this.p.x || this.p.y < 0 || Bullet.HEIGHT < this.p.y) {
+        if (this.p.x < 0 || this.game.width < this.p.x || this.p.y < 0 || this.game.height < this.p.y) {
             this.life = 0
         }
         yield

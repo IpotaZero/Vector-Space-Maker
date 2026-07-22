@@ -5,17 +5,17 @@ import { DigitalInput } from "@ipota/input"
 import * as tiled from "@kayahr/tiled"
 import { Zone } from "./movable/zone/Zone"
 import { Edge } from "./movable/Edge"
-import { vec } from "@ipota/vec"
+import { Vec, vec } from "@ipota/vec"
 import { Player } from "./Actor/Player"
 import { Enemy } from "./Actor/Enemy"
 import { Bullet } from "./Actor/Bullet"
 import { BulletDrawer } from "./BulletDrawer"
 import { BulletCollision } from "./BulletCollision"
-import { remodel } from "./Remodel"
-import { T } from "../T"
+import { EnemyTest } from "../Enemy/EnemyTest"
+import { Ctx } from "../utils/Functions/Ctx"
 
-const WIDTH = 1200
-const HEIGHT = 900
+const WIDTH = 1024
+const HEIGHT = 768
 
 /**
  * ゲーム本体をカプセル化したクラス。
@@ -31,7 +31,6 @@ export class Game {
     camera!: Camera
 
     private gens: Generator[] = []
-
     enemies: Enemy[] = []
     bullets: Bullet[] = []
 
@@ -55,21 +54,34 @@ export class Game {
     /** ステージを読み込み、初期状態をセットアップする */
     async loadFromMapData(mapData: tiled.Map): Promise<void> {
         this.stage = await loadStageFromMapData(mapData)
-        this.camera = new Camera(vec(this.stage.start.x, this.stage.start.y))
-        Bullet.WIDTH = this.stage.width
-        Bullet.HEIGHT = this.stage.height
+        this.camera = new Camera(vec(WIDTH / 2, HEIGHT / 2))
         this.reset()
     }
 
+    get width() {
+        return this.stage.width
+    }
+
+    get height() {
+        return this.stage.height
+    }
+
     private reset(): void {
-        this.player = new Player(vec(this.stage.start.x, this.stage.start.y))
-        this.camera.scale = 1.5
+        this.player = new Player(this, vec(this.stage.start.x, this.stage.start.y))
+        this.camera.scale = 1
+
+        this.gens = []
         this.enemies = []
         this.bullets = []
-        this.gens = []
+
+        this.enemies.push(new EnemyTest(this))
     }
 
     update(): void {
+        this.ctx.clearRect(0, 0, WIDTH, HEIGHT)
+        this.ctx.fillStyle = "#fcfcfc"
+        this.ctx.fillRect(0, 0, WIDTH, HEIGHT)
+
         this.updateMovables()
         this.handleZoneEnter()
 
@@ -80,7 +92,9 @@ export class Game {
             .filter((b) => b.type === "enemy")
             .forEach((b) => {
                 if (this.bulletCollision.isColliding(b, this.player)) {
-                    this.player.life--
+                    this.player.life -= b.damage
+                    b.life = 0
+                    this.gens.push(this.drawDamage(b.p, b.damage))
                 }
             })
 
@@ -89,13 +103,20 @@ export class Game {
             .forEach((b) => {
                 this.enemies.forEach((e) => {
                     if (this.bulletCollision.isColliding(b, e)) {
-                        e.life--
+                        e.life -= b.damage
+                        b.life = 0
+                        this.gens.push(this.drawDamage(b.p, b.damage))
                     }
                 })
             })
 
-        this.bullets = this.bullets.filter((b) => b.life > 0)
-        this.enemies = this.enemies.filter((e) => e.life > 0)
+        const aliveBullets = this.bullets.filter((b) => b.life > 0)
+        this.bullets.length = 0
+        this.bullets.push(...aliveBullets)
+
+        const aliveEnemies = this.enemies.filter((e) => e.life > 0)
+        this.enemies.length = 0
+        this.enemies.push(...aliveEnemies)
 
         this.updatePlayer()
         this.updateCamera()
@@ -133,7 +154,7 @@ export class Game {
     }
 
     private updateCamera(): void {
-        this.camera.update(this.player.p, this.player.g)
+        this.camera.update(vec(WIDTH / 2, HEIGHT / 2), this.player.g)
     }
 
     private restartIfOutOfBounds(): void {
@@ -141,10 +162,10 @@ export class Game {
 
         // ステージ外に落ちたらリスタート
         if (
-            this.player.p.x < 0 ||
-            this.player.p.x > stage.width ||
-            this.player.p.y < 0 ||
-            this.player.p.y > stage.height
+            this.player.p.x < -10 ||
+            this.player.p.x > stage.width + 10 ||
+            this.player.p.y < -10 ||
+            this.player.p.y > stage.height + 10
         ) {
             this.reset()
         }
@@ -153,7 +174,6 @@ export class Game {
     private updateGenerators(): void {
         this.gens = this.gens.filter((gen) => {
             const result = gen.next()
-
             return !result.done
         })
     }
@@ -161,10 +181,6 @@ export class Game {
     private draw(): void {
         const stage = this.stage
         const ctx = this.ctx
-
-        ctx.clearRect(0, 0, WIDTH, HEIGHT)
-        ctx.fillStyle = "#fcfcfc"
-        ctx.fillRect(0, 0, WIDTH, HEIGHT)
 
         ctx.save()
         this.camera.apply(ctx, WIDTH, HEIGHT)
@@ -176,5 +192,17 @@ export class Game {
         this.bullets.forEach((b) => this.bulletDrawer.draw(b, ctx))
 
         ctx.restore()
+    }
+
+    private *drawDamage(p: Vec, damage: number) {
+        const frame = 30
+
+        for (let i = 0; i < frame; i++) {
+            Ctx.text(this.ctx, p.l, `rgba(255,0,0,${1 - i / frame})`, `${damage}`, {
+                fontSize: 32,
+                fontFamily: "serif",
+            })
+            yield
+        }
     }
 }

@@ -8,7 +8,7 @@ import { NumberKeys } from "../utils/NumberKeys"
 import { Actor } from "./Actor/Actor"
 
 export function remodel<Parent extends Actor>(e: Parent) {
-    return new Proxy(new Remodel([new Bullet()], e), {
+    return new Proxy(new Remodel([new Bullet(e.game)], e), {
         get(target, key) {
             if (key in target) return (target as any)[key]
 
@@ -29,12 +29,24 @@ export class Remodel<Parent extends Actor> {
         private readonly e: Parent,
     ) {}
 
-    fire(bullets: Bullet[]) {
+    *fire(bullets: Bullet[]) {
         this.bullets.forEach((b) => {
             b.init()
         })
 
-        bullets.push(...this.bullets)
+        let frame = 0
+
+        this.bullets.sort((a, b) => a.delay - b.delay)
+
+        for (const b of this.bullets) {
+            while (b.delay > frame) {
+                frame++
+                yield
+            }
+
+            console.log(frame, b)
+            bullets.push(b)
+        }
     }
 
     static *homing(me: Bullet, p: Vec, frame: number) {
@@ -98,6 +110,13 @@ export class Remodel<Parent extends Actor> {
                 yield
             }
         }
+    }
+
+    delayByIndex() {
+        this.forEach((b, index) => {
+            b.delay = index
+        })
+        return this
     }
 
     colorful(seed: number) {

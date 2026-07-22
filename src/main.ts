@@ -11,7 +11,7 @@ export const input = new DigitalInput({
     left: ["ArrowLeft", "KeyA", "gamepad-axis-0-negative"],
     right: ["ArrowRight", "KeyD", "gamepad-axis-0-positive"],
     jump: ["ArrowUp", "KeyW", "Space", "gamepad-button-0"],
-    fire: ["KeyX", "gamepad-button-3"],
+    fire: ["KeyX", "gamepad-button-5", "gamepad-button-7"],
     slash: ["KeyZ", "gamepad-button-2"],
 
     ok: ["Enter", "KeyZ", "Space", "gamepad-button-0"],

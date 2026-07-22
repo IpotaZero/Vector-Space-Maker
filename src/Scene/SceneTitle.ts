@@ -81,7 +81,7 @@ export class SceneTitle extends Scene {
         focuses.setPage(this.pages.getCurrentPage())
 
         this.pages.beforeEnter("stage-test", async () => {
-            const mapData = (await fetch(`stages/test.tmj`).then((res) => res.json())) as tiled.Map
+            const mapData = (await fetch(`stages/test2.tmj`).then((res) => res.json())) as tiled.Map
             console.log(mapData)
             sc.goto(new SceneGame(mapData))
             // sc.goto(new SceneGame(args.dataset.stage!))

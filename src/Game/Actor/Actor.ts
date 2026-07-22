@@ -9,6 +9,8 @@ export type GameLike = {
     enemies: Enemy[]
     bullets: Bullet[]
     input: DigitalInput.Reader<"jump" | "left" | "right" | "fire" | "slash">
+    width: number
+    height: number
 }
 
 export abstract class Actor {
@@ -16,7 +18,9 @@ export abstract class Actor {
     r: number = 8
     life = 1
 
-    private gens: Generator[] = []
+    protected gens: Generator[] = []
+
+    constructor(readonly game: GameLike) {}
 
     update(game: GameLike) {
         const finished = this.gens.filter((g) => g.next().done)
