@@ -1,6 +1,7 @@
 import { vec, Vec } from "@ipota/vec"
 import { Actor } from "./Actor"
 import { GameLike } from "../Game"
+import { Ease } from "@ipota/functions"
 
 const normalizeAngle = (a: number): number => {
     while (a > Math.PI) a -= Math.PI * 2
@@ -13,12 +14,16 @@ export class Camera extends Actor {
     angle = 0
     scale = 1.5
 
+    private shakeP = vec(0, 0)
+
     constructor(game: GameLike, start: Vec) {
         super(game)
         this.p = start
     }
 
     update() {
+        super.update()
+
         this.updatePosition(this.game.player.g, vec(this.game.width / 2, this.game.height / 2))
         this.updateRotate(this.game.player.g)
     }
@@ -54,7 +59,7 @@ export class Camera extends Actor {
         ctx.translate(width / 2, height / 2)
         ctx.rotate(this.angle)
         ctx.scale(this.scale, this.scale)
-        ctx.translate(-this.p.x, -this.p.y)
+        ctx.translate(-this.p.x - this.shakeP.x, -this.p.y - this.shakeP.y)
     }
 
     scaleTo(scale: number) {
@@ -66,6 +71,19 @@ export class Camera extends Actor {
 
         for (let i = 0; i < 30; i++) {
             this.scale = s + (scale - s) * (i / 30)
+            yield
+        }
+    }
+
+    shake(power: number) {
+        this.gens.push(this.shakeG(power))
+    }
+
+    private *shakeG(power: number) {
+        const frame = 10
+
+        for (let i = 1; i < frame + 1; i++) {
+            this.shakeP.x = Math.sin(i) * Ease.Out(1 - i / frame) * power
             yield
         }
     }

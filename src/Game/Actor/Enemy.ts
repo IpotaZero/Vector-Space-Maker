@@ -11,6 +11,20 @@ export abstract class Enemy extends Actor {
         ctx.stroke()
     }
 
+    hit() {
+        this.addScript(this.hitG.bind(this))
+    }
+
+    private *hitG() {
+        const r = this.r
+        const frame = 6
+
+        for (let i = 1; i < frame + 1; i++) {
+            this.r = r - r * Ease.Out(1 - i / frame) * 0.1
+            yield
+        }
+    }
+
     protected *moveTo(end: Vec, frame: number) {
         const start = this.p
 

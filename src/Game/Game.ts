@@ -144,8 +144,14 @@ export class Game extends GameNode {
                     if (this.bulletCollision.isColliding(b, e)) {
                         e.life -= b.damage
                         b.life = 0
+                        e.hit()
                         this.gens.push(this.drawDamage(b.p, b.damage))
-                        this.addScript(() => this.hitStop())
+
+                        if (b.r > 8) {
+                            this.addScript(() => this.hitStopSlash())
+                        } else {
+                            this.addScript(() => this.hitStopShot())
+                        }
                     }
                 })
             })
@@ -202,8 +208,10 @@ export class Game extends GameNode {
     private *drawDamage(p: Vec, damage: number) {
         const frame = 30
 
+        const l = p.add(vec(Math.random() * 32, Math.random() * 32)).l
+
         for (let i = 0; i < frame; i++) {
-            Ctx.text(this.ctx, p.l, `rgba(255,0,0,${1 - i / frame})`, `${damage}`, {
+            Ctx.text(this.ctx, l, `rgba(255,0,0,${1 - i / frame})`, `${damage}`, {
                 fontSize: 32,
                 fontFamily: "serif",
             })
@@ -211,7 +219,17 @@ export class Game extends GameNode {
         }
     }
 
-    private *hitStop() {
-        yield* Array(30)
+    private *hitStopShot() {
+        this.camera.shake(2)
+        looper.setFPS(30)
+        yield* Array(1)
+        looper.setFPS(60)
+    }
+
+    private *hitStopSlash() {
+        this.camera.shake(6)
+        looper.setFPS(20)
+        yield* Array(1)
+        looper.setFPS(60)
     }
 }
