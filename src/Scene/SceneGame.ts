@@ -1,6 +1,7 @@
 import { Dom } from "../Dom"
 import { Game } from "../Game/Game"
-import { focuses, focusesUpdater, input, sc } from "../main"
+import { focuses, focusesUpdater, sc } from "../main"
+import { input } from "../input"
 import { Pages } from "@ipota/pages"
 import { Scene } from "../utils/Scene/Scene"
 import { SceneTitle } from "./SceneTitle"
