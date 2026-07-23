@@ -86,7 +86,7 @@ export class Game extends GameNode {
         this.player = new Player(this, vec(this.stage.start.x, this.stage.start.y))
         this.camera.scale = 1
 
-        this.gens = []
+        this.scripts.clear()
         this.enemies = []
         this.bullets = []
 
@@ -118,22 +118,20 @@ export class Game extends GameNode {
             .forEach((zone) => {
                 if (zone.contains(this.player.p)) {
                     const gen = zone.onEnter(this)
-                    this.gens.push(gen)
+                    this.addScript(() => gen)
                 }
             })
     }
 
     private updateBulletAndEnemy() {
-        this.bullets.forEach((b) => b.update())
-        this.enemies.forEach((e) => e.update())
-
         this.bullets
             .filter((b) => b.type === "enemy")
             .forEach((b) => {
                 if (this.bulletCollision.isColliding(b, this.player)) {
                     this.player.life -= b.damage
+                    this.player.sleep(1)
                     b.life = 0
-                    this.gens.push(this.drawDamage(b.p, b.damage))
+                    this.addScript(() => this.drawDamage(b.p, b.damage))
                 }
             })
 
@@ -142,11 +140,13 @@ export class Game extends GameNode {
             .forEach((b) => {
                 this.enemies.forEach((e) => {
                     if (this.bulletCollision.isColliding(b, e)) {
-                        e.life -= b.damage
                         b.life = 0
+
+                        e.life -= b.damage
                         e.hit()
-                        this.gens.push(this.drawDamage(b.p, b.damage))
                         e.sleep(1)
+
+                        this.addScript(() => this.drawDamage(b.p, b.damage))
 
                         if (b.r > 8) {
                             this.player.hitSlash()
@@ -158,13 +158,16 @@ export class Game extends GameNode {
                 })
             })
 
+        this.bullets.forEach((b) => b.update())
+        this.enemies.forEach((e) => e.update())
+
         const aliveBullets = this.bullets.filter((b) => b.life > 0)
         this.bullets.length = 0
         this.bullets.push(...aliveBullets)
 
         const aliveEnemies = this.enemies.filter((e) => {
             if (e.life <= 0) {
-                this.gens.push(e.onDead())
+                this.addScript(() => e.onDead())
             }
 
             return e.life > 0
@@ -205,10 +208,10 @@ export class Game extends GameNode {
         this.camera.apply(ctx, WIDTH, HEIGHT)
 
         for (const t of stage.movables) t.draw(ctx)
-        this.player.draw(ctx)
 
-        this.enemies.forEach((e) => e.draw(ctx))
         this.bullets.forEach((b) => this.bulletDrawer.draw(b, ctx))
+        this.enemies.forEach((e) => e.draw(ctx))
+        this.player.draw(ctx)
 
         ctx.restore()
     }

@@ -1,5 +1,5 @@
 export abstract class GameNode {
-    protected gens: Generator[] = []
+    protected scripts = new Map<string, Generator>()
 
     private sleepFrame: number = 0
 
@@ -9,18 +9,30 @@ export abstract class GameNode {
             return
         }
 
-        const finished = this.gens.filter((g) => g.next().done)
-        this.gens = this.gens.filter((g) => !finished.includes(g))
+        const finished = this.scripts
+            .entries()
+            .filter(([id, g]) => g.next().done)
+            .map(([id, _]) => id)
+
+        finished.forEach((id) => {
+            this.scripts.delete(id)
+        })
     }
 
     sleep(frame: number) {
         this.sleepFrame = frame
     }
 
-    protected addScript(g: (me: this) => Generator, { loop = 1, margin = 0 }: { loop?: number; margin?: number } = {}) {
+    protected addScript(
+        g: (me: this) => Generator,
+        { loop = 1, margin = 0, id }: { loop?: number; margin?: number; id?: string } = {},
+    ) {
         const me = this
 
-        this.gens.push(
+        const ID = id ?? crypto.randomUUID()
+
+        this.scripts.set(
+            ID,
             (function* () {
                 yield* Array(margin)
 
@@ -29,5 +41,9 @@ export abstract class GameNode {
                 }
             })(),
         )
+    }
+
+    protected removeScript(id: string) {
+        this.scripts.delete(id)
     }
 }

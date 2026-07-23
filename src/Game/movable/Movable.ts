@@ -16,7 +16,7 @@ export abstract class Movable extends GameNode {
         this.joints = joints
         this.cycle = Math.max(cycle, 1)
 
-        this.gens.push(this.move())
+        this.addScript(() => this.move())
     }
 
     update(): void {

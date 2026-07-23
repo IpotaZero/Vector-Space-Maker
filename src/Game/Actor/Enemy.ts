@@ -1,16 +1,28 @@
 import { vec, Vec } from "@ipota/vec"
-import { T } from "../../T"
 import { Actor } from "./Actor"
 import { Ease } from "@ipota/functions"
+import { GameLike } from "../Game"
+import { Ctx } from "../../utils/Functions/Ctx"
 
 export abstract class Enemy extends Actor {
     private shakeP = vec(0, 0)
+    private maxLife: number
+
+    constructor(game: GameLike, life: number) {
+        super(game)
+        this.life = life
+        this.maxLife = life
+    }
 
     draw(ctx: CanvasRenderingContext2D) {
-        ctx.strokeStyle = "black"
-        ctx.beginPath()
-        ctx.arc(this.p.x + this.shakeP.x, this.p.y + this.shakeP.y, this.r, 0, T)
-        ctx.stroke()
+        Ctx.arc(ctx, this.p.l, this.r, "black", { lineWidth: 1 })
+
+        const w = this.game.width / 2
+
+        Ctx.rect(ctx, [w - 64, 64], [w, 32], "black", { lineWidth: 1 })
+        Ctx.rect(ctx, [w - 64 + w * (1 - this.life / this.maxLife), 64], [w * (this.life / this.maxLife), 32], "gray", {
+            lineWidth: 0,
+        })
     }
 
     hit() {

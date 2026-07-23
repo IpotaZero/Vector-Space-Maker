@@ -21,6 +21,8 @@ export class Player extends Actor {
     private isJumping = false
     private canDoubleJump = true // 2段ジャンプの権利
 
+    private readonly maxLife = 100
+
     /**最後に入力した方向 */
     private direction = 1
 
@@ -172,6 +174,13 @@ export class Player extends Actor {
             baseline: "middle",
             fontSize: 0.5,
             fontFamily: "serif",
+        })
+
+        const w = this.game.width / 4
+
+        Ctx.rect(ctx, [64, 64], [w, 32], "black", { lineWidth: 1 })
+        Ctx.rect(ctx, [64 + w * (1 - this.life / this.maxLife), 64], [w * (this.life / this.maxLife), 32], "gray", {
+            lineWidth: 0,
         })
     }
 

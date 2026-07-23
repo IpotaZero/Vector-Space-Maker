@@ -20,7 +20,7 @@ export class Bullet extends Actor {
 
         b.p = this.p.clone()
         b.genfs = [...this.genfs]
-        b.gens = [...this.gens]
+        b.scripts = new Map()
         // @ts-ignore
         b.__proto__ = this.__proto__
 

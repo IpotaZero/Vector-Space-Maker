@@ -5,37 +5,58 @@ import { Remodel, remodel } from "../Game/Remodel"
 
 export class EnemyTest extends Enemy {
     constructor(game: GameLike) {
-        super(game)
+        super(game, 100)
         this.p = vec(400, 400)
         this.r = 48
-        this.life = 100
 
         this.addScript(this.text.bind(this))
     }
 
+    private *phase() {
+        this.addScript(this.attack0.bind(this), { loop: Infinity, id: "attack0" })
+        this.addScript(this.move0.bind(this), { loop: Infinity, id: "move0" })
+
+        while (this.life > 50) yield
+
+        this.removeScript("attack0")
+        this.removeScript("move0")
+
+        yield* this.moveTo(vec(this.game.width - 200, 200), 120)
+        yield* this.game.textBox.say(["いちちっ！近寄るんじゃあないっ！"], { name: "ボス" })
+
+        this.addScript(this.attack1.bind(this), { loop: Infinity, id: "attack1" })
+        this.addScript(this.move1.bind(this), { loop: Infinity, id: "move1" })
+    }
+
     *onDead(): Generator {
         yield* Array(120)
-        yield* this.game.textBox.say([
-            "ま、待ってくだせえ！",
-            "素晴らしい腕並み、自分、マジ関心しやしたっ！",
-            "しっかし、獄卒が居るのは本当なんよぉ？",
-            "……閻魔様に会いに行く？<br>へえ、そりゃあ……なんでっすか？",
-            "待ってくださいよぉっ、兄貴！",
-        ])
+        yield* this.game.textBox.say(
+            [
+                "……あんた、名前は？",
+                "へえ、『ハレ』か。良い名前じゃん！",
+                "俺様は畜生の『ボス』！",
+                "獄卒が居るのはホントなんだけど……<br>ふぇっ、閻魔様に会いに行く？",
+                "なんかおもろそー、俺様もついていくかぁ！",
+            ],
+            { name: "ボス" },
+        )
     }
 
     private *text() {
-        yield* this.game.textBox.say([
-            "おい！そこのお前！",
-            "きひひっ、この先は獄卒が見張ってるぜぇ。",
-            "俺様の忠告を無視するのかっ！？<br>生意気なヤツめっ。<br>やっつけてやる！",
-        ])
+        yield* this.game.textBox.say(
+            [
+                "おい！そこのお前！",
+                "へっへっへ、この先は獄卒が見張ってるぜぇ。",
+                "俺様の忠告を無視するのかっ！？<br>生意気なヤツめっ。<br>やっつけてやる！",
+                "そこを動くんじゃあないぞ。決して矢印キーを押したりZを押したりするんじゃあないぞ！",
+            ],
+            { name: "ボス" },
+        )
 
-        this.addScript(this.attack.bind(this), { loop: Infinity })
-        this.addScript(this.move.bind(this), { loop: Infinity })
+        this.addScript(this.phase.bind(this))
     }
 
-    private *attack() {
+    private *attack0() {
         // yield* remodel(this)
         //     .p(this.p.clone())
         //     .aim(this.game.player.p)
@@ -57,10 +78,18 @@ export class EnemyTest extends Enemy {
         yield* Array(300)
     }
 
-    private *move() {
+    private *move0() {
         yield* this.moveTo(vec((this.game.width / 4) * 3, this.game.height / 4), 60)
         yield* Array(60)
         yield* this.moveTo(vec(this.game.width / 4, this.game.height / 4), 60)
         yield* Array(60)
+    }
+
+    private *attack1() {
+        yield
+    }
+
+    private *move1() {
+        yield
     }
 }

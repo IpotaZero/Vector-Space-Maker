@@ -127,7 +127,7 @@
                 }, 
                 {
                  "height":0,
-                 "id":51,
+                 "id":52,
                  "name":"",
                  "opacity":1,
                  "polyline":[
@@ -144,7 +144,7 @@
                  "visible":true,
                  "width":0,
                  "x":64,
-                 "y":96
+                 "y":672
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -193,7 +193,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":52,
+ "nextobjectid":53,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

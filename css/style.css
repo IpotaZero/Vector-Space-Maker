@@ -95,21 +95,29 @@ button {
 
 .text-box {
     position: absolute;
-    bottom: 1em;
+    top: 1em;
     left: 1em;
     width: calc(100% - 2em);
     height: 8em;
-    background: #ffffffe0;
+    background: #fffffff0;
     border-radius: 0.1em;
     border: 0.1em solid #00000020;
-    padding: 0.5em;
+    padding: 1em;
+    padding-top: 0.5em;
     pointer-events: none;
 
     font-size: 1.2em;
 
-    &::after {
-        content: "/";
-        animation: blink 1s infinite;
+    .name {
+        border-bottom: 0.05em solid #00000020;
+        height: 1.5em;
+    }
+
+    .text {
+        &::after {
+            content: "/";
+            animation: blink 1s infinite;
+        }
     }
 }
 

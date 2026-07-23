@@ -63,7 +63,7 @@ export class Camera extends Actor {
     }
 
     scaleTo(scale: number) {
-        this.gens.push(this.scaleToG(scale))
+        this.addScript(() => this.scaleToG(scale))
     }
 
     private *scaleToG(scale: number) {
@@ -76,7 +76,7 @@ export class Camera extends Actor {
     }
 
     shake(power: number) {
-        this.gens.push(this.shakeG(power))
+        this.addScript(() => this.shakeG(power))
     }
 
     private *shakeG(power: number) {
