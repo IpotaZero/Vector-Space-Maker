@@ -6,11 +6,22 @@ import { Remodel, remodel } from "../Game/Remodel"
 export class EnemyTest extends Enemy {
     constructor(game: GameLike) {
         super(game)
-        this.p = this.game.player.p.add(vec(0, -50))
+        this.p = vec(400, 400)
         this.r = 48
-        this.life = 1000
+        this.life = 100
 
         this.addScript(this.text.bind(this))
+    }
+
+    *onDead(): Generator {
+        yield* Array(120)
+        yield* this.game.textBox.say([
+            "ま、待ってくだせえ！",
+            "素晴らしい腕並み、自分、マジ関心しやしたっ！",
+            "しっかし、獄卒が居るのは本当なんよぉ？",
+            "……閻魔様に会いに行く？<br>へえ、そりゃあ……なんでっすか？",
+            "待ってくださいよぉっ、兄貴！",
+        ])
     }
 
     private *text() {

@@ -146,6 +146,7 @@ export class Game extends GameNode {
                         b.life = 0
                         e.hit()
                         this.gens.push(this.drawDamage(b.p, b.damage))
+                        e.sleep(1)
 
                         if (b.r > 8) {
                             this.player.hitSlash()
@@ -161,7 +162,13 @@ export class Game extends GameNode {
         this.bullets.length = 0
         this.bullets.push(...aliveBullets)
 
-        const aliveEnemies = this.enemies.filter((e) => e.life > 0)
+        const aliveEnemies = this.enemies.filter((e) => {
+            if (e.life <= 0) {
+                this.gens.push(e.onDead())
+            }
+
+            return e.life > 0
+        })
         this.enemies.length = 0
         this.enemies.push(...aliveEnemies)
     }

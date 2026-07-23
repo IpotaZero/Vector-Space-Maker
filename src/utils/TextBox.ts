@@ -24,7 +24,7 @@ export class TextBox {
     }
 
     private *wait() {
-        while (!this.input.isPushed("ok")) yield
+        while (!this.input.isPushed("ok") && !this.input.isPushed("cancel")) yield
         yield
     }
 }

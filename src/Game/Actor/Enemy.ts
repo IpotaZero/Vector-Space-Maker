@@ -18,6 +18,8 @@ export abstract class Enemy extends Actor {
         this.addScript(this.shakeG.bind(this))
     }
 
+    *onDead(): Generator {}
+
     private *hitG() {
         const r = 48
         const frame = 6
