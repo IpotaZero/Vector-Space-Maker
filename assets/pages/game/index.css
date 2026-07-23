@@ -12,8 +12,6 @@
 
     height: 100%;
 
-    background: #ffffff80;
-
     .kakomi {
         h2 {
             width: 100%;
@@ -37,6 +35,8 @@
 
         gap: 1em;
 
-        background: #f8f8f8;
+        background: #303030;
+
+        z-index: 1000;
     }
 }

@@ -22,7 +22,8 @@ body {
 
     font-family: "normal", sans-serif;
 
-    background: #e8e8e8;
+    background: #333;
+    color: #ffffff;
 
     font-size: 24px;
 
@@ -67,6 +68,7 @@ button {
     font-family: "normal", sans-serif;
 
     padding-bottom: 0.17em;
+    color: #ffffff;
 }
 
 .options {
@@ -99,7 +101,7 @@ button {
     left: 1em;
     width: calc(100% - 2em);
     height: 8em;
-    background: #fffffff0;
+    background: #303030f0;
     border-radius: 0.1em;
     border: 0.1em solid #00000020;
     padding: 1em;
@@ -107,6 +109,8 @@ button {
     pointer-events: none;
 
     font-size: 1.2em;
+
+    animation: fade-in 0.2s ease-out forwards;
 
     .name {
         border-bottom: 0.05em solid #00000020;
@@ -119,14 +123,6 @@ button {
             animation: blink 1s infinite;
         }
     }
-}
-
-.fade {
-    opacity: 0;
-    transform: translateY(1em);
-    transition:
-        opacity 0.2s ease-in-out,
-        transform 0.2s ease-in-out;
 }
 
 @keyframes blink {

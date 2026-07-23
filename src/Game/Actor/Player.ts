@@ -178,10 +178,16 @@ export class Player extends Actor {
 
         const w = this.game.width / 4
 
-        Ctx.rect(ctx, [64, 64], [w, 32], "black", { lineWidth: 1 })
-        Ctx.rect(ctx, [64 + w * (1 - this.life / this.maxLife), 64], [w * (this.life / this.maxLife), 32], "gray", {
-            lineWidth: 0,
-        })
+        Ctx.rect(ctx, [64, 64], [w, 32], "#80808080", { lineWidth: 1 })
+        Ctx.rect(
+            ctx,
+            [64 + w * (this.life / this.maxLife), 64],
+            [w * (1 - this.life / this.maxLife), 32],
+            "#80808080",
+            {
+                lineWidth: 0,
+            },
+        )
     }
 
     hitSlash() {

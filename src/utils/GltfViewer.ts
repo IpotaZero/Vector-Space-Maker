@@ -2,7 +2,7 @@ import * as THREE from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
 export class GltfViewer {
-    public readonly domElement: HTMLElement
+    public readonly canvas: HTMLCanvasElement
 
     private readonly scene: THREE.Scene
     private readonly camera: THREE.PerspectiveCamera
@@ -13,6 +13,11 @@ export class GltfViewer {
     private currentModel: THREE.Group | null = null
     private animations: THREE.AnimationClip[] = []
     private currentAction: THREE.AnimationAction | null = null
+
+    // ▼ クロックを追加
+    private readonly timer: THREE.Timer = new THREE.Timer()
+    // ▼ フレーム制御用の時間を蓄積する変数を追加
+    private timeAccumulator: number = 0
 
     // 一度読み込んだモデルを使い回すためのキャッシュ
     private readonly modelCache: Map<string, { model: THREE.Group; animations: THREE.AnimationClip[] }> = new Map()
@@ -29,14 +34,11 @@ export class GltfViewer {
         this.renderer.setSize(width, height)
         this.renderer.setClearColor(0x000000, 0) // 完全透過
 
-        this.domElement = this.renderer.domElement
+        this.canvas = this.renderer.domElement
 
         // 3. DOMのスタイル設定 (ゲームキャンバスの上に絶対配置で被せる)
-        this.domElement.style.position = "absolute"
-        this.domElement.style.height = "100%"
-        this.domElement.style.width = "auto"
-        this.domElement.style.pointerEvents = "none" // クリック入力を下の2Dキャンバスに貫通させる
-        this.domElement.style.display = "none" // 初期状態は非表示
+        this.canvas.classList.add("gltf-viewer")
+        this.canvas.style.display = "none" // 初期状態は非表示
 
         // 4. ライトの設定 (GLTFモデルが暗くならないように)
         const ambientLight = new THREE.AmbientLight(0xffffff, 1)
@@ -58,7 +60,7 @@ export class GltfViewer {
             rotateY = 0,
         }: { animationName?: string; scale?: number; p?: [number, number, number]; rotateY?: number } = {},
     ): Promise<void> {
-        this.domElement.style.display = "block"
+        this.canvas.style.display = ""
 
         // キャッシュになければロード
         if (!this.modelCache.has(url)) {
@@ -88,7 +90,7 @@ export class GltfViewer {
 
     /** 立ち絵を非表示にする */
     public hide(): void {
-        this.domElement.style.display = "none"
+        this.canvas.style.display = "none"
         if (this.currentAction) {
             this.currentAction.stop()
         }
@@ -104,22 +106,43 @@ export class GltfViewer {
         if (!clip) return
 
         if (this.currentAction) {
-            // 前のアニメーションから0.2秒かけてスムーズにブレンド(遷移)させる
-            this.currentAction.fadeOut(0.2)
+            // 前のアニメーションから1秒かけてスムーズにブレンド(遷移)させる
+            this.currentAction.fadeOut(1)
         }
 
         this.currentAction = this.mixer.clipAction(clip)
-        this.currentAction.reset().fadeIn(0.2).play()
+        this.currentAction.reset().fadeIn(1).play()
     }
 
     /** 毎フレーム呼び出す更新処理 */
     public update(): void {
-        if (this.domElement.style.display === "none") {
+        if (this.canvas.style.display === "none") {
             return
         }
 
+        this.timer.update()
+        const delta = this.timer.getDelta()
+
         if (this.mixer) {
-            this.mixer.update(0.01)
+            // ▼ 目標のFPSを設定（数値が小さいほどカクカクになる。12〜15あたりがレトロ風）
+            const targetFPS = 10
+            const frameTime = 1 / targetFPS
+
+            // 経過時間を蓄積
+            this.timeAccumulator += delta
+
+            // 蓄積された時間が1フレーム分の時間を超えたら更新
+            if (this.timeAccumulator >= frameTime) {
+                // 何フレーム分進めるべきか計算
+                const steps = Math.floor(this.timeAccumulator / frameTime)
+                const timeToAdvance = steps * frameTime
+
+                // アニメーションをコマ送りで進める
+                this.mixer.update(timeToAdvance)
+
+                // 消費した分の時間を減らす
+                this.timeAccumulator -= timeToAdvance
+            }
         }
 
         this.renderer.render(this.scene, this.camera)

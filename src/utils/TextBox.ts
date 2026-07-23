@@ -1,6 +1,4 @@
 import { DigitalInput } from "@ipota/input"
-import { GltfViewer } from "./GltfViewer"
-// ※別途 Three.js を使ってGLTFを表示・管理するクラス (例: GltfViewer) を作成する想定です
 
 export interface TalkConfig {
     name?: string
@@ -18,7 +16,7 @@ export class TextBox {
         `
         this.name = this.box.querySelector(".name") as HTMLElement
         this.text = this.box.querySelector(".text") as HTMLElement
-        this.box.classList.add("fade", "text-box")
+        this.box.classList.add("hidden", "text-box")
     }
 
     *say(texts: readonly string[], config: TalkConfig = {}) {
@@ -29,14 +27,14 @@ export class TextBox {
     }
 
     private *saySingle(text: string, config: TalkConfig) {
-        this.box.classList.remove("fade")
-
         this.name.innerHTML = config.name ?? ""
         this.text.innerHTML = text
 
+        this.box.classList.remove("hidden")
+
         yield* this.wait()
 
-        this.box.classList.add("fade")
+        this.box.classList.add("hidden")
     }
 
     private *wait() {
