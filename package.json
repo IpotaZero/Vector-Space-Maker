@@ -7,9 +7,13 @@
         "@ipota/vec": "^1.0.2",
         "@kayahr/tiled": "^0.0.1",
         "jszip": "^3.10.1",
+        "three": "^0.185.1",
         "vite": "^8.1.2"
     },
     "scripts": {
         "build": "npx vite build --watch"
+    },
+    "devDependencies": {
+        "@types/three": "^0.185.1"
     }
 }

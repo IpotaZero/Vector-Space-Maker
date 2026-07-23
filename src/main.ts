@@ -1,6 +1,5 @@
 import { Dom } from "./Dom.js"
 import { SceneChanger } from "./utils/Scene/SceneChanger.js"
-import { SceneTitle } from "./Scene/SceneTitle.js"
 import { Focuses } from "@ipota/focuses"
 import { Pages } from "@ipota/pages"
 import { looper } from "./looper.js"
@@ -11,7 +10,6 @@ Dom.init()
 export const focuses = new Focuses(input)
 
 export const sc = new SceneChanger(Dom.container)
-sc.goto(new SceneTitle())
 
 sc.onTransitionStart = () => {
     input.pause("scene-transition")
@@ -33,6 +31,11 @@ looper.start()
 
 window.addEventListener("keydown", (e) => {
     if (["Tab", "Enter"].includes(e.code)) e.preventDefault()
+})
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const { SceneTitle } = await import("./Scene/SceneTitle.js")
+    sc.goto(new SceneTitle())
 })
 
 export function focusesUpdater(pages: Pages) {

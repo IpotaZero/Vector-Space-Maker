@@ -1,0 +1,1 @@
+{"version":3,"file":"Scene-wRFRLxEB.js","names":[],"sources":["../../../src/utils/Scene/Scene.ts"],"sourcesContent":["export abstract class Scene {\r\n    abstract start(): Promise<void>\r\n    abstract end(): Promise<void>\r\n\r\n    abstract update(): void\r\n}\r\n"],"mappings":"AAAA,IAAsB,EAAtB,KAA4B,CAK5B"}

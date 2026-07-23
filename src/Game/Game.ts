@@ -16,6 +16,7 @@ import { Ctx } from "../utils/Functions/Ctx"
 import { TextBox } from "../utils/TextBox"
 import { GameNode } from "./GameNode"
 import { looper } from "../looper"
+import { GltfViewer } from "../utils/GltfViewer"
 
 const WIDTH = 32 * 40
 const HEIGHT = 32 * 24
@@ -28,6 +29,7 @@ export type GameLike = {
     readonly width: number
     readonly height: number
     readonly textBox: TextBox
+    readonly gltfViewer: GltfViewer
 }
 
 /**
@@ -45,6 +47,7 @@ export class Game extends GameNode {
     bullets: Bullet[] = []
 
     readonly textBox: TextBox
+    readonly gltfViewer: GltfViewer
 
     private bulletDrawer = new BulletDrawer()
     private bulletCollision = new BulletCollision()
@@ -65,6 +68,7 @@ export class Game extends GameNode {
         this.canvas.height = HEIGHT
 
         this.textBox = new TextBox(this.input)
+        this.gltfViewer = new GltfViewer(WIDTH / 3, HEIGHT / 3)
     }
 
     /** ステージを読み込み、初期状態をセットアップする */
@@ -104,6 +108,8 @@ export class Game extends GameNode {
         this.updatePlayer()
         this.updateCamera()
         this.restartIfOutOfBounds()
+
+        this.gltfViewer.update()
 
         this.draw()
     }

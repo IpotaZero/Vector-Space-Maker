@@ -2,6 +2,7 @@ import { vec } from "@ipota/vec"
 import { Enemy } from "../Game/Actor/Enemy"
 import { GameLike } from "../Game/Game"
 import { Remodel, remodel } from "../Game/Remodel"
+import { T } from "../T"
 
 export class EnemyTest extends Enemy {
     constructor(game: GameLike) {
@@ -21,17 +22,32 @@ export class EnemyTest extends Enemy {
         this.removeScript("attack0")
         this.removeScript("move0")
 
+        this.game.gltfViewer.show("assets/3d/bos.gltf", {
+            scale: 0.8,
+            p: [1.5, -1.5, -5],
+            rotateY: -T / 12,
+            animationName: "fluttering",
+        })
         yield* this.moveTo(vec(this.game.width - 200, 200), 120)
         yield* this.game.textBox.say(["いちちっ！近寄るんじゃあないっ！"], { name: "ボス" })
+        this.game.gltfViewer.hide()
 
         this.addScript(this.attack1.bind(this), { loop: Infinity, id: "attack1" })
         this.addScript(this.move1.bind(this), { loop: Infinity, id: "move1" })
     }
 
     *onDead(): Generator {
+        this.game.gltfViewer.show("assets/3d/bos.gltf", {
+            scale: 0.8,
+            p: [1.5, -1.5, -5],
+            rotateY: -T / 12,
+            animationName: "fluttering",
+        })
         yield* Array(120)
+
         yield* this.game.textBox.say(
             [
+                "やーらーれーたーっ",
                 "……あんた、名前は？",
                 "へえ、『ハレ』か。良い名前じゃん！",
                 "俺様は畜生の『ボス』！",
@@ -43,6 +59,13 @@ export class EnemyTest extends Enemy {
     }
 
     private *text() {
+        this.game.gltfViewer.show("assets/3d/bos.gltf", {
+            scale: 0.8,
+            p: [1.5, -1.5, -5],
+            rotateY: -T / 12,
+            animationName: "fluttering",
+        })
+
         yield* this.game.textBox.say(
             [
                 "おい！そこのお前！",
@@ -52,6 +75,8 @@ export class EnemyTest extends Enemy {
             ],
             { name: "ボス" },
         )
+
+        this.game.gltfViewer.hide()
 
         this.addScript(this.phase.bind(this))
     }

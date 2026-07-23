@@ -4,7 +4,6 @@ import { focuses, focusesUpdater, sc } from "../main"
 import { input } from "../input"
 import { Pages } from "@ipota/pages"
 import { Scene } from "../utils/Scene/Scene"
-import { SceneTitle } from "./SceneTitle"
 import * as tiled from "@kayahr/tiled"
 
 export class SceneGame extends Scene {
@@ -20,11 +19,12 @@ export class SceneGame extends Scene {
     async start(): Promise<void> {
         await this.pages.loadFromFile(Dom.container, "assets/pages/game/index.html")
 
-        this.pages.beforeEnter("retry", () => {
+        this.pages.beforeEnter("retry", async () => {
             sc.goto(new SceneGame(this.mapData))
         })
 
-        this.pages.beforeEnter("next", () => {
+        this.pages.beforeEnter("next", async () => {
+            const { SceneTitle } = await import("./SceneTitle")
             sc.goto(new SceneTitle())
         })
 
@@ -37,6 +37,7 @@ export class SceneGame extends Scene {
         })
 
         Dom.container.appendChild(this.game.textBox.box)
+        Dom.container.appendChild(this.game.gltfViewer.domElement)
 
         await this.game.loadFromMapData(this.mapData)
     }

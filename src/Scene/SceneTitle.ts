@@ -2,8 +2,6 @@ import { Dom } from "../Dom"
 import { Pages } from "@ipota/pages"
 import { Scene } from "../utils/Scene/Scene"
 import { focuses, focusesUpdater, sc } from "../main"
-import { input } from "../input"
-import { SceneGame } from "./SceneGame"
 import { Files } from "@ipota/functions"
 import * as tiled from "@kayahr/tiled"
 
@@ -84,26 +82,29 @@ export class SceneTitle extends Scene {
         this.pages.beforeEnter("stage-test", async () => {
             const mapData = (await fetch(`stages/test2.tmj`).then((res) => res.json())) as tiled.Map
             console.log(mapData)
+
+            const { SceneGame } = await import("./SceneGame")
+
             sc.goto(new SceneGame(mapData))
             // sc.goto(new SceneGame(args.dataset.stage!))
         })
 
-        this.pages.beforeEnter("download", async () => {
-            const mapData = await fetch(`stages/test.tmj`).then((res) => res.text())
-            Files.downLoadString(mapData, "test", "tmj")
-        })
+        // this.pages.beforeEnter("download", async () => {
+        //     const mapData = await fetch(`stages/test.tmj`).then((res) => res.text())
+        //     Files.downLoadString(mapData, "test", "tmj")
+        // })
 
-        this.pages.beforeEnter("load", async () => {
-            const file = await Files.inputFile("json")
-            if (!file) return
+        // this.pages.beforeEnter("load", async () => {
+        //     const file = await Files.inputFile("json")
+        //     if (!file) return
 
-            const text = await file.text()
-            const data = JSON.parse(text)
+        //     const text = await file.text()
+        //     const data = JSON.parse(text)
 
-            console.log(data)
+        //     console.log(data)
 
-            sc.goto(new SceneGame(data))
-        })
+        //     sc.goto(new SceneGame(data))
+        // })
     }
 
     async end(): Promise<void> {
