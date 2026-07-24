@@ -54,6 +54,8 @@ export abstract class Enemy extends Actor {
     }
 
     *onDead(): Generator {
+        this.gltfViewer.dispose()
+
         yield* remodel(this)
             .type("effect")
             .alpha(0.5)

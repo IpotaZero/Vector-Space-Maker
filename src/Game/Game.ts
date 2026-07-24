@@ -71,6 +71,10 @@ export class Game extends GameNode {
         this.gltfViewer = new GltfViewer(WIDTH / 3, HEIGHT / 3)
     }
 
+    dispose() {
+        this.gltfViewer.dispose()
+    }
+
     /** ステージを読み込み、初期状態をセットアップする */
     async loadFromMapData(mapData: tiled.Map): Promise<void> {
         this.stage = await loadStageFromMapData(mapData)

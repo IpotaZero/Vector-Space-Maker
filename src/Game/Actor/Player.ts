@@ -21,7 +21,7 @@ export class Player extends Actor {
     private isJumping = false
     private canDoubleJump = true // 2段ジャンプの権利
 
-    private readonly maxLife = 100
+    private readonly maxLife = 10
 
     /**最後に入力した方向 */
     private direction = 1
@@ -29,7 +29,7 @@ export class Player extends Actor {
     constructor(game: GameLike, start: Vec) {
         super(game)
         this.p = start
-        this.life = 100
+        this.life = 10
 
         this.addScript(this.attack.bind(this), { loop: Infinity })
     }

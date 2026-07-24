@@ -14,6 +14,13 @@ export class GltfViewer {
     private animations: THREE.AnimationClip[] = []
     private currentAction: THREE.AnimationAction | null = null
 
+    // 現在の待機（ループ）アニメーション名
+    private currentIdleName: string | undefined = undefined
+    // 一時アニメーション（ワンショット）を再生中かどうか
+    private isPlayingOnce: boolean = false
+    // 一時アニメーション終了時のmixerイベントリスナー（後片付け用）
+    private onOnceFinished: ((event: { action: THREE.AnimationAction }) => void) | null = null
+
     // ▼ クロックを追加
     private readonly timer: THREE.Timer = new THREE.Timer()
     // ▼ フレーム制御用の時間を蓄積する変数を追加
@@ -83,9 +90,11 @@ export class GltfViewer {
 
             this.mixer = new THREE.AnimationMixer(this.currentModel)
             this.animations = animations
+            this.currentIdleName = undefined
+            this.isPlayingOnce = false
         }
 
-        this.playAnimation(animationName)
+        this.playIdle(animationName)
     }
 
     /** 立ち絵を非表示にする */
@@ -96,22 +105,106 @@ export class GltfViewer {
         }
     }
 
-    /** 指定されたアニメーションを再生する */
-    private playAnimation(name?: string): void {
-        if (!this.mixer || this.animations.length === 0) return
+    /** 名前からアニメーションクリップを探す（見つからなければ先頭のクリップ） */
+    private findClip(name?: string): THREE.AnimationClip | null {
+        if (this.animations.length === 0) return null
+        const clip = name ? this.animations.find((a) => a.name === name) : this.animations[0]
+        return clip ?? this.animations[0] ?? null
+    }
 
-        // 名前指定がなければ最初のアニメーションを使用
-        let clip = name ? this.animations.find((a) => a.name === name) : this.animations[0]
-        if (!clip) clip = this.animations[0]
+    /**
+     * 待機アニメーション（無限ループ）を再生する。
+     * 一時アニメーション再生中であっても、これを呼ぶと待機アニメーションに切り替わる。
+     */
+    public playIdle(name?: string): void {
+        if (!this.mixer) return
+        const clip = this.findClip(name)
         if (!clip) return
 
-        if (this.currentAction) {
-            // 前のアニメーションから1秒かけてスムーズにブレンド(遷移)させる
-            this.currentAction.fadeOut(1)
+        this.currentIdleName = name ?? clip.name
+        this.isPlayingOnce = false
+        this.cleanupOnceListener()
+
+        this.crossFadeTo(clip, THREE.LoopRepeat)
+    }
+
+    /**
+     * 一時アニメーション（ワンショット）を一度だけ再生し、終了したら
+     * 自動的に現在の待機アニメーションへ戻る。
+     * @param name 再生する一時アニメーションのクリップ名
+     * @param onFinish 一時アニメーション終了時に呼ばれるコールバック（任意）
+     */
+    public playOnce(name: string, onFinish?: () => void): void {
+        if (!this.mixer) return
+        const clip = this.findClip(name)
+        if (!clip) return
+
+        this.cleanupOnceListener()
+        this.isPlayingOnce = true
+
+        // 一時アニメーションへは即座に切り替える（ブレンドしない）
+        const action = this.crossFadeTo(clip, THREE.LoopOnce, true, 0)
+        if (!action) return
+
+        const mixer = this.mixer
+        const handler = (event: { action: THREE.AnimationAction }) => {
+            if (event.action !== action) return
+            mixer.removeEventListener("finished", handler as any)
+            this.onOnceFinished = null
+
+            // 別の一時アニメーションに割り込まれていた場合は何もしない
+            if (!this.isPlayingOnce) return
+
+            this.isPlayingOnce = false
+            onFinish?.()
+            this.playIdle(this.currentIdleName)
         }
 
-        this.currentAction = this.mixer.clipAction(clip)
-        this.currentAction.reset().fadeIn(1).play()
+        this.onOnceFinished = handler
+        mixer.addEventListener("finished", handler as any)
+    }
+
+    /** 一時アニメーション終了リスナーの後片付け */
+    private cleanupOnceListener(): void {
+        if (this.mixer && this.onOnceFinished) {
+            this.mixer.removeEventListener("finished", this.onOnceFinished as any)
+        }
+        this.onOnceFinished = null
+    }
+
+    /** 指定クリップへ切り替える（fadeDurationを0にすると即座に切り替わる） */
+    private crossFadeTo(
+        clip: THREE.AnimationClip,
+        loop: THREE.AnimationActionLoopStyles,
+        clampWhenFinished: boolean = false,
+        fadeDuration: number = 0.5,
+    ): THREE.AnimationAction | null {
+        if (!this.mixer) return null
+
+        if (this.currentAction) {
+            if (fadeDuration > 0) {
+                // 前のアニメーションからスムーズにブレンド(遷移)させる
+                this.currentAction.fadeOut(fadeDuration)
+            } else {
+                // 即座に停止（ブレンドしない）
+                this.currentAction.stop()
+            }
+        }
+
+        const action = this.mixer.clipAction(clip)
+        action.reset()
+        action.setLoop(loop, loop === THREE.LoopOnce ? 1 : Infinity)
+        action.clampWhenFinished = clampWhenFinished
+
+        if (fadeDuration > 0) {
+            action.fadeIn(fadeDuration)
+        } else {
+            action.setEffectiveWeight(1)
+        }
+        action.play()
+
+        this.currentAction = action
+        return action
     }
 
     /** 毎フレーム呼び出す更新処理 */
@@ -146,5 +239,62 @@ export class GltfViewer {
         }
 
         this.renderer.render(this.scene, this.camera)
+    }
+
+    /**
+     * このインスタンスが保持する全リソースを解放する。
+     * キャッシュ済みの全モデル（geometry/material/texture）とrendererを破棄する。
+     * 呼び出し後、このインスタンスは再利用できない。
+     */
+    public dispose(): void {
+        this.hide()
+
+        // mixerの後片付け
+        this.cleanupOnceListener()
+        if (this.mixer) {
+            this.mixer.stopAllAction()
+            this.mixer.uncacheRoot(this.mixer.getRoot())
+        }
+        this.mixer = null
+        this.currentAction = null
+
+        // 現在表示中のモデルをシーンから除去
+        if (this.currentModel) {
+            this.scene.remove(this.currentModel)
+            this.currentModel = null
+        }
+        this.animations = []
+
+        // キャッシュ済みの全モデルのgeometry/material/textureを解放
+        for (const { model } of this.modelCache.values()) {
+            GltfViewer.disposeObject(model)
+        }
+        this.modelCache.clear()
+
+        // rendererの解放
+        this.renderer.dispose()
+        this.renderer.forceContextLoss()
+    }
+
+    /** Object3Dツリーを辿ってgeometry/material/textureを解放する */
+    private static disposeObject(object: THREE.Object3D): void {
+        object.traverse((child) => {
+            if (!(child instanceof THREE.Mesh) && !(child instanceof THREE.SkinnedMesh)) return
+
+            child.geometry?.dispose()
+
+            const materials = Array.isArray(child.material) ? child.material : [child.material]
+            for (const material of materials) {
+                if (!material) continue
+
+                for (const key of Object.keys(material)) {
+                    const value = (material as unknown as Record<string, unknown>)[key]
+                    if (value instanceof THREE.Texture) {
+                        value.dispose()
+                    }
+                }
+                material.dispose()
+            }
+        })
     }
 }

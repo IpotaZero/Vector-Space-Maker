@@ -3,7 +3,6 @@ import { Enemy } from "../Game/Actor/Enemy"
 import { GameLike } from "../Game/Game"
 import { Remodel, remodel } from "../Game/Remodel"
 import { T } from "../T"
-import { GenUtils } from "@ipota/functions"
 
 export class EnemyTest extends Enemy {
     constructor(game: GameLike) {
@@ -18,6 +17,11 @@ export class EnemyTest extends Enemy {
             rotateY: -T / 24,
             animationName: "fluttering",
         })
+    }
+
+    hit(): void {
+        super.hit()
+        this.gltfViewer.playOnce("damage")
     }
 
     private *phase() {
@@ -78,14 +82,30 @@ export class EnemyTest extends Enemy {
             animationName: "fluttering",
         })
 
+        yield* this.game.textBox.say(["おい！そこのお前！"], { name: "ボス" })
+
+        this.game.gltfViewer.hide()
+
+        yield* this.game.textBox.say(["..."], {
+            name: "???",
+        })
+
+        this.game.gltfViewer.show("assets/3d/bos.gltf", {
+            scale: 0.8,
+            p: [1.5, -1, -5],
+            rotateY: -T / 12,
+            animationName: "fluttering",
+        })
+
         yield* this.game.textBox.say(
             [
-                "おい！そこのお前！",
                 "へっへっへ、この先は獄卒が見張ってるぜぇ。",
                 "俺様の忠告を無視するのかっ！？<br>生意気なヤツめっ。<br>やっつけてやる！",
                 "そこを動くんじゃあないぞ。決して矢印キーを押したりZを押したりするんじゃあないぞ！",
             ],
-            { name: "ボス" },
+            {
+                name: "ボス",
+            },
         )
 
         this.game.gltfViewer.hide()

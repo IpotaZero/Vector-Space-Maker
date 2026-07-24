@@ -58,5 +58,6 @@ export class SceneGame extends Scene {
 
     async end(): Promise<void> {
         this.pages.dispose()
+        this.game.dispose()
     }
 }
