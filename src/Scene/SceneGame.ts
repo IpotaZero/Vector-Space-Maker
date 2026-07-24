@@ -20,12 +20,11 @@ export class SceneGame extends Scene {
         await this.pages.loadFromFile(Dom.container, "assets/pages/game/index.html")
 
         this.pages.beforeEnter("retry", async () => {
-            sc.goto(new SceneGame(this.mapData))
+            sc.goto(async () => new SceneGame(this.mapData))
         })
 
         this.pages.beforeEnter("next", async () => {
-            const { SceneTitle } = await import("./SceneTitle")
-            sc.goto(new SceneTitle())
+            sc.goto(async () => await import("./SceneTitle").then(({ SceneTitle }) => new SceneTitle()))
         })
 
         this.game = new Game(this.pages.getElement("#main", HTMLCanvasElement), input, () => {

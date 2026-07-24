@@ -73,6 +73,7 @@ export class Game extends GameNode {
 
     dispose() {
         this.gltfViewer.dispose()
+        this.enemies.forEach((e) => e.dispose())
     }
 
     /** ステージを読み込み、初期状態をセットアップする */
@@ -116,6 +117,10 @@ export class Game extends GameNode {
         this.gltfViewer.update()
 
         this.draw()
+
+        if (this.enemies.length === 0 && this.scripts.size === 0) {
+            this.onFinish()
+        }
     }
 
     private updateMovables(): void {

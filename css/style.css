@@ -27,7 +27,7 @@ body {
 
     font-size: 24px;
 
-    overflow: visible;
+    overflow: hidden;
 }
 
 #container {
@@ -40,6 +40,8 @@ body {
     overflow: hidden;
 
     position: relative;
+
+    overflow: hidden;
 }
 
 .hidden {
@@ -69,6 +71,8 @@ button {
 
     padding-bottom: 0.17em;
     color: #ffffff;
+
+    transition: all 0.2s ease-out;
 }
 
 .options {

@@ -53,8 +53,12 @@ export abstract class Enemy extends Actor {
         this.addScript(this.shakeG.bind(this))
     }
 
-    *onDead(): Generator {
+    dispose() {
         this.gltfViewer.dispose()
+    }
+
+    *onDead(): Generator {
+        this.dispose()
 
         yield* remodel(this)
             .type("effect")

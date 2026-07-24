@@ -1,10 +1,80 @@
 #first {
+    position: relative;
+    width: 100%;
+    height: 100vh;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    grid-template-rows: auto 1fr auto;
 
-    height: 100%;
+    /* うっすらとした粒子ノイズで質感を出す */
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+            radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.03), transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(143, 174, 138, 0.05), transparent 45%);
+        pointer-events: none;
+    }
+
+    /* ===== 右側の縦メニュー ===== */
+    .options {
+        position: absolute;
+        right: 1em;
+        bottom: 2em;
+        z-index: 100;
+    }
+}
+
+/* ===== 上部メタ情報 ===== */
+.meta {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 36px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    z-index: 2;
+}
+
+/* ===== タイトル（あえて左端に寄せ、少しはみ出させる）===== */
+.title-wrap {
+    position: absolute;
+    left: -1em;
+    bottom: 1em;
+
+    display: flex;
+    align-items: flex-end;
+    z-index: 2;
+
+    pointer-events: none;
+}
+
+.title {
+    font-weight: 700;
+    font-size: 6em;
+    line-height: 0.86;
+    letter-spacing: -0.02em;
+    user-select: none;
+}
+
+/* ===== フッター ===== */
+.footnote {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    display: flex;
+    justify-content: space-between;
+    padding: 22px 36px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    z-index: 2;
 }
 
 #stages {

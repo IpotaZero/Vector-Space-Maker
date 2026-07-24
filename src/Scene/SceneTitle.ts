@@ -83,9 +83,7 @@ export class SceneTitle extends Scene {
             const mapData = (await fetch(`stages/test2.tmj`).then((res) => res.json())) as tiled.Map
             console.log(mapData)
 
-            const { SceneGame } = await import("./SceneGame")
-
-            sc.goto(new SceneGame(mapData))
+            sc.goto(async () => await import("./SceneGame").then(({ SceneGame }) => new SceneGame(mapData)))
             // sc.goto(new SceneGame(args.dataset.stage!))
         })
 

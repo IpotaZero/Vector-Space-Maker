@@ -17,7 +17,7 @@ export class SceneChanger {
         }
     }
 
-    async goto(newScene: Scene): Promise<void> {
+    async goto(newScene: () => Promise<Scene>): Promise<void> {
         if (this.isTransitioning) return
         this.isTransitioning = true
         this.onTransitionStart()
@@ -27,7 +27,7 @@ export class SceneChanger {
             await this.currentScene.end()
         }
 
-        this.currentScene = newScene
+        this.currentScene = await newScene()
         await this.currentScene.start()
         this.onTransitionEnd()
         this.isTransitioning = false

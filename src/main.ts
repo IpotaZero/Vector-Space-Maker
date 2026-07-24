@@ -34,8 +34,7 @@ window.addEventListener("keydown", (e) => {
 })
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const { SceneTitle } = await import("./Scene/SceneTitle.js")
-    sc.goto(new SceneTitle())
+    sc.goto(async () => await import("./Scene/SceneTitle.js").then(({ SceneTitle }) => new SceneTitle()))
 })
 
 export function focusesUpdater(pages: Pages) {
