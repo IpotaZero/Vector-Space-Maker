@@ -84,7 +84,11 @@ export class EnemyTest extends Enemy {
 
         yield* this.game.textBox.say(["おい！そこのお前！"], { name: "ボス" })
 
-        this.game.gltfViewer.hide()
+        this.game.gltfViewer.show("assets/3d/hare.gltf", {
+            scale: 2,
+            p: [-2, -1.5, -5],
+            rotateY: T / 12,
+        })
 
         yield* this.game.textBox.say(["..."], {
             name: "???",
