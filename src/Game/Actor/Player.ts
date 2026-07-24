@@ -77,18 +77,23 @@ export class Player extends Actor {
         if (input.isPressed("right")) {
             this.v = this.v.add(this.g.normal().scale(SPEED))
             this.direction = 1
-            this.gltfViewer.setRotationY(T / 8)
-        }
-        if (input.isPressed("left")) {
+            this.gltfViewer.setRotationY(-T / 8 - T / 4)
+            this.gltfViewer.playIdle("run", true)
+        } else if (input.isPressed("left")) {
             this.v = this.v.add(this.g.normal().scale(-SPEED))
             this.direction = -1
-            this.gltfViewer.setRotationY(-T / 8)
+            this.gltfViewer.setRotationY(T / 8 + T / 4)
+            this.gltfViewer.playIdle("run", true)
+        } else {
+            this.gltfViewer.playIdle("wait", true)
         }
 
         if (input.isPressed("jump")) {
             if (this.onFloor.includes(true)) {
                 this.jump()
                 this.onFloor = []
+
+                this.gltfViewer.playOnce("jump")
             } else if (this.canDoubleJump && !this.isJumping) {
                 this.jump()
                 this.canDoubleJump = false

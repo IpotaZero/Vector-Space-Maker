@@ -106,6 +106,7 @@ export class GltfViewer {
     /** 立ち絵を非表示にする */
     public hide(): void {
         this.canvas.style.display = "none"
+
         if (this.currentAction) {
             this.currentAction.stop()
         }
@@ -122,10 +123,14 @@ export class GltfViewer {
      * 待機アニメーション（無限ループ）を再生する。
      * 一時アニメーション再生中であっても、これを呼ぶと待機アニメーションに切り替わる。
      */
-    public playIdle(name?: string): void {
+    public playIdle(name?: string, everyFrame?: boolean): void {
         if (!this.mixer) return
         const clip = this.findClip(name)
         if (!clip) return
+
+        if (everyFrame && name === this.currentIdleName) {
+            return
+        }
 
         this.currentIdleName = name ?? clip.name
         this.isPlayingOnce = false
@@ -183,7 +188,7 @@ export class GltfViewer {
         clip: THREE.AnimationClip,
         loop: THREE.AnimationActionLoopStyles,
         clampWhenFinished: boolean = false,
-        fadeDuration: number = 0.5,
+        fadeDuration: number = 0.2,
     ): THREE.AnimationAction | null {
         if (!this.mixer) return null
 

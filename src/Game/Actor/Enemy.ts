@@ -27,9 +27,9 @@ export abstract class Enemy extends Actor {
     draw(ctx: CanvasRenderingContext2D) {
         this.frame++
 
-        Ctx.arc(ctx, this.p.l, 48, "#00000020", { lineWidth: 1 })
-        Ctx.polygon(ctx, 13, 3, this.p.l, 48 * 1.1, "#00000020", { lineWidth: 1, theta: this.frame / 60 })
-        Ctx.polygon(ctx, 9, 2, this.p.l, 48 * 0.6, "#00000020", { lineWidth: 1, theta: this.frame / 120 })
+        Ctx.arc(ctx, this.p.l, 96, "#00000020", { lineWidth: 1 })
+        Ctx.polygon(ctx, 13, 3, this.p.l, 96 * 1.1, "#00000020", { lineWidth: 1, theta: this.frame / 60 })
+        Ctx.polygon(ctx, 9, 2, this.p.l, 96 * 0.6, "#00000020", { lineWidth: 1, theta: this.frame / 120 })
 
         const w = this.game.width / 2
 

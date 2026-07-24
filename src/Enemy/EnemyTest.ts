@@ -87,7 +87,7 @@ export class EnemyTest extends Enemy {
         this.game.gltfViewer.show("assets/3d/hare.gltf", {
             scale: 1.5,
             p: [-2, -1.5, -5],
-            rotateY: T / 8 + T / 2,
+            rotateY: (T / 4) * 3,
             animationName: "wait",
         })
 
