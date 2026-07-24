@@ -11,7 +11,7 @@ export class EnemyTest extends Enemy {
 
         this.addScript(this.text.bind(this))
 
-        this.gltfViewer.show("assets/3d/bos.gltf", {
+        this.gltfViewer.show("assets/3d/C8.glb", {
             scale: 1,
             p: [0, 0, -5],
             rotateY: -T / 24,
