@@ -10,7 +10,7 @@ import { GltfViewer } from "../../utils/GltfViewer"
 
 const SKIN = 0.01 // 数値誤差対策のごく小さい押し戻し量
 const MAX_SLIDE_ITER = 4 // 1フレームあたりの最大スライド回数
-const SPEED = 4
+const SPEED = 3
 const JUMP = 48 * 0.3
 
 export class Player extends Actor {
@@ -22,7 +22,7 @@ export class Player extends Actor {
     private isJumping = false
     private canDoubleJump = true // 2段ジャンプの権利
 
-    private gltfViewer = new GltfViewer(200, 200)
+    private gltfViewer = new GltfViewer(300, 300)
 
     private readonly maxLife = 10
 
@@ -36,8 +36,8 @@ export class Player extends Actor {
 
         this.addScript(this.attack.bind(this), { loop: Infinity })
 
-        this.gltfViewer.show("assets/3d/hare.gltf", {
-            scale: 2,
+        this.gltfViewer.show("assets/3d/hare.glb", {
+            scale: 1.2,
             p: [0, 0, -5],
             rotateY: T / 8,
             animationName: "wait",
@@ -97,6 +97,8 @@ export class Player extends Actor {
             } else if (this.canDoubleJump && !this.isJumping) {
                 this.jump()
                 this.canDoubleJump = false
+
+                this.gltfViewer.playOnce("double-jump")
             }
         } else {
             // ジャンプキャンセル（小ジャンプ）の計算を簡略化
@@ -211,7 +213,7 @@ export class Player extends Actor {
         )
 
         this.gltfViewer.update()
-        ctx.drawImage(this.gltfViewer.canvas, this.p.x - 100, this.p.y - 100)
+        ctx.drawImage(this.gltfViewer.canvas, this.p.x - 150, this.p.y - 150 - 25)
     }
 
     hitSlash() {
@@ -223,6 +225,8 @@ export class Player extends Actor {
     private *attack() {
         // 遠距離
         if (this.game.input.isPushed("fire")) {
+            this.gltfViewer.playOnce("shot")
+
             yield* remodel(this)
                 .p(this.p)
                 .type("friend")
@@ -233,6 +237,8 @@ export class Player extends Actor {
 
         // 近距離(15frame)
         if (this.game.input.isPushed("slash")) {
+            this.gltfViewer.playOnce("slash")
+
             yield* remodel(this)
                 .damage(5)
                 .p(this.p.add(this.g.normal().scale(this.direction * 12)))

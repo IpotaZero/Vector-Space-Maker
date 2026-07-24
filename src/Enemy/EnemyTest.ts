@@ -7,7 +7,7 @@ import { T } from "../T"
 export class EnemyTest extends Enemy {
     constructor(game: GameLike) {
         super(game, 100, 96)
-        this.p = vec(800, 400)
+        this.p = vec(800, 600)
 
         this.addScript(this.text.bind(this))
 
@@ -33,16 +33,10 @@ export class EnemyTest extends Enemy {
         this.removeScript("attack0")
         this.removeScript("move0")
 
-        this.game.gltfViewer.show("assets/3d/bos.gltf", {
-            scale: 0.8,
-            p: [1.5, -1, -5],
-            rotateY: -T / 12,
-            animationName: "fluttering",
-        })
         yield* this.moveTo(vec(this.game.width - 200, 200), 120)
         yield* this.game.textBox.say(
             ["いちちっ！近寄るんじゃあないっ！", "決してXを押して遠距離攻撃なんかするなよな！"],
-            { name: "ボス" },
+            { name: "C8" },
         )
         this.game.gltfViewer.hide()
 
@@ -53,67 +47,38 @@ export class EnemyTest extends Enemy {
     *onDead(): Generator {
         yield* super.onDead()
 
-        this.game.gltfViewer.show("assets/3d/bos.gltf", {
-            scale: 0.8,
-            p: [1.5, -1, -5],
-            rotateY: -T / 12,
-            animationName: "fluttering",
-        })
         yield* Array(120)
 
         yield* this.game.textBox.say(
             [
                 "やーらーれーたーっ",
-                "……あんた、名前は？",
+                "あんた、名前は？",
                 "へえ、『ハレ』か。良い名前じゃん！",
-                "俺様は畜生の『ボス』！",
+                "俺の名前は『C8』！",
                 "獄卒が居るのはホントなんだけど……<br>ふぇっ、閻魔様に会いに行く？",
-                "なんかおもろそー、俺様もついていくかぁ！",
+                "なんかおもろそー、俺もついていくかぁ！",
             ],
-            { name: "ボス" },
+            { name: "C8" },
         )
     }
 
     private *text() {
-        this.game.gltfViewer.show("assets/3d/bos.gltf", {
-            scale: 0.8,
-            p: [1.5, -1, -5],
-            rotateY: -T / 12,
-            animationName: "fluttering",
-        })
-
-        yield* this.game.textBox.say(["おい！そこのお前！"], { name: "ボス" })
-
-        this.game.gltfViewer.show("assets/3d/hare.gltf", {
-            scale: 1.5,
-            p: [-2, -1.5, -5],
-            rotateY: (T / 4) * 3,
-            animationName: "wait",
-        })
+        yield* this.game.textBox.say(["おい！そこのお前！"], { name: "C8" })
 
         yield* this.game.textBox.say(["..."], {
             name: "???",
         })
 
-        this.game.gltfViewer.show("assets/3d/bos.gltf", {
-            scale: 0.8,
-            p: [1.5, -1, -5],
-            rotateY: -T / 12,
-            animationName: "fluttering",
-        })
-
         yield* this.game.textBox.say(
             [
                 "へっへっへ、この先は獄卒が見張ってるぜぇ。",
-                "俺様の忠告を無視するのかっ！？<br>生意気なヤツめっ。<br>やっつけてやる！",
+                "俺の忠告を無視するのかっ！？<br>生意気なヤツめっ。<br>やっつけてやる！",
                 "そこを動くんじゃあないぞ。決して矢印キーを押したりZを押したりするんじゃあないぞ！",
             ],
             {
-                name: "ボス",
+                name: "C8",
             },
         )
-
-        this.game.gltfViewer.hide()
 
         this.addScript(this.phase.bind(this))
     }

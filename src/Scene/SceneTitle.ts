@@ -87,6 +87,18 @@ export class SceneTitle extends Scene {
             // sc.goto(new SceneGame(args.dataset.stage!))
         })
 
+        this.pages.beforeEnter("records", async () => {
+            alert("notimplemented")
+        })
+
+        this.pages.beforeEnter("settings", async () => {
+            alert("notimplemented")
+        })
+
+        this.pages.beforeEnter("credits", async () => {
+            alert("notimplemented")
+        })
+
         // this.pages.beforeEnter("download", async () => {
         //     const mapData = await fetch(`stages/test.tmj`).then((res) => res.text())
         //     Files.downLoadString(mapData, "test", "tmj")
