@@ -68,12 +68,13 @@ export class Game extends GameNode {
         this.canvas.height = HEIGHT
 
         this.textBox = new TextBox(this.input)
-        this.gltfViewer = new GltfViewer(WIDTH / 3, HEIGHT / 3)
+        this.gltfViewer = new GltfViewer(WIDTH / 2, HEIGHT / 2)
     }
 
     dispose() {
         this.gltfViewer.dispose()
         this.enemies.forEach((e) => e.dispose())
+        this.player.dispose()
     }
 
     /** ステージを読み込み、初期状態をセットアップする */

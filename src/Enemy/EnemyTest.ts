@@ -6,7 +6,7 @@ import { T } from "../T"
 
 export class EnemyTest extends Enemy {
     constructor(game: GameLike) {
-        super(game, 100, 48)
+        super(game, 100, 96)
         this.p = vec(800, 400)
 
         this.addScript(this.text.bind(this))
@@ -85,9 +85,10 @@ export class EnemyTest extends Enemy {
         yield* this.game.textBox.say(["おい！そこのお前！"], { name: "ボス" })
 
         this.game.gltfViewer.show("assets/3d/hare.gltf", {
-            scale: 2,
+            scale: 1.5,
             p: [-2, -1.5, -5],
-            rotateY: T / 12,
+            rotateY: T / 8 + T / 2,
+            animationName: "wait",
         })
 
         yield* this.game.textBox.say(["..."], {

@@ -6,6 +6,7 @@ import { Actor } from "./Actor"
 import { T } from "../../T"
 import { remodel } from "../Remodel"
 import { GameLike } from "../Game"
+import { GltfViewer } from "../../utils/GltfViewer"
 
 const SKIN = 0.01 // 数値誤差対策のごく小さい押し戻し量
 const MAX_SLIDE_ITER = 4 // 1フレームあたりの最大スライド回数
@@ -21,6 +22,8 @@ export class Player extends Actor {
     private isJumping = false
     private canDoubleJump = true // 2段ジャンプの権利
 
+    private gltfViewer = new GltfViewer(200, 200)
+
     private readonly maxLife = 10
 
     /**最後に入力した方向 */
@@ -32,6 +35,17 @@ export class Player extends Actor {
         this.life = 10
 
         this.addScript(this.attack.bind(this), { loop: Infinity })
+
+        this.gltfViewer.show("assets/3d/hare.gltf", {
+            scale: 2,
+            p: [0, 0, -5],
+            rotateY: T / 8,
+            animationName: "wait",
+        })
+    }
+
+    dispose() {
+        this.gltfViewer.dispose()
     }
 
     update(): void {
@@ -63,10 +77,12 @@ export class Player extends Actor {
         if (input.isPressed("right")) {
             this.v = this.v.add(this.g.normal().scale(SPEED))
             this.direction = 1
+            this.gltfViewer.setRotationY(T / 8)
         }
         if (input.isPressed("left")) {
             this.v = this.v.add(this.g.normal().scale(-SPEED))
             this.direction = -1
+            this.gltfViewer.setRotationY(-T / 8)
         }
 
         if (input.isPressed("jump")) {
@@ -188,6 +204,9 @@ export class Player extends Actor {
                 lineWidth: 0,
             },
         )
+
+        this.gltfViewer.update()
+        ctx.drawImage(this.gltfViewer.canvas, this.p.x - 100, this.p.y - 100)
     }
 
     hitSlash() {

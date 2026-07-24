@@ -97,6 +97,12 @@ export class GltfViewer {
         this.playIdle(animationName)
     }
 
+    setRotationY(angle: number): void {
+        if (this.currentModel) {
+            this.currentModel.rotation.y = angle
+        }
+    }
+
     /** 立ち絵を非表示にする */
     public hide(): void {
         this.canvas.style.display = "none"

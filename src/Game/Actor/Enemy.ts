@@ -81,7 +81,7 @@ export abstract class Enemy extends Actor {
     }
 
     private *hitG() {
-        const r = 48
+        const r = 96
         const frame = 6
 
         for (let i = 1; i < frame + 1; i++) {
