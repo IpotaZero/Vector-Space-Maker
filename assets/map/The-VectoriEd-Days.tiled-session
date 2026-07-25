@@ -4,10 +4,13 @@
     ],
     "fileStates": {
         "Tutorial.tmj": {
+            "expandedObjectLayers": [
+                2
+            ],
             "scale": 0.2493,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 631.768953068592,
+                "x": 2408.7444845567593,
                 "y": 336.9434416365823
             }
         },

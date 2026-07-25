@@ -95,7 +95,7 @@ button {
 :focus,
 .nav-focus {
     outline: none;
-    background: #00000020;
+    background: #11111180 !important;
     border-radius: 0.1em;
 }
 

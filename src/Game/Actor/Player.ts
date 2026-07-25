@@ -200,18 +200,20 @@ export class Player extends Actor {
             fontFamily: "serif",
         })
 
-        const w = this.game.width / 4
+        if (this.game.isBossBattle) {
+            const w = this.game.width / 4
 
-        Ctx.rect(ctx, [64, 64], [w, 32], "#80808080", { lineWidth: 1 })
-        Ctx.rect(
-            ctx,
-            [64 + w * (this.life / this.maxLife), 64],
-            [w * (1 - this.life / this.maxLife), 32],
-            "#80808080",
-            {
-                lineWidth: 0,
-            },
-        )
+            Ctx.rect(ctx, [64, 64], [w, 32], "#80808080", { lineWidth: 1 })
+            Ctx.rect(
+                ctx,
+                [64 + w * (this.life / this.maxLife), 64],
+                [w * (1 - this.life / this.maxLife), 32],
+                "#80808080",
+                {
+                    lineWidth: 0,
+                },
+            )
+        }
 
         this.gltfViewer.update()
 

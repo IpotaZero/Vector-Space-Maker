@@ -1,5 +1,5 @@
 import * as tiled from "@kayahr/tiled"
-import { Stage } from "./Stage.js"
+import { TiledStage } from "./TiledStage.js"
 import { Edge } from "./movable/Edge.js"
 import { GoalZone } from "./movable/zone/GoalZone.js"
 import { GravityZone } from "./movable/zone/GravityZone.js"
@@ -8,7 +8,7 @@ import { TextObject } from "./movable/TextObject.js"
 import { Movable } from "./movable/Movable.js"
 import { Vec, vec } from "@ipota/vec"
 
-export async function loadStageFromUrl(url: string): Promise<Stage> {
+export async function loadStageFromUrl(url: string): Promise<TiledStage> {
     const response = await fetch(url)
     // JSON全体を tiled.Map 型としてキャスト
     const mapData = (await response.json()) as tiled.Map
@@ -16,7 +16,7 @@ export async function loadStageFromUrl(url: string): Promise<Stage> {
     return loadStageFromMapData(mapData)
 }
 
-export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
+export async function loadStageFromMapData(mapData: tiled.Map): Promise<TiledStage> {
     const movables: Movable[] = []
     let start = { x: 0, y: 0 }
 
@@ -166,5 +166,5 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<Stage> {
         }
     }
 
-    return new Stage(mapData.width * mapData.tilewidth, mapData.height * mapData.tileheight, movables, start)
+    return new TiledStage(mapData.width * mapData.tilewidth, mapData.height * mapData.tileheight, movables, start)
 }

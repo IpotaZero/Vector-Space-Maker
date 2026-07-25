@@ -24,7 +24,12 @@ export class Camera extends Actor {
     update() {
         super.update()
 
-        this.updatePosition(this.game.player.g, this.game.player.p)
+        if (this.game.isBossBattle) {
+            this.updatePosition(this.game.player.g, vec(this.game.width / 2, this.game.height / 2))
+        } else {
+            this.updatePosition(this.game.player.g, this.game.player.p)
+        }
+
         this.updateRotate(this.game.player.g)
     }
 

@@ -5,12 +5,13 @@ import { input } from "../input"
 import { Pages } from "@ipota/pages"
 import { Scene } from "../utils/Scene/Scene"
 import * as tiled from "@kayahr/tiled"
+import { Stage } from "../Stage/Stage"
 
 export class SceneGame extends Scene {
     private game!: Game
     private pages = new Pages()
 
-    constructor(private readonly mapData: tiled.Map) {
+    constructor(private readonly stage: Stage) {
         super()
 
         focusesUpdater(this.pages)
@@ -20,14 +21,14 @@ export class SceneGame extends Scene {
         await this.pages.loadFromFile(Dom.container, "assets/pages/game/index.html")
 
         this.pages.beforeEnter("retry", async () => {
-            sc.goto(async () => new SceneGame(this.mapData))
+            sc.goto(async () => new SceneGame(this.stage))
         })
 
         this.pages.beforeEnter("next", async () => {
             sc.goto(async () => await import("./SceneTitle").then(({ SceneTitle }) => new SceneTitle()))
         })
 
-        this.game = new Game(this.pages.getElement("#main", HTMLCanvasElement), input, () => {
+        this.game = new Game(this.stage, this.pages.getElement("#main", HTMLCanvasElement), input, () => {
             this.pages.enter("clear")
         })
 
@@ -38,7 +39,7 @@ export class SceneGame extends Scene {
         Dom.container.appendChild(this.game.textBox.box)
         Dom.container.appendChild(this.game.gltfViewer.canvas)
 
-        await this.game.loadFromMapData(this.mapData)
+        await this.game.loadFromMapData(await this.stage.getMapData())
     }
 
     update() {

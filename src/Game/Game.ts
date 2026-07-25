@@ -1,6 +1,6 @@
 import { Camera } from "./Actor/Camera"
 import { loadStageFromMapData, loadStageFromUrl } from "./loadStageFromJson"
-import { Stage } from "./Stage"
+import { TiledStage } from "./TiledStage"
 import { DigitalInput } from "@ipota/input"
 import * as tiled from "@kayahr/tiled"
 import { Zone } from "./movable/zone/Zone"
@@ -11,12 +11,12 @@ import { Enemy } from "./Actor/Enemy"
 import { Bullet } from "./Actor/Bullet"
 import { BulletDrawer } from "./BulletDrawer"
 import { BulletCollision } from "./BulletCollision"
-import { EnemyTest } from "../Enemy/EnemyTest"
 import { Ctx } from "../utils/Functions/Ctx"
 import { TextBox } from "../utils/TextBox"
 import { GameNode } from "./GameNode"
 import { looper } from "../looper"
 import { GltfViewer } from "../utils/GltfViewer"
+import { Stage } from "../Stage/Stage"
 
 const WIDTH = 32 * 40
 const HEIGHT = 32 * 24
@@ -30,6 +30,8 @@ export type GameLike = {
     readonly height: number
     readonly textBox: TextBox
     readonly gltfViewer: GltfViewer
+    isBossBattle: boolean
+    onFinish: () => void
 }
 
 /**
@@ -39,12 +41,14 @@ export class Game extends GameNode {
     private readonly canvas: HTMLCanvasElement
     private readonly ctx: CanvasRenderingContext2D
 
-    private stage!: Stage
+    private tiledStage!: TiledStage
     player!: Player
     camera!: Camera
 
     enemies: Enemy[] = []
     bullets: Bullet[] = []
+
+    isBossBattle = false
 
     readonly textBox: TextBox
     readonly gltfViewer: GltfViewer
@@ -53,6 +57,7 @@ export class Game extends GameNode {
     private bulletCollision = new BulletCollision()
 
     constructor(
+        private readonly stage: Stage,
         canvas: HTMLCanvasElement,
         readonly input: DigitalInput.Reader<"right" | "left" | "jump" | "fire" | "ok" | "cancel">,
         readonly onFinish: () => void,
@@ -79,26 +84,28 @@ export class Game extends GameNode {
 
     /** ステージを読み込み、初期状態をセットアップする */
     async loadFromMapData(mapData: tiled.Map): Promise<void> {
-        this.stage = await loadStageFromMapData(mapData)
+        this.tiledStage = await loadStageFromMapData(mapData)
         this.camera = new Camera(this, vec(WIDTH / 2, HEIGHT / 2))
         this.reset()
     }
 
     get width() {
-        return this.stage.width
+        return this.tiledStage.width
     }
 
     get height() {
-        return this.stage.height
+        return this.tiledStage.height
     }
 
     private reset(): void {
-        this.player = new Player(this, vec(this.stage.start.x, this.stage.start.y))
+        this.player = new Player(this, vec(this.tiledStage.start.x, this.tiledStage.start.y))
         this.camera.scale = 1
 
         this.scripts.clear()
         this.enemies = []
         this.bullets = []
+
+        this.addScript(this.stage.setup.bind(this.stage, this))
 
         // this.enemies.push(new EnemyTest(this))
     }
@@ -125,11 +132,11 @@ export class Game extends GameNode {
     }
 
     private updateMovables(): void {
-        this.stage.movables.forEach((movable) => movable.update())
+        this.tiledStage.movables.forEach((movable) => movable.update())
     }
 
     private handleZoneEnter(): void {
-        this.stage.movables
+        this.tiledStage.movables
             .filter((obj) => obj instanceof Zone)
             .forEach((zone) => {
                 if (zone.contains(this.player.p)) {
@@ -195,7 +202,7 @@ export class Game extends GameNode {
     private updatePlayer(): void {
         this.player.move(this.input)
         this.player.update()
-        this.player.resolveCollisions(this.stage.movables.filter((obj) => obj instanceof Edge))
+        this.player.resolveCollisions(this.tiledStage.movables.filter((obj) => obj instanceof Edge))
     }
 
     private updateCamera(): void {
@@ -203,7 +210,7 @@ export class Game extends GameNode {
     }
 
     private restartIfOutOfBounds(): void {
-        const stage = this.stage
+        const stage = this.tiledStage
 
         // ステージ外に落ちたらリスタート
         if (
@@ -217,7 +224,7 @@ export class Game extends GameNode {
     }
 
     private draw(): void {
-        const stage = this.stage
+        const stage = this.tiledStage
         const ctx = this.ctx
 
         ctx.save()

@@ -2,11 +2,12 @@ import { Dom } from "../Dom"
 import { Pages } from "@ipota/pages"
 import { Scene } from "../utils/Scene/Scene"
 import { focuses, focusesUpdater, sc } from "../main"
-import { Files } from "@ipota/functions"
-import * as tiled from "@kayahr/tiled"
+import { GltfViewer } from "../utils/GltfViewer"
+import { T } from "../T"
 
 export class SceneTitle extends Scene {
     private pages = new Pages()
+    private gltfViewer = new GltfViewer(window.innerWidth, window.innerHeight)
 
     constructor() {
         super()
@@ -14,10 +15,20 @@ export class SceneTitle extends Scene {
         focusesUpdater(this.pages)
     }
 
-    update() {}
+    update() {
+        this.gltfViewer.update()
+    }
 
     async start(): Promise<void> {
         await this.pages.loadFromFile(Dom.container, "assets/pages/title/index.html")
+
+        this.pages.getPage("first").appendChild(this.gltfViewer.canvas)
+        this.gltfViewer.show("assets/3d/Hare.glb", {
+            animationName: "wait",
+            scale: 3,
+            p: [2, -1, -5],
+            rotateY: T / 2,
+        })
 
         this.pages.setTransition("first", "stages", {
             from: async ({ from }) => {
@@ -73,7 +84,7 @@ export class SceneTitle extends Scene {
             crossfade: true,
         })
 
-        const stages = ["tutorial", "test2"]
+        const stages = ["Tutorial", "Test"]
 
         stages.forEach((stage) => {
             this.pages
@@ -81,11 +92,14 @@ export class SceneTitle extends Scene {
                 .insertAdjacentHTML("beforeend", `<button data-link="stage-${stage}">${stage}</button>`)
 
             this.pages.beforeEnter(`stage-${stage}`, async () => {
-                const mapData = (await fetch(`stages/${stage}.tmj`).then((res) => res.json())) as tiled.Map
-                console.log(mapData)
-
-                sc.goto(async () => await import("./SceneGame").then(({ SceneGame }) => new SceneGame(mapData)))
-                // sc.goto(new SceneGame(args.dataset.stage!))
+                sc.goto(async () => {
+                    // @ts-ignore
+                    const modules = import.meta.glob("../Stage/*")
+                    const url = `../Stage/Stage${stage}.ts`
+                    const cls = await modules[url]()
+                    const { SceneGame } = await import("./SceneGame")
+                    return new SceneGame(new cls.default())
+                })
             })
         })
 
@@ -123,5 +137,6 @@ export class SceneTitle extends Scene {
 
     async end(): Promise<void> {
         this.pages.dispose()
+        this.gltfViewer.dispose()
     }
 }
