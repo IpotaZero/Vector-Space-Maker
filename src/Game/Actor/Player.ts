@@ -1,29 +1,30 @@
 import { Ctx } from "../../utils/Functions/Ctx"
 import { DigitalInput } from "@ipota/input"
 import { vec, Vec } from "@ipota/vec"
-import { Edge } from "../movable/Edge"
 import { Actor } from "./Actor"
 import { T } from "../../T"
 import { remodel } from "../Remodel"
 import { GameLike } from "../Game"
 import { GltfViewer } from "../../utils/GltfViewer"
-import { se } from "../../se"
+import { Physics } from "../Physics"
 
-const SKIN = 0.01 // 数値誤差対策のごく小さい押し戻し量
-const MAX_SLIDE_ITER = 4 // 1フレームあたりの最大スライド回数
 const SPEED = 3
 const JUMP = 48 * 0.3
 
 export class Player extends Actor {
+    private physics: Physics = new Physics(this.game, this, () => {
+        this.onFloor.push(true)
+        this.canDoubleJump = true // 着地時に2段ジャンプを回復
+    })
+
+    g: Vec = vec(0, 0.7)
     v: Vec = vec(0, 0)
-    /** 重力(向きと強さ)。初期値はGame既定値をコピーし、以後はこのActor自身の状態として持つ */
-    g: Vec
 
     private onFloor: boolean[] = []
-    private rotation = 0
     private isJumping = false
     private canDoubleJump = true // 2段ジャンプの権利
 
+    private rotation = 0
     private gltfViewer = new GltfViewer(300, 300)
 
     private readonly maxLife = 10
@@ -33,12 +34,11 @@ export class Player extends Actor {
 
     constructor(game: GameLike, start: Vec) {
         super(game)
-        this.g = game.g
         this.p = start
         this.life = 10
 
         this.addScript(this.attack.bind(this), { loop: Infinity })
-        this.addScript(this.physics.bind(this), { loop: Infinity, id: "physics" })
+        this.addScript(this.physicsUpdate.bind(this), { loop: Infinity, id: "physics" })
 
         this.gltfViewer.show("assets/3d/hare.glb", {
             scale: 1.2,
@@ -56,29 +56,13 @@ export class Player extends Actor {
      * 物理演算(重力の積分・摩擦・衝突解決)を毎フレーム行うスクリプト。
      * addScriptで登録され、loop: Infinityにより毎フレーム再実行される。
      */
-    private *physics() {
+    private *physicsUpdate() {
         this.onFloor = this.onFloor.slice(-6)
-        this.v = this.v.add(this.g) // 重力の加算
-        this.rotation += this.v.dot(this.g.normal()) / 36
         this.onFloor.push(false)
 
-        // 重力方向の単位ベクトル
-        const gDir = this.g.normalize()
-        // 垂直方向と水平方向の速度成分に分解
-        const vUp = gDir.scale(this.v.dot(gDir))
-        const vHorizontal = this.v.sub(vUp)
+        this.rotation += this.v.dot(this.g.normal()) / 36
 
-        // 水平方向にのみ強い摩擦（例えば0.7など）をかける
-        // ※onFloor配列を使って空中と地上の摩擦を変えるのも効果的です
-        const newVHorizontal = vHorizontal.scale(0.7)
-
-        // 垂直方向には軽い空気抵抗（終端速度の調整用）をかけるか、そのままにする
-        const newVUp = vUp.scale(0.99)
-
-        // 再合成
-        this.v = newVHorizontal.add(newVUp)
-
-        this.resolveCollisions()
+        this.physics.update()
 
         yield
     }
@@ -125,80 +109,6 @@ export class Player extends Actor {
         // 現在の垂直速度を消去してからジャンプ力を加える（落下中の2段ジャンプ対策）
         this.v = this.v.sub(gDir.scale(this.v.dot(gDir))).add(gDir.scale(-JUMP))
         this.isJumping = true
-    }
-
-    /**
-     * 現在の速度をもとに、衝突を解決しながら実際に this.p を進める。
-     * 1フレーム内で複数回当たっても、常に「最も早い衝突」だけを採用し、
-     * 残りの移動量でスライドを続けることで、引っかかりを防ぐ。
-     */
-    private resolveCollisions(): void {
-        const floors = this.game.floor
-
-        let start = this.p
-        let remaining = this.v // このフレームで進むべき残り移動量
-
-        for (let i = 0; i < MAX_SLIDE_ITER; i++) {
-            const end = start.add(remaining)
-
-            let closest: { t: number; point: Vec; floor: Edge } | null = null
-
-            // 最も早く衝突する床を探す
-            for (const floor of floors) {
-                // 【変更】床の移動量(dp)を考慮し、相対的な移動開始位置を計算して判定する
-                const relStart = start.add(floor.dp)
-                const hit = floor.getSweepHit(relStart, end)
-                if (!hit) continue
-                if (!closest || hit.t < closest.t) {
-                    closest = { ...hit, floor }
-                }
-            }
-
-            // 衝突がなければ残り移動量をそのまま適用して終了
-            if (!closest) {
-                start = end
-                break
-            }
-
-            const { point, floor } = closest
-            const normal = floor.vec().normal() // 常にEdgeの左側（表側）を向く法線
-
-            // 移動開始地点がEdgeの右側(裏側)だったか判定
-            // (法線は左側を向いているため、内積が負なら右側にいたことになる)
-            const q = start.sub(floor.start)
-            const isFromRightSide = q.dot(normal) < 0
-
-            // 床判定
-            const verticality = floor.vec().normalize().cross(this.g.normalize())
-            if (verticality >= 0.2) {
-                this.onFloor.push(true)
-                this.canDoubleJump = true // 着地時に2段ジャンプを回復
-            }
-
-            // 速度成分の打ち消し（速度を殺す）
-            const vn = this.v.dot(normal)
-            // 左からの衝突(vn < 0)、または右からのすり抜け吸着(isFromRightSide && vn > 0)の場合
-            if (vn < 0 || (isFromRightSide && vn > 0)) {
-                this.v = this.v.sub(normal.scale(vn))
-            }
-
-            // 残り移動量からも成分を除去(スライド または 吸着)
-            // ※元コードの斜め衝突時のバグを修正するため、残りの移動量(unconsumed)を基に再計算しています
-            const unconsumed = end.sub(point)
-            const un = unconsumed.dot(normal)
-            if (un < 0 || (isFromRightSide && un > 0)) {
-                remaining = unconsumed.sub(normal.scale(un))
-            } else {
-                remaining = unconsumed
-            }
-
-            // 常にEdgeの左側(表側)へSKIN分押し戻す
-            // 左からぶつかった場合は「めり込み防止」として機能し、
-            // 右から接触した場合は「すり抜けた直後に表側に吸着」として機能する
-            start = point.add(normal.scale(SKIN))
-        }
-
-        this.p = start
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
