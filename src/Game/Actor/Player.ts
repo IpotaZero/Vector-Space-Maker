@@ -16,7 +16,8 @@ const JUMP = 48 * 0.3
 
 export class Player extends Actor {
     v: Vec = vec(0, 0)
-    g: Vec = vec(0, 0.7)
+    /** 重力(向きと強さ)。初期値はGame既定値をコピーし、以後はこのActor自身の状態として持つ */
+    g: Vec
 
     private onFloor: boolean[] = []
     private rotation = 0
@@ -32,10 +33,12 @@ export class Player extends Actor {
 
     constructor(game: GameLike, start: Vec) {
         super(game)
+        this.g = game.g
         this.p = start
         this.life = 10
 
         this.addScript(this.attack.bind(this), { loop: Infinity })
+        this.addScript(this.physics.bind(this), { loop: Infinity, id: "physics" })
 
         this.gltfViewer.show("assets/3d/hare.glb", {
             scale: 1.2,
@@ -49,9 +52,11 @@ export class Player extends Actor {
         this.gltfViewer.dispose()
     }
 
-    update(): void {
-        super.update()
-
+    /**
+     * 物理演算(重力の積分・摩擦・衝突解決)を毎フレーム行うスクリプト。
+     * addScriptで登録され、loop: Infinityにより毎フレーム再実行される。
+     */
+    private *physics() {
         this.onFloor = this.onFloor.slice(-6)
         this.v = this.v.add(this.g) // 重力の加算
         this.rotation += this.v.dot(this.g.normal()) / 36
@@ -72,6 +77,10 @@ export class Player extends Actor {
 
         // 再合成
         this.v = newVHorizontal.add(newVUp)
+
+        this.resolveCollisions()
+
+        yield
     }
 
     move(input: DigitalInput.Reader<"left" | "right" | "jump">): void {
@@ -123,7 +132,9 @@ export class Player extends Actor {
      * 1フレーム内で複数回当たっても、常に「最も早い衝突」だけを採用し、
      * 残りの移動量でスライドを続けることで、引っかかりを防ぐ。
      */
-    resolveCollisions(floors: Edge[]): void {
+    private resolveCollisions(): void {
+        const floors = this.game.floor
+
         let start = this.p
         let remaining = this.v // このフレームで進むべき残り移動量
 

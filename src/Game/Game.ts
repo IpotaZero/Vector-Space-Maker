@@ -20,6 +20,9 @@ import { createEnemy } from "../Enemy/createEnemy"
 const WIDTH = 32 * 40
 const HEIGHT = 32 * 24
 
+/** ステージの既定の重力。個々のActorはこれを初期値としてコピーし、以後は自分の状態として持つ */
+const DEFAULT_GRAVITY = vec(0, 0.7)
+
 export type GameLike = {
     readonly player: Player
     readonly enemies: Enemy[]
@@ -29,6 +32,10 @@ export type GameLike = {
     readonly height: number
     readonly textBox: TextBox
     readonly gltfViewer: GltfViewer
+    /** 衝突判定の対象となる床・壁のEdge一覧 */
+    readonly floor: Edge[]
+    /** ステージ既定の重力(向きと強さ) */
+    readonly g: Vec
     isBossBattle: boolean
     onFinish: () => void
 }
@@ -96,6 +103,14 @@ export class Game extends GameNode {
 
     get isBossBattle() {
         return this.stage.isBossBattle
+    }
+
+    get floor(): Edge[] {
+        return this.stage.movables.filter((obj): obj is Edge => obj instanceof Edge)
+    }
+
+    get g(): Vec {
+        return DEFAULT_GRAVITY
     }
 
     private reset(): void {
@@ -214,7 +229,6 @@ export class Game extends GameNode {
     private updatePlayer(): void {
         this.player.move(this.input)
         this.player.update()
-        this.player.resolveCollisions(this.stage.movables.filter((obj) => obj instanceof Edge))
     }
 
     private updateCamera(): void {
