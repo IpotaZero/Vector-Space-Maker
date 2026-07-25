@@ -190,9 +190,10 @@ export class Player extends Actor {
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
-        Ctx.polygon(ctx, 8, 2, this.p.l, 24, "#111", { theta: this.rotation / 2, lineWidth: 0.5 })
-        Ctx.arc(ctx, this.p.l, 8, "#111", { lineWidth: 0.5 })
-        Ctx.text(ctx, this.p.l, "#111", "罪", {
+        const center = this.p.add(this.g.normalize().scale(-40))
+        Ctx.polygon(ctx, 8, 2, center.l, 48, "#1114", { theta: this.rotation / 32, lineWidth: 0.5 })
+        Ctx.arc(ctx, center.l, 16, "#1114", { lineWidth: 0.5 })
+        Ctx.text(ctx, center.l, "#111", "罪", {
             align: "center",
             baseline: "middle",
             fontSize: 0.5,
@@ -213,7 +214,12 @@ export class Player extends Actor {
         )
 
         this.gltfViewer.update()
-        ctx.drawImage(this.gltfViewer.canvas, this.p.x - 150, this.p.y - 150 - 25)
+
+        ctx.save()
+        ctx.translate(this.p.x, this.p.y)
+        ctx.rotate(this.g.radian() - T / 4)
+        ctx.drawImage(this.gltfViewer.canvas, -150, -150 - 20)
+        ctx.restore()
     }
 
     hitSlash() {
@@ -228,7 +234,7 @@ export class Player extends Actor {
             this.gltfViewer.playOnce("shot")
 
             yield* remodel(this)
-                .p(this.p)
+                .p(this.p.add(this.g.normalize().scale(-40)))
                 .type("friend")
                 .radian(this.g.radian() + (-T / 4) * this.direction)
                 .speed(28)
@@ -240,14 +246,15 @@ export class Player extends Actor {
             this.gltfViewer.playOnce("slash")
 
             yield* remodel(this)
+                .alpha(0)
                 .damage(5)
-                .p(this.p.add(this.g.normal().scale(this.direction * 12)))
                 .type("friend")
                 .speed(0)
-                .r(this.r * 6)
+                .r(this.r * 12)
                 .g(function* (me) {
+                    me.alpha = 1
                     for (let i = 0; i < 15; i++) {
-                        me.p = this.p.add(this.g.normal().scale(this.direction * 12))
+                        me.p = this.p.add(this.g.normal().scale(this.direction * 32)).add(this.g.normalize().scale(-40))
                         yield
                     }
                     me.life = 0

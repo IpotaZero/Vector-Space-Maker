@@ -100,7 +100,7 @@ export class Game extends GameNode {
         this.enemies = []
         this.bullets = []
 
-        this.enemies.push(new EnemyTest(this))
+        // this.enemies.push(new EnemyTest(this))
     }
 
     update(): void {
@@ -119,9 +119,9 @@ export class Game extends GameNode {
 
         this.draw()
 
-        if (this.enemies.length === 0 && this.scripts.size === 0) {
-            this.onFinish()
-        }
+        // if (this.enemies.length === 0 && this.scripts.size === 0) {
+        //     this.onFinish()
+        // }
     }
 
     private updateMovables(): void {

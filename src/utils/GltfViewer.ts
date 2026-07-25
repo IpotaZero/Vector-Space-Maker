@@ -18,6 +18,7 @@ export class GltfViewer {
     private currentIdleName: string | undefined = undefined
     // 一時アニメーション（ワンショット）を再生中かどうか
     private isPlayingOnce: boolean = false
+    private canOverrideOnce: boolean = true
     // 一時アニメーション終了時のmixerイベントリスナー（後片付け用）
     private onOnceFinished: ((event: { action: THREE.AnimationAction }) => void) | null = null
 
@@ -143,15 +144,19 @@ export class GltfViewer {
      * 一時アニメーション（ワンショット）を一度だけ再生し、終了したら
      * 自動的に現在の待機アニメーションへ戻る。
      * @param name 再生する一時アニメーションのクリップ名
-     * @param onFinish 一時アニメーション終了時に呼ばれるコールバック（任意）
      */
-    public playOnce(name: string, onFinish?: () => void): void {
+    public playOnce(name: string, { canOverride = true }: { canOverride?: boolean } = {}): void {
         if (!this.mixer) return
         const clip = this.findClip(name)
         if (!clip) return
 
+        if (this.isPlayingOnce && !this.canOverrideOnce) {
+            return
+        }
+
         this.cleanupOnceListener()
         this.isPlayingOnce = true
+        this.canOverrideOnce = canOverride
 
         // 一時アニメーションへは即座に切り替える（ブレンドしない）
         const action = this.crossFadeTo(clip, THREE.LoopOnce, true, 0)
@@ -167,7 +172,6 @@ export class GltfViewer {
             if (!this.isPlayingOnce) return
 
             this.isPlayingOnce = false
-            onFinish?.()
             this.playIdle(this.currentIdleName)
         }
 

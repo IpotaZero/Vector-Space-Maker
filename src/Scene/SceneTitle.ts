@@ -73,19 +73,23 @@ export class SceneTitle extends Scene {
             crossfade: true,
         })
 
-        this.pages
-            .getElement("#stage-buttons")
-            .insertAdjacentHTML("beforeend", `<button data-link="stage-${"test"}">${"test"}</button>`)
+        const stages = ["tutorial", "test2"]
+
+        stages.forEach((stage) => {
+            this.pages
+                .getElement("#stage-buttons")
+                .insertAdjacentHTML("beforeend", `<button data-link="stage-${stage}">${stage}</button>`)
+
+            this.pages.beforeEnter(`stage-${stage}`, async () => {
+                const mapData = (await fetch(`stages/${stage}.tmj`).then((res) => res.json())) as tiled.Map
+                console.log(mapData)
+
+                sc.goto(async () => await import("./SceneGame").then(({ SceneGame }) => new SceneGame(mapData)))
+                // sc.goto(new SceneGame(args.dataset.stage!))
+            })
+        })
 
         focuses.setPage(this.pages.getCurrentPage())
-
-        this.pages.beforeEnter("stage-test", async () => {
-            const mapData = (await fetch(`stages/test2.tmj`).then((res) => res.json())) as tiled.Map
-            console.log(mapData)
-
-            sc.goto(async () => await import("./SceneGame").then(({ SceneGame }) => new SceneGame(mapData)))
-            // sc.goto(new SceneGame(args.dataset.stage!))
-        })
 
         this.pages.beforeEnter("records", async () => {
             alert("notimplemented")

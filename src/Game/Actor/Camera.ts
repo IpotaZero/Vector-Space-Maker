@@ -24,7 +24,7 @@ export class Camera extends Actor {
     update() {
         super.update()
 
-        this.updatePosition(this.game.player.g, vec(this.game.width / 2, this.game.height / 2))
+        this.updatePosition(this.game.player.g, this.game.player.p)
         this.updateRotate(this.game.player.g)
     }
 
@@ -51,7 +51,7 @@ export class Camera extends Actor {
         // 重力方向が常に画面の「下」を向くように回転させる（既存の処理）
         const targetAngle = Math.PI / 2 - gravity.radian()
         const diffAngle = normalizeAngle(targetAngle - this.angle)
-        this.angle += diffAngle * 0.1
+        this.angle += diffAngle * 0.05
     }
 
     // ctx をカメラ視点に合わせて変換する

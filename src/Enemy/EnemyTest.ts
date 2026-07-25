@@ -84,35 +84,32 @@ export class EnemyTest extends Enemy {
     }
 
     private *attack0() {
-        // yield* remodel(this)
-        //     .p(this.p.clone())
-        //     .aim(this.game.player.p)
-        //     .appearance("arrow")
-        //     .collision("arrow")
-        //     .r(28)
-        //     .ex(13)
-        //     .delayByIndex()
-        //     .g(function* (me, index) {
-        //         yield* Remodel.stop(me, 30)
-        //         yield* Array(31 - index)
-        //         yield* Remodel.ease(me, "radian", this.game.player.p.sub(me.p).radian(), 30)
-        //         yield* Remodel.accel(me, 30, 48)
-        //     })
-        //     .fire(this.game.bullets)
+        this.gltfViewer.playOnce("charge", { canOverride: false })
+        yield* Array(120)
 
-        // yield* remodel(this).p(this.p.clone()).beam(this.game.width).fire(this.game.bullets)
+        yield* remodel(this)
+            .p(this.p.clone())
+            .radian(T / 2)
+            .beam(this.game.width)
+            .r(32)
+            .g(function* (me) {
+                yield* Array(60)
+                yield* Remodel.fadeout(me, 30)
+            })
+            .fire(this.game.bullets)
 
         yield* Array(300)
     }
 
     private *move0() {
-        yield* this.moveTo(vec((this.game.width / 4) * 3, this.game.height / 4), 60)
-        yield* Array(60)
-        yield* this.moveTo(vec(this.game.width / 4, this.game.height / 4), 60)
-        yield* Array(60)
+        yield* this.moveTo(vec((this.game.width / 4) * 3.5, (this.game.height / 4) * 3.5), 60)
+        yield* Array(120)
     }
 
     private *attack1() {
+        this.gltfViewer.playOnce("charge", { canOverride: false })
+        yield* Array(120)
+
         for (let i = 0; i < 4; i++)
             yield* remodel(this)
                 .collision("arrow")
@@ -135,6 +132,8 @@ export class EnemyTest extends Enemy {
         yield* Array(180)
 
         for (let i = 0; i < 4; i++) {
+            this.gltfViewer.playOnce("charge-short", { canOverride: false })
+
             yield* remodel(this)
                 .damage(3)
                 .p(this.p.clone())
@@ -143,10 +142,10 @@ export class EnemyTest extends Enemy {
                 .nway(23, T / 24)
                 .fire(this.game.bullets)
 
-            yield* Array(60)
+            yield* Array(45)
         }
 
-        yield* Array(300)
+        yield* Array(180)
     }
 
     private *move1() {
