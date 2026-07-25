@@ -7,6 +7,7 @@ import { T } from "../../T"
 import { remodel } from "../Remodel"
 import { GameLike } from "../Game"
 import { GltfViewer } from "../../utils/GltfViewer"
+import { se } from "../../se"
 
 const SKIN = 0.01 // 数値誤差対策のごく小さい押し戻し量
 const MAX_SLIDE_ITER = 4 // 1フレームあたりの最大スライド回数

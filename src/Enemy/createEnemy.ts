@@ -6,8 +6,6 @@ import { GameLike } from "../Game/Game"
 // @ts-ignore
 const modules = import.meta.glob<Record<string, unknown>>("./*.ts", { eager: true })
 
-console.log("[createEnemy] modules:", modules)
-
 /**
  * Tiledの "enemy" プロパティ（クラス名の文字列）から、対応する
  * Enemyサブクラスをインスタンス化する。

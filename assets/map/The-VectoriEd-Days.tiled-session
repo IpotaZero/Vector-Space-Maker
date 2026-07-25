@@ -18,7 +18,7 @@
             "scale": 0.20286458333333332,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1441.8485237483953,
+                "x": 1468.9602053915278,
                 "y": 320.4107830551991
             }
         },
@@ -31,10 +31,13 @@
             }
         },
         "道中-0.tmj": {
+            "expandedObjectLayers": [
+                2
+            ],
             "scale": 0.2852783203125,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1025.3145057766367,
+                "x": 634.4681215233206,
                 "y": 385.58836114676944
             }
         }
@@ -45,7 +48,7 @@
     "openFiles": [
     ],
     "project": "The-VectoriEd-Days.tiled-project",
-    "property.type": "file",
+    "property.type": "float",
     "recentFiles": [
     ]
 }

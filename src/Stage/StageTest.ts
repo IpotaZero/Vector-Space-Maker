@@ -1,3 +1,4 @@
+import { bm } from "../bm"
 import { GameLike } from "../Game/Game"
 import { Stage } from "./Stage"
 

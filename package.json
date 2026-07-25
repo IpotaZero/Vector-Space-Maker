@@ -1,5 +1,6 @@
 {
     "dependencies": {
+        "@ipota/bgm-manager": "^1.0.3",
         "@ipota/focuses": "^1.0.1",
         "@ipota/functions": "^1.0.4",
         "@ipota/input": "^1.0.1",

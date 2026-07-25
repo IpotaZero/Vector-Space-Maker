@@ -4,11 +4,19 @@ import { Focuses } from "@ipota/focuses"
 import { Pages } from "@ipota/pages"
 import { looper } from "./looper.js"
 import { input } from "./input.js"
+import { se } from "./se.js"
 
-Dom.init()
+document.addEventListener("DOMContentLoaded", async () => {
+    await se.load()
+
+    looper.start()
+
+    sc.goto(async () => await import("./Scene/SceneTitle.js").then(({ SceneTitle }) => new SceneTitle()))
+})
 
 export const focuses = new Focuses(input)
 
+Dom.init()
 export const sc = new SceneChanger(Dom.container)
 
 sc.onTransitionStart = () => {
@@ -27,14 +35,8 @@ looper.addHandler((timeScale) => {
     input.update()
 })
 
-looper.start()
-
 window.addEventListener("keydown", (e) => {
     if (["Tab", "Enter"].includes(e.code)) e.preventDefault()
-})
-
-document.addEventListener("DOMContentLoaded", async () => {
-    sc.goto(async () => await import("./Scene/SceneTitle.js").then(({ SceneTitle }) => new SceneTitle()))
 })
 
 export function focusesUpdater(pages: Pages) {

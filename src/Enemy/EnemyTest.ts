@@ -3,6 +3,7 @@ import { Enemy } from "../Game/Actor/Enemy"
 import { GameLike } from "../Game/Game"
 import { Remodel, remodel } from "../Game/Remodel"
 import { T } from "../T"
+import { bm } from "../bm"
 
 export default class extends Enemy {
     constructor(game: GameLike) {
@@ -47,6 +48,8 @@ export default class extends Enemy {
     *onDead(): Generator {
         yield* super.onDead()
 
+        bm.fadeOut(2)
+
         yield* Array(120)
 
         yield* this.game.textBox.say(
@@ -82,6 +85,12 @@ export default class extends Enemy {
                 name: "C8",
             },
         )
+
+        bm.load({
+            src: "assets/bgm/test.mp3",
+        }).then(() => {
+            bm.play()
+        })
 
         this.addScript(this.phase.bind(this))
     }

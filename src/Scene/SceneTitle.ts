@@ -4,6 +4,7 @@ import { Scene } from "../utils/Scene/Scene"
 import { focuses, focusesUpdater, sc } from "../main"
 import { GltfViewer } from "../utils/GltfViewer"
 import { T } from "../T"
+import { bm } from "../bm"
 
 export class SceneTitle extends Scene {
     private pages = new Pages()
@@ -20,6 +21,8 @@ export class SceneTitle extends Scene {
     }
 
     async start(): Promise<void> {
+        bm.fadeOut(2)
+
         await this.pages.loadFromFile(Dom.container, "assets/pages/title/index.html")
 
         this.pages.getPage("first").appendChild(this.gltfViewer.canvas)
