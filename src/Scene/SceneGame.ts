@@ -28,9 +28,17 @@ export class SceneGame extends Scene {
             sc.goto(async () => await import("./SceneTitle").then(({ SceneTitle }) => new SceneTitle()))
         })
 
-        this.game = new Game(this.stage, this.pages.getElement("#main", HTMLCanvasElement), input, () => {
-            this.pages.enter("clear")
-        })
+        this.game = new Game(
+            this.stage,
+            this.pages.getElement("#main", HTMLCanvasElement),
+            input,
+            () => {
+                this.pages.enter("clear")
+            },
+            () => {
+                this.pages.enter("gameover")
+            },
+        )
 
         this.pages.beforeEnter("resume", () => {
             this.pages.back(1)

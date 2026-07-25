@@ -105,7 +105,7 @@ export class EnemyTest extends Enemy {
     }
 
     private *move0() {
-        yield* this.moveTo(vec((this.game.width / 4) * 3.5, (this.game.height / 4) * 3.5), 60)
+        yield* this.moveTo(vec((this.game.width / 4) * 4, (this.game.height / 4) * 3.5), 60)
         yield* Array(120)
     }
 

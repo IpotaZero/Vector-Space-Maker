@@ -11,7 +11,7 @@ export default defineConfig({
                 entryFileNames: "main.js",
                 dir: "dist/module",
                 // ファイル分割時は名前衝突を防ぐため、元の設定にハッシュや識別子を追加することを推奨します
-                chunkFileNames: `assets/[name]-[hash].js`,
+                chunkFileNames: `assets/[name].js`,
                 assetFileNames: `assets/[name].[ext]`,
                 // npmでインストールしたライブラリを別ファイルに切り出す
                 manualChunks(id) {
@@ -26,6 +26,7 @@ export default defineConfig({
                 },
             },
         },
+
         sourcemap: true,
     },
 })

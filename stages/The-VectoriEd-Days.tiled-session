@@ -1,0 +1,35 @@
+{
+    "activeFile": "test2.tmj",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "Tutorial.tmj": {
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 0.2493,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 2408.7444845567593,
+                "y": 336.9434416365823
+            }
+        },
+        "test2.tmj": {
+            "scale": 0.3896484375,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 553.062656641604,
+                "y": 646.7368421052632
+            }
+        }
+    },
+    "openFiles": [
+        "test2.tmj",
+        "Tutorial.tmj"
+    ],
+    "recentFiles": [
+        "Tutorial.tmj",
+        "test2.tmj"
+    ]
+}

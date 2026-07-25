@@ -4,7 +4,8 @@
 }
 
 #clear,
-#pause {
+#pause,
+#gameover {
     display: flex;
     flex-direction: column;
     align-items: center;

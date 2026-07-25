@@ -61,6 +61,7 @@ export class Game extends GameNode {
         canvas: HTMLCanvasElement,
         readonly input: DigitalInput.Reader<"right" | "left" | "jump" | "fire" | "ok" | "cancel">,
         readonly onFinish: () => void,
+        readonly onGameOver: () => void,
     ) {
         super()
 
@@ -126,9 +127,9 @@ export class Game extends GameNode {
 
         this.draw()
 
-        // if (this.enemies.length === 0 && this.scripts.size === 0) {
-        //     this.onFinish()
-        // }
+        if (this.player.life <= 0) {
+            this.onGameOver()
+        }
     }
 
     private updateMovables(): void {

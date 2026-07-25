@@ -1,2 +1,0 @@
-import{Stage as e}from"./Stage-hxt4r_AI.js";var t=class extends e{mapUrl=`assets/map/tutorial.tmj`;*setup(e){}};export{t as default};
-//# sourceMappingURL=StageTutorial-DILYAkLJ.js.map
