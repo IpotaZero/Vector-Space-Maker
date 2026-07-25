@@ -6,13 +6,19 @@ import { ScaleZone } from "../Game/movable/zone/ScaleZone.js"
 import { TextObject } from "../Game/movable/TextObject.js"
 import { Movable } from "../Game/movable/Movable.js"
 import { Vec, vec } from "@ipota/vec"
-import { Enemy } from "../Game/Actor/Enemy.js"
+
+export type EnemySpawn = {
+    type: string
+    x: number
+    y: number
+}
 
 type TiledStage = {
     width: number
     height: number
     movables: Movable[]
-    start: { x: number; y: number }
+    start: Vec
+    enemySpawns: EnemySpawn[]
 }
 
 export async function loadStageFromUrl(url: string): Promise<TiledStage> {
@@ -24,9 +30,9 @@ export async function loadStageFromUrl(url: string): Promise<TiledStage> {
 }
 
 export async function loadStageFromMapData(mapData: tiled.Map): Promise<TiledStage> {
-    const enemies: Enemy[] = []
+    const enemySpawns: EnemySpawn[] = []
     const movables: Movable[] = []
-    let start = { x: 0, y: 0 }
+    let start = vec(0, 0)
 
     // "joints" (object型のlistプロパティ) が参照するオブジェクトの位置を
     // 引けるように、先にすべてのオブジェクトのIDと位置を集めておく
@@ -155,14 +161,24 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<TiledSta
             }
 
             if (obj.name === "Start") {
-                start = { x: obj.x, y: obj.y }
+                start = vec(obj.x, obj.y)
             }
 
             if (obj.name === "Enemy") {
-                // @ts-ignore
-                const modules = import.meta.glob("../Enemy/*.ts", { eager: true })
-                const loader = modules[`../Enemy/${obj.properties?.find((p) => p.name === "enemy")}.ts`]
-                const mod = loader().default
+                const rawType = obj.properties?.find((p) => p.name === "enemy")?.value as string | undefined
+
+                // Tiledの "enemy" プロパティは string 型で "EnemyTest" と直接入れる場合と、
+                // file 型でファイルを選ぶ場合(値が "../../src/Enemy/EnemyTest.ts" のような
+                // マップファイルからの相対パスになる)の両方があり得るため、
+                // どちらの場合でもクラス名(拡張子なしのファイル名)だけを取り出す。
+                const type = rawType
+                    ?.split("/")
+                    .pop()
+                    ?.replace(/\.tsx?$/, "")
+
+                if (type) {
+                    enemySpawns.push({ type, x: obj.x, y: obj.y })
+                }
             }
 
             if (obj.name === "Goal") {
@@ -186,5 +202,6 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<TiledSta
         height: mapData.height * mapData.tileheight,
         movables,
         start,
+        enemySpawns,
     }
 }

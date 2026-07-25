@@ -1,7 +1,7 @@
 import { GameLike } from "../Game/Game"
 import { Movable } from "../Game/movable/Movable"
 
-import { loadStageFromUrl } from "./loadStageFromJson"
+import { EnemySpawn, loadStageFromUrl } from "./loadStageFromJson"
 
 export class Stage {
     protected static readonly mapUrl: string
@@ -13,12 +13,15 @@ export class Stage {
         readonly height: number,
         readonly movables: Movable[],
         readonly start: { x: number; y: number },
+        readonly enemySpawns: EnemySpawn[] = [],
     ) {}
 
     static async create(): Promise<Stage> {
-        const { width, height, movables, start } = await loadStageFromUrl(this.mapUrl)
+        const { width, height, movables, start, enemySpawns } = await loadStageFromUrl(this.mapUrl)
 
-        return new this(width, height, movables, start)
+        console.log("Stage.create", { width, height, movables, start, enemySpawns })
+
+        return new this(width, height, movables, start, enemySpawns)
     }
 
     *setup(game: GameLike): Generator<void, void, unknown> {}

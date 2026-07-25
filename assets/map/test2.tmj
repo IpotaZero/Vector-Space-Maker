@@ -145,6 +145,25 @@
                  "width":0,
                  "x":64,
                  "y":672
+                }, 
+                {
+                 "height":0,
+                 "id":53,
+                 "name":"Enemy",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"enemy",
+                         "type":"file",
+                         "value":"..\/..\/src\/Enemy\/EnemyTest.ts"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":970.105263157895,
+                 "y":431.157894736842
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -193,7 +212,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":53,
+ "nextobjectid":54,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

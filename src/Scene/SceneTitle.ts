@@ -96,9 +96,9 @@ export class SceneTitle extends Scene {
                     // @ts-ignore
                     const modules = import.meta.glob("../Stage/*")
                     const url = `../Stage/Stage${stage}.ts`
-                    const cls = await modules[url]()
+                    const { default: cls } = await modules[url]()
                     const { SceneGame } = await import("./SceneGame")
-                    return new SceneGame(new cls.default())
+                    return new SceneGame(await cls.create())
                 })
             })
         })

@@ -4,7 +4,7 @@ import { GameLike } from "../Game/Game"
 import { Remodel, remodel } from "../Game/Remodel"
 import { T } from "../T"
 
-export class EnemyTest extends Enemy {
+export default class extends Enemy {
     constructor(game: GameLike) {
         super(game, 100, 96)
         this.p = vec(800, 600)

@@ -15,6 +15,7 @@ import { GameNode } from "./GameNode"
 import { looper } from "../looper"
 import { GltfViewer } from "../utils/GltfViewer"
 import { Stage } from "../Stage/Stage"
+import { createEnemy } from "../Enemy/createEnemy"
 
 const WIDTH = 32 * 40
 const HEIGHT = 32 * 24
@@ -80,6 +81,7 @@ export class Game extends GameNode {
 
     /** ステージを読み込み、初期状態をセットアップする */
     async loadFromStage(stage: Stage): Promise<void> {
+        console.log(stage)
         this.camera = new Camera(this, vec(stage.start.x, stage.start.y))
         this.reset()
     }
@@ -104,9 +106,20 @@ export class Game extends GameNode {
         this.enemies = []
         this.bullets = []
 
-        this.addScript(this.stage.setup.bind(this.stage, this))
+        this.spawnEnemiesFromStage()
 
-        // this.enemies.push(new EnemyTest(this))
+        this.addScript(this.stage.setup.bind(this.stage, this))
+    }
+
+    /** Tiledで配置されたEnemyを、Game自身が完成した後に実体化する */
+    private spawnEnemiesFromStage(): void {
+        for (const spawn of this.stage.enemySpawns) {
+            const enemy = createEnemy(spawn.type, this)
+            if (!enemy) continue
+
+            enemy.p = vec(spawn.x, spawn.y)
+            this.enemies.push(enemy)
+        }
     }
 
     update(): void {
