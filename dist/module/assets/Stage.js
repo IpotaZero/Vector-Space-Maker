@@ -1,2 +1,2 @@
-var e=class{async getMapData(){return await fetch(`${this.mapUrl}`).then(e=>e.json())}};export{e as Stage};
+import{n as e}from"./loadStageFromJson.js";var t=class{width;height;movables;start;static mapUrl;isBossBattle=!1;constructor(e,t,n,r){this.width=e,this.height=t,this.movables=n,this.start=r}static async create(){let{width:t,height:n,movables:r,start:i}=await e(this.mapUrl);return new this(t,n,r,i)}*setup(e){}};export{t as Stage};
 //# sourceMappingURL=Stage.js.map

@@ -1,13 +1,25 @@
 import { GameLike } from "../Game/Game"
+import { Movable } from "../Game/movable/Movable"
 
-import * as tiled from "@kayahr/tiled"
+import { loadStageFromUrl } from "./loadStageFromJson"
 
-export abstract class Stage {
-    protected abstract readonly mapUrl: string
+export class Stage {
+    protected static readonly mapUrl: string
 
-    async getMapData(): Promise<tiled.Map> {
-        return (await fetch(`${this.mapUrl}`).then((res) => res.json())) as tiled.Map
+    isBossBattle = false
+
+    constructor(
+        readonly width: number,
+        readonly height: number,
+        readonly movables: Movable[],
+        readonly start: { x: number; y: number },
+    ) {}
+
+    static async create(): Promise<Stage> {
+        const { width, height, movables, start } = await loadStageFromUrl(this.mapUrl)
+
+        return new this(width, height, movables, start)
     }
 
-    abstract setup(game: GameLike): Generator<void, void, unknown>
+    *setup(game: GameLike): Generator<void, void, unknown> {}
 }

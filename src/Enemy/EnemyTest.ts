@@ -1,8 +1,8 @@
 import { vec } from "@ipota/vec"
-import { Enemy } from "../../Game/Actor/Enemy"
-import { GameLike } from "../../Game/Game"
-import { Remodel, remodel } from "../../Game/Remodel"
-import { T } from "../../T"
+import { Enemy } from "../Game/Actor/Enemy"
+import { GameLike } from "../Game/Game"
+import { Remodel, remodel } from "../Game/Remodel"
+import { T } from "../T"
 
 export class EnemyTest extends Enemy {
     constructor(game: GameLike) {

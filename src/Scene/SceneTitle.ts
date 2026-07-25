@@ -84,7 +84,7 @@ export class SceneTitle extends Scene {
             crossfade: true,
         })
 
-        const stages = ["Tutorial", "Test"]
+        const stages = ["Tutorial", "Test", "道中-0"]
 
         stages.forEach((stage) => {
             this.pages

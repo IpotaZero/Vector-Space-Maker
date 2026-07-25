@@ -47,7 +47,7 @@ export class SceneGame extends Scene {
         Dom.container.appendChild(this.game.textBox.box)
         Dom.container.appendChild(this.game.gltfViewer.canvas)
 
-        await this.game.loadFromMapData(await this.stage.getMapData())
+        await this.game.loadFromStage(this.stage)
     }
 
     update() {

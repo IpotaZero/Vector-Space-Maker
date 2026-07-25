@@ -14,6 +14,14 @@
                 "y": 336.9434416365823
             }
         },
+        "test.tmj": {
+            "scale": 0.20286458333333332,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1441.8485237483953,
+                "y": 320.4107830551991
+            }
+        },
         "test2.tmj": {
             "scale": 0.3896484375,
             "selectedLayer": 0,
@@ -29,7 +37,7 @@
     "openFiles": [
     ],
     "project": "The-VectoriEd-Days.tiled-project",
-    "property.type": "float",
+    "property.type": "file",
     "recentFiles": [
     ]
 }

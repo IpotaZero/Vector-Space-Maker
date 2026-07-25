@@ -1,12 +1,19 @@
 import * as tiled from "@kayahr/tiled"
-import { TiledStage } from "./TiledStage.js"
-import { Edge } from "./movable/Edge.js"
-import { GoalZone } from "./movable/zone/GoalZone.js"
-import { GravityZone } from "./movable/zone/GravityZone.js"
-import { ScaleZone } from "./movable/zone/ScaleZone.js"
-import { TextObject } from "./movable/TextObject.js"
-import { Movable } from "./movable/Movable.js"
+import { Edge } from "../Game/movable/Edge.js"
+import { GoalZone } from "../Game/movable/zone/GoalZone.js"
+import { GravityZone } from "../Game/movable/zone/GravityZone.js"
+import { ScaleZone } from "../Game/movable/zone/ScaleZone.js"
+import { TextObject } from "../Game/movable/TextObject.js"
+import { Movable } from "../Game/movable/Movable.js"
 import { Vec, vec } from "@ipota/vec"
+import { Enemy } from "../Game/Actor/Enemy.js"
+
+type TiledStage = {
+    width: number
+    height: number
+    movables: Movable[]
+    start: { x: number; y: number }
+}
 
 export async function loadStageFromUrl(url: string): Promise<TiledStage> {
     const response = await fetch(url)
@@ -17,6 +24,7 @@ export async function loadStageFromUrl(url: string): Promise<TiledStage> {
 }
 
 export async function loadStageFromMapData(mapData: tiled.Map): Promise<TiledStage> {
+    const enemies: Enemy[] = []
     const movables: Movable[] = []
     let start = { x: 0, y: 0 }
 
@@ -150,6 +158,13 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<TiledSta
                 start = { x: obj.x, y: obj.y }
             }
 
+            if (obj.name === "Enemy") {
+                // @ts-ignore
+                const modules = import.meta.glob("../Enemy/*.ts", { eager: true })
+                const loader = modules[`../Enemy/${obj.properties?.find((p) => p.name === "enemy")}.ts`]
+                const mod = loader().default
+            }
+
             if (obj.name === "Goal") {
                 movables.push(
                     new GoalZone(
@@ -166,5 +181,10 @@ export async function loadStageFromMapData(mapData: tiled.Map): Promise<TiledSta
         }
     }
 
-    return new TiledStage(mapData.width * mapData.tilewidth, mapData.height * mapData.tileheight, movables, start)
+    return {
+        width: mapData.width * mapData.tilewidth,
+        height: mapData.height * mapData.tileheight,
+        movables,
+        start,
+    }
 }

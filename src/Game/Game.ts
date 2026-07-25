@@ -1,6 +1,4 @@
 import { Camera } from "./Actor/Camera"
-import { loadStageFromMapData, loadStageFromUrl } from "./loadStageFromJson"
-import { TiledStage } from "./TiledStage"
 import { DigitalInput } from "@ipota/input"
 import * as tiled from "@kayahr/tiled"
 import { Zone } from "./movable/zone/Zone"
@@ -41,14 +39,11 @@ export class Game extends GameNode {
     private readonly canvas: HTMLCanvasElement
     private readonly ctx: CanvasRenderingContext2D
 
-    private tiledStage!: TiledStage
     player!: Player
     camera!: Camera
 
     enemies: Enemy[] = []
     bullets: Bullet[] = []
-
-    isBossBattle = false
 
     readonly textBox: TextBox
     readonly gltfViewer: GltfViewer
@@ -84,22 +79,25 @@ export class Game extends GameNode {
     }
 
     /** ステージを読み込み、初期状態をセットアップする */
-    async loadFromMapData(mapData: tiled.Map): Promise<void> {
-        this.tiledStage = await loadStageFromMapData(mapData)
-        this.camera = new Camera(this, vec(WIDTH / 2, HEIGHT / 2))
+    async loadFromStage(stage: Stage): Promise<void> {
+        this.camera = new Camera(this, vec(stage.start.x, stage.start.y))
         this.reset()
     }
 
     get width() {
-        return this.tiledStage.width
+        return this.stage.width
     }
 
     get height() {
-        return this.tiledStage.height
+        return this.stage.height
+    }
+
+    get isBossBattle() {
+        return this.stage.isBossBattle
     }
 
     private reset(): void {
-        this.player = new Player(this, vec(this.tiledStage.start.x, this.tiledStage.start.y))
+        this.player = new Player(this, vec(this.stage.start.x, this.stage.start.y))
         this.camera.scale = 1
 
         this.scripts.clear()
@@ -133,11 +131,11 @@ export class Game extends GameNode {
     }
 
     private updateMovables(): void {
-        this.tiledStage.movables.forEach((movable) => movable.update())
+        this.stage.movables.forEach((movable) => movable.update())
     }
 
     private handleZoneEnter(): void {
-        this.tiledStage.movables
+        this.stage.movables
             .filter((obj) => obj instanceof Zone)
             .forEach((zone) => {
                 if (zone.contains(this.player.p)) {
@@ -203,7 +201,7 @@ export class Game extends GameNode {
     private updatePlayer(): void {
         this.player.move(this.input)
         this.player.update()
-        this.player.resolveCollisions(this.tiledStage.movables.filter((obj) => obj instanceof Edge))
+        this.player.resolveCollisions(this.stage.movables.filter((obj) => obj instanceof Edge))
     }
 
     private updateCamera(): void {
@@ -211,7 +209,7 @@ export class Game extends GameNode {
     }
 
     private restartIfOutOfBounds(): void {
-        const stage = this.tiledStage
+        const stage = this.stage
 
         // ステージ外に落ちたらリスタート
         if (
@@ -225,7 +223,7 @@ export class Game extends GameNode {
     }
 
     private draw(): void {
-        const stage = this.tiledStage
+        const stage = this.stage
         const ctx = this.ctx
 
         ctx.save()
