@@ -1,4 +1,4 @@
-import { EnemyTest } from "../Enemy/EnemyTest"
+import { EnemyTest } from "./Enemy/EnemyTest"
 import { GameLike } from "../Game/Game"
 import { Stage } from "./Stage"
 

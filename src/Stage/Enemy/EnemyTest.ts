@@ -1,8 +1,8 @@
 import { vec } from "@ipota/vec"
-import { Enemy } from "../Game/Actor/Enemy"
-import { GameLike } from "../Game/Game"
-import { Remodel, remodel } from "../Game/Remodel"
-import { T } from "../T"
+import { Enemy } from "../../Game/Actor/Enemy"
+import { GameLike } from "../../Game/Game"
+import { Remodel, remodel } from "../../Game/Remodel"
+import { T } from "../../T"
 
 export class EnemyTest extends Enemy {
     constructor(game: GameLike) {
@@ -94,7 +94,7 @@ export class EnemyTest extends Enemy {
             .p(this.p.clone())
             .radian(T / 2)
             .beam(this.game.width)
-            .r(32)
+            .r(64)
             .g(function* (me) {
                 yield* Array(60)
                 yield* Remodel.fadeout(me, 30)
