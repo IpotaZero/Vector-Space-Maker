@@ -171,6 +171,7 @@ export class Game extends GameNode {
                 if (this.bulletCollision.isColliding(b, this.player)) {
                     this.player.life -= b.damage
                     this.player.sleep(1)
+                    this.player.knockBack(vec.arg(b.radian).scale(b.damage ** 3), b.damage ** 3)
                     b.life = 0
                     this.addScript(() => this.drawDamage(b.p, b.damage))
                 }

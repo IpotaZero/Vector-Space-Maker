@@ -27,6 +27,8 @@ export class Player extends Actor {
     private rotation = 0
     private gltfViewer = new GltfViewer(300, 300)
 
+    private playable = true
+
     private readonly maxLife = 10
 
     /**最後に入力した方向 */
@@ -46,6 +48,18 @@ export class Player extends Actor {
             rotateY: T / 8,
             animationName: "wait",
         })
+    }
+
+    knockBack(impulse: Vec, time: number) {
+        this.v = this.v.add(impulse)
+        this.sleep(1)
+        this.addScript(() => this.knockBackG(time))
+    }
+
+    private *knockBackG(time: number): Generator {
+        this.playable = false
+        yield* Array(time)
+        this.playable = true
     }
 
     dispose() {
@@ -68,6 +82,8 @@ export class Player extends Actor {
     }
 
     move(input: DigitalInput.Reader<"left" | "right" | "jump">): void {
+        if (!this.playable) return
+
         if (input.isPressed("right")) {
             this.v = this.v.add(this.g.normal().scale(SPEED))
             this.direction = 1
