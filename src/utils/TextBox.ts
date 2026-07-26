@@ -38,7 +38,7 @@ export class TextBox {
     }
 
     private *wait() {
-        while (!this.input.isSomethingPushed()) yield
+        while (!this.input.isPushed("ok")) yield
         yield
     }
 }

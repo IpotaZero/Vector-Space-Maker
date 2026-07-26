@@ -157,7 +157,7 @@ export class Player extends Actor {
 
     draw(ctx: CanvasRenderingContext2D): void {
         const center = this.getDanmakuP()
-        Ctx.polygon(ctx, 8, 2, center.l, 48, "#1114", { theta: this.rotation / 32, lineWidth: 0.5 })
+        Ctx.polygon(ctx, 8, 3, center.l, 48, "#1114", { theta: this.rotation / 32, lineWidth: 0.5 })
         Ctx.arc(ctx, center.l, 16, "#1114", { lineWidth: 0.5 })
         Ctx.text(ctx, center.l, "#111", "罪", {
             align: "center",

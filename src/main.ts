@@ -39,6 +39,10 @@ window.addEventListener("keydown", (e) => {
     if (["Tab", "Enter"].includes(e.code)) e.preventDefault()
 })
 
+window.addEventListener("contextmenu", (e) => {
+    e.preventDefault()
+})
+
 export function focusesUpdater(pages: Pages) {
     pages.onTransitionStart(() => {
         input.pause("page-transition")
