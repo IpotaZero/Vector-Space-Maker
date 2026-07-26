@@ -157,7 +157,7 @@ export default class extends Enemy {
                 .appearance("arrow")
                 .r(38)
                 .p(this.p.clone())
-                .aim(this.game.player.p)
+                .aim(this.game.player.getDanmakuP())
                 .duplicate(63, (me, i) => {
                     me.radian = i % 2 === 0 ? (i / 63) * T : (-i / 63) * T
                     return me
@@ -179,7 +179,7 @@ export default class extends Enemy {
                 .damage(3)
                 .p(this.p.clone())
                 .laser(30, 20, this.game.width)
-                .aim(this.game.player.p)
+                .aim(this.game.player.getDanmakuP())
                 .nway(23, T / 24)
                 .fire(this.game.bullets)
 

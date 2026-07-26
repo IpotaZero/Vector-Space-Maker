@@ -54,6 +54,9 @@ export class Game extends GameNode {
     private bulletDrawer = new BulletDrawer()
     private bulletCollision = new BulletCollision()
 
+    /** 死亡演出～ページ切り替えまでの間trueになる */
+    private isDead = false
+
     constructor(
         private readonly stage: Stage,
         canvas: HTMLCanvasElement,
@@ -113,6 +116,7 @@ export class Game extends GameNode {
         this.bullets = []
 
         this.spawnEnemiesFromStage()
+        this.isDead = false
 
         this.addScript(this.stage.setup.bind(this.stage, this))
     }
@@ -144,8 +148,11 @@ export class Game extends GameNode {
 
         this.draw()
 
-        if (this.player.life <= 0) {
-            this.onGameOver()
+        if (this.player.life <= 0 && !this.isDead) {
+            this.isDead = true
+            this.player.isDead = true
+            this.player.break()
+            this.addScript(() => this.playerDeathSequence())
         }
     }
 
@@ -169,7 +176,12 @@ export class Game extends GameNode {
             this.bullets
                 .filter((b) => b.type === "enemy")
                 .forEach((b) => {
-                    if (this.bulletCollision.isColliding(b, this.player)) {
+                    const playerCircle = {
+                        p: this.player.getDanmakuP(),
+                        r: this.player.r,
+                    }
+
+                    if (this.bulletCollision.isColliding(b, playerCircle)) {
                         this.player.life -= b.damage
                         this.player.knockBack(vec.arg(b.radian).scale(b.damage ** 3), b.damage ** 3)
                         this.player.invincibleFrame = 60
@@ -278,6 +290,24 @@ export class Game extends GameNode {
             this.ctx.restore()
             yield
         }
+    }
+
+    /**
+     * プレイヤーの死亡演出。
+     * 数フレームだけフレームレートを落として「間」を作り、
+     * その間プレイヤーは操作不能(Player.isDead)のまま静止させる。
+     * 演出が終わったら元のFPSに戻し、onGameOverでページ切り替えを行う。
+     */
+    private *playerDeathSequence(): Generator {
+        const frame = 60
+
+        this.camera.shake(8)
+        looper.setFPS(15)
+
+        yield* Array(frame)
+
+        looper.setFPS(60)
+        this.onGameOver()
     }
 
     private *hitStopShot() {

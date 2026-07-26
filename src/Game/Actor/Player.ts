@@ -36,6 +36,9 @@ export class Player extends Actor {
 
     private playable = true
 
+    /** lifeが0以下になり、死亡演出中(操作不能)であるかどうか */
+    isDead = false
+
     private readonly maxLife = 10
 
     /**最後に入力した方向 */
@@ -55,6 +58,14 @@ export class Player extends Actor {
             rotateY: T / 8,
             animationName: "wait",
         })
+    }
+
+    break() {
+        this.gltfViewer.playOnce("break", { canOverride: false })
+    }
+
+    getDanmakuP() {
+        return this.p.add(this.g.normalize().scale(-40))
     }
 
     update() {
@@ -97,7 +108,7 @@ export class Player extends Actor {
     }
 
     move(input: DigitalInput.Reader<"left" | "right" | "jump">): void {
-        if (!this.playable) return
+        if (!this.playable || this.isDead) return
 
         if (input.isPressed("right")) {
             this.v = this.v.add(this.g.normal().scale(SPEED))
@@ -145,7 +156,7 @@ export class Player extends Actor {
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
-        const center = this.p.add(this.g.normalize().scale(-40))
+        const center = this.getDanmakuP()
         Ctx.polygon(ctx, 8, 2, center.l, 48, "#1114", { theta: this.rotation / 32, lineWidth: 0.5 })
         Ctx.arc(ctx, center.l, 16, "#1114", { lineWidth: 0.5 })
         Ctx.text(ctx, center.l, "#111", "罪", {
@@ -180,6 +191,8 @@ export class Player extends Actor {
         ctx.rotate(this.g.radian() - T / 4)
         ctx.drawImage(this.gltfViewer.canvas, -150, -150 - 20)
         ctx.restore()
+
+        Ctx.arc(ctx, center.l, 4, "red", { lineWidth: 0 })
     }
 
     hitSlash() {
