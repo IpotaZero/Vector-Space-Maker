@@ -192,7 +192,7 @@ export class Player extends Actor {
         ctx.drawImage(this.gltfViewer.canvas, -150, -150 - 20)
         ctx.restore()
 
-        Ctx.arc(ctx, center.l, 4, "red", { lineWidth: 0 })
+        // Ctx.arc(ctx, center.l, 4, "red", { lineWidth: 0 })
     }
 
     hitSlash() {

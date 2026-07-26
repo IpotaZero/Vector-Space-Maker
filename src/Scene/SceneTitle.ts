@@ -108,16 +108,12 @@ export class SceneTitle extends Scene {
 
         focuses.setPage(this.pages.getCurrentPage())
 
-        this.pages.beforeEnter("records", async () => {
+        this.pages.beforeEnter("records|settings|credits", async () => {
             alert("notimplemented")
         })
 
-        this.pages.beforeEnter("settings", async () => {
-            alert("notimplemented")
-        })
-
-        this.pages.beforeEnter("credits", async () => {
-            alert("notimplemented")
+        this.pages.beforeEnter("くしくし", async () => {
+            this.gltfViewer.playOnce("grooming")
         })
 
         // this.pages.beforeEnter("download", async () => {

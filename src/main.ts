@@ -44,8 +44,15 @@ export function focusesUpdater(pages: Pages) {
         input.pause("page-transition")
     })
 
-    pages.onTransitionEnd(async (pages) => {
+    pages.onTransitionEnd((pages) => {
         input.resume("page-transition")
+    })
+
+    pages.onJustEnter(".*", (pages) => {
         focuses.setPage(pages.getCurrentPage())
+    })
+
+    pages.onBack(() => {
+        focuses.setPage(pages.getCurrentPage(), true)
     })
 }

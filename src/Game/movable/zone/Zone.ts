@@ -7,7 +7,8 @@ export abstract class Zone extends Movable {
     readonly width: number
     readonly height: number
 
-    private coolDown = 0
+    /** 直前のフレームでpがゾーン内にいたかどうか(「入った瞬間」判定用) */
+    private inside = false
 
     constructor(p: Vec, width: number, height: number, config: { joints?: Vec[]; cycle?: number } = {}) {
         super(p, config)
@@ -15,15 +16,20 @@ export abstract class Zone extends Movable {
         this.height = height
     }
 
-    update(): void {
-        super.update()
-        if (this.coolDown > 0) this.coolDown--
+    /**
+     * このフレームで p がゾーンの外から中へ入った瞬間だけ true を返す。
+     * 触れ続けている間は再度 true にならず、一度離れて再び触れると
+     * また true になる。（SEや演出がゾーンに触れ続けている間ずっと
+     * 再発火してしまうのを防ぐための「エッジ検出」方式）
+     */
+    checkEnter(p: Vec): boolean {
+        const nowInside = this.isInsideArea(p)
+        const justEntered = nowInside && !this.inside
+        this.inside = nowInside
+        return justEntered
     }
 
-    contains(p: Vec): boolean {
-        if (this.coolDown > 0) false
-        this.coolDown = 60
-
+    private isInsideArea(p: Vec): boolean {
         return (
             Math.abs(p.x - this.p.x - this.width / 2) <= this.width / 2 &&
             Math.abs(p.y - this.p.y - this.height / 2) <= this.height / 2

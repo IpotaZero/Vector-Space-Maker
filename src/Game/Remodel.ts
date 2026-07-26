@@ -43,7 +43,6 @@ export class Remodel<Parent extends Actor> {
                 yield
             }
 
-            console.log(frame, b)
             bullets.push(b)
         }
     }

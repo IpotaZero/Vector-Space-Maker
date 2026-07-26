@@ -15,6 +15,7 @@ import { looper } from "../looper"
 import { GltfViewer } from "../utils/GltfViewer"
 import { Stage } from "../Stage/Stage"
 import { createEnemy } from "../Enemy/createEnemy"
+import { se } from "../se"
 
 const WIDTH = 32 * 40
 const HEIGHT = 32 * 24
@@ -164,7 +165,8 @@ export class Game extends GameNode {
         this.stage.movables
             .filter((obj) => obj instanceof Zone)
             .forEach((zone) => {
-                if (zone.contains(this.player.p)) {
+                if (zone.checkEnter(this.player.getDanmakuP())) {
+                    se.zone.play()
                     const gen = zone.onEnter(this)
                     this.addScript(() => gen)
                 }
