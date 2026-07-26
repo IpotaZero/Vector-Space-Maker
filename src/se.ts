@@ -42,16 +42,18 @@ export class se {
     static doubleJump: SE
     static land: SE
     static zone: SE
+    static u: SE
 
     private static context: AudioContext
 
     static async load() {
         this.context = new AudioContext({ latencyHint: "interactive" })
-        ;[this.jump, this.doubleJump, this.land, this.zone] = await Promise.all([
+        ;[this.jump, this.doubleJump, this.land, this.zone, this.u] = await Promise.all([
             SE.create(this.context, "assets/se/jump.mp3"),
             SE.create(this.context, "assets/se/double-jump.mp3"),
             SE.create(this.context, "assets/se/landing.mp3"),
             SE.create(this.context, "assets/se/se_touch.mp3"),
+            SE.create(this.context, "assets/se/u.mp3"),
         ])
     }
 }

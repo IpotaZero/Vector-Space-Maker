@@ -193,6 +193,7 @@ export class Game extends GameNode {
                         }
 
                         this.addScript(() => this.drawDamage(b.p, b.damage))
+                        se.u.play()
                     }
                 })
         }

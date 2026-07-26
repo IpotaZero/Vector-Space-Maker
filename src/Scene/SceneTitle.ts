@@ -21,7 +21,7 @@ export class SceneTitle extends Scene {
     }
 
     async start(): Promise<void> {
-        bm.fadeOut(2)
+        this.playBgm()
 
         await this.pages.loadFromFile(Dom.container, "assets/pages/title/index.html")
 
@@ -132,6 +132,14 @@ export class SceneTitle extends Scene {
 
         //     sc.goto(new SceneGame(data))
         // })
+    }
+
+    private async playBgm() {
+        if (bm.isPlaying()) {
+            await bm.fadeOut(2)
+        }
+        await bm.load({ src: "assets/bgm/title.mp3" })
+        await bm.play()
     }
 
     async end(): Promise<void> {
