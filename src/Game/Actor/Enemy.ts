@@ -13,6 +13,7 @@ export abstract class Enemy extends Actor {
     private frame = 0
 
     protected gltfViewer
+    protected isBoss = false
 
     constructor(game: GameLike, life: number, r: number) {
         super(game)
@@ -31,18 +32,20 @@ export abstract class Enemy extends Actor {
         Ctx.polygon(ctx, 13, 3, this.p.l, 96 * 1.1, "#00000020", { lineWidth: 1, theta: this.frame / 60 })
         Ctx.polygon(ctx, 9, 2, this.p.l, 96 * 0.6, "#00000020", { lineWidth: 1, theta: this.frame / 120 })
 
-        const w = this.game.width / 2
+        if (this.isBoss) {
+            const w = this.game.width / 2
 
-        Ctx.rect(ctx, [w - 64, 64], [w, 32], "#80808080", { lineWidth: 1 })
-        Ctx.rect(
-            ctx,
-            [w - 64 + (1 - this.life / this.maxLife), 64],
-            [w * (1 - this.life / this.maxLife), 32],
-            "#80808080",
-            {
-                lineWidth: 0,
-            },
-        )
+            Ctx.rect(ctx, [w - 64, 64], [w, 32], "#80808080", { lineWidth: 1 })
+            Ctx.rect(
+                ctx,
+                [w - 64 + (1 - this.life / this.maxLife), 64],
+                [w * (1 - this.life / this.maxLife), 32],
+                "#80808080",
+                {
+                    lineWidth: 0,
+                },
+            )
+        }
 
         this.gltfViewer.update()
         ctx.drawImage(this.gltfViewer.canvas, this.p.x - this.r * 2, this.p.y - this.r * 2, this.r * 4, this.r * 4)

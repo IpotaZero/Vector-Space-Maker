@@ -165,17 +165,23 @@ export class Game extends GameNode {
     }
 
     private updateBulletAndEnemy() {
-        this.bullets
-            .filter((b) => b.type === "enemy")
-            .forEach((b) => {
-                if (this.bulletCollision.isColliding(b, this.player)) {
-                    this.player.life -= b.damage
-                    this.player.sleep(1)
-                    this.player.knockBack(vec.arg(b.radian).scale(b.damage ** 3), b.damage ** 3)
-                    b.life = 0
-                    this.addScript(() => this.drawDamage(b.p, b.damage))
-                }
-            })
+        if (this.player.invincibleFrame === 0) {
+            this.bullets
+                .filter((b) => b.type === "enemy")
+                .forEach((b) => {
+                    if (this.bulletCollision.isColliding(b, this.player)) {
+                        this.player.life -= b.damage
+                        this.player.knockBack(vec.arg(b.radian).scale(b.damage ** 3), b.damage ** 3)
+                        this.player.invincibleFrame = 60
+
+                        if (b.scorenizable) {
+                            b.life = 0
+                        }
+
+                        this.addScript(() => this.drawDamage(b.p, b.damage))
+                    }
+                })
+        }
 
         this.bullets
             .filter((b) => b.type === "friend")
@@ -263,10 +269,13 @@ export class Game extends GameNode {
         const l = p.add(vec(Math.random() * 32, Math.random() * 32)).l
 
         for (let i = 0; i < frame; i++) {
+            this.ctx.save()
+            this.camera.apply(this.ctx, WIDTH, HEIGHT)
             Ctx.text(this.ctx, l, `rgba(255,0,0,${1 - i / frame})`, `${damage}`, {
                 fontSize: 32,
                 fontFamily: "serif",
             })
+            this.ctx.restore()
             yield
         }
     }

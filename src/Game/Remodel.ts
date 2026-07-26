@@ -222,6 +222,7 @@ export class Remodel<Parent extends Actor> {
             .r(12)
             .appearance("laser")
             .collision("laser")
+            .scorenizable(false)
             .g(function* (me) {
                 let i = 0
 

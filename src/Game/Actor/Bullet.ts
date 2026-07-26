@@ -6,6 +6,7 @@ export class Bullet extends Actor {
     length: number = 0
     damage: number = 1
     delay: number = 0
+    scorenizable: boolean = true
 
     appearance: "donut" | "ball" | "line" | "arrow" | "laser" | "player" = "donut"
     collision: "ball" | "line" | "arrow" | "laser" = "ball"

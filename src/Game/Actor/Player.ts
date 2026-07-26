@@ -7,15 +7,22 @@ import { remodel } from "../Remodel"
 import { GameLike } from "../Game"
 import { GltfViewer } from "../../utils/GltfViewer"
 import { Physics } from "../Physics"
+import { se } from "../../se"
 
 const SPEED = 3
 const JUMP = 48 * 0.3
 
 export class Player extends Actor {
     private physics: Physics = new Physics(this.game, this, () => {
+        if (this.onFloor.filter((x) => x).length <= 1) {
+            se.land.play()
+        }
+
         this.onFloor.push(true)
         this.canDoubleJump = true // 着地時に2段ジャンプを回復
     })
+
+    invincibleFrame = 0
 
     g: Vec = vec(0, 0.7)
     v: Vec = vec(0, 0)
@@ -48,6 +55,14 @@ export class Player extends Actor {
             rotateY: T / 8,
             animationName: "wait",
         })
+    }
+
+    update() {
+        super.update()
+
+        if (this.invincibleFrame > 0) {
+            this.invincibleFrame--
+        }
     }
 
     knockBack(impulse: Vec, time: number) {
@@ -102,11 +117,13 @@ export class Player extends Actor {
             if (this.onFloor.includes(true)) {
                 this.jump()
                 this.onFloor = []
+                se.jump.play()
 
                 this.gltfViewer.playOnce("jump")
             } else if (this.canDoubleJump && !this.isJumping) {
                 this.jump()
                 this.canDoubleJump = false
+                se.doubleJump.play()
 
                 this.gltfViewer.playOnce("double-jump")
             }
@@ -156,6 +173,9 @@ export class Player extends Actor {
         this.gltfViewer.update()
 
         ctx.save()
+        if (this.invincibleFrame > 0 && Math.floor(this.invincibleFrame / 4) % 2 === 0) {
+            ctx.globalAlpha = 0.5
+        }
         ctx.translate(this.p.x, this.p.y)
         ctx.rotate(this.g.radian() - T / 4)
         ctx.drawImage(this.gltfViewer.canvas, -150, -150 - 20)

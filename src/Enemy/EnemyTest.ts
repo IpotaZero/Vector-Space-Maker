@@ -6,6 +6,8 @@ import { T } from "../T"
 import { bm } from "../bm"
 
 export default class extends Enemy {
+    isBoss = true
+
     constructor(game: GameLike) {
         super(game, 100, 96)
         this.p = vec(800, 600)
@@ -27,7 +29,6 @@ export default class extends Enemy {
 
     private *phase() {
         this.addScript(this.attack0.bind(this), { loop: Infinity, id: "attack0" })
-        this.addScript(this.move0.bind(this), { loop: Infinity, id: "move0" })
 
         while (this.life > 50) yield
 
@@ -88,6 +89,7 @@ export default class extends Enemy {
 
         bm.load({
             src: "assets/bgm/test.mp3",
+            trackVolume: 0.5,
         }).then(() => {
             bm.play()
         })
@@ -96,6 +98,28 @@ export default class extends Enemy {
     }
 
     private *attack0() {
+        yield* this.moveTo(vec((this.game.width / 4) * 4 - 80, (this.game.height / 4) * 3.2), 60)
+
+        this.addScript(this.move0.bind(this), { id: "move0" })
+
+        const frame = 40
+
+        for (let i = 0; i < frame; i++) {
+            yield* remodel(this)
+                .collision("arrow")
+                .appearance("arrow")
+                .r(28)
+                .p(this.p.clone())
+                .radian(T / 2)
+                .speed(0)
+                .g((me) => Remodel.accel(me, 120, 31))
+                .fire(this.game.bullets)
+
+            yield* Array(15)
+        }
+
+        yield* Array(120)
+
         this.gltfViewer.playOnce("charge", { canOverride: false })
         yield* Array(120)
 
@@ -103,6 +127,7 @@ export default class extends Enemy {
             .p(this.p.clone())
             .radian(T / 2)
             .beam(this.game.width)
+            .damage(3)
             .r(64)
             .g(function* (me) {
                 yield* Array(60)
@@ -114,8 +139,12 @@ export default class extends Enemy {
     }
 
     private *move0() {
-        yield* this.moveTo(vec((this.game.width / 4) * 4, (this.game.height / 4) * 3.5), 60)
-        yield* Array(120)
+        const frame = 1200
+
+        for (let i = 0; i < frame; i++) {
+            this.p.y = (this.game.height / 4) * 3.2 + Math.sin((i / frame) * T * 4) * 100
+            yield
+        }
     }
 
     private *attack1() {
