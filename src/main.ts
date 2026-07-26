@@ -40,8 +40,6 @@ window.addEventListener("keydown", (e) => {
 })
 
 export function focusesUpdater(pages: Pages) {
-    console.log(pages)
-
     pages.onTransitionStart(() => {
         input.pause("page-transition")
     })
