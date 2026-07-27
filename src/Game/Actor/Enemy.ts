@@ -15,6 +15,8 @@ export abstract class Enemy extends Actor {
     protected gltfViewer
     protected isBoss = false
 
+    isInvincible = false
+
     constructor(game: GameLike, life: number, r: number) {
         super(game)
         this.life = life
@@ -34,13 +36,14 @@ export abstract class Enemy extends Actor {
 
         if (this.isBoss) {
             const w = this.game.width / 2
+            const color = this.isInvincible ? "#ff000080" : "#80808080"
 
-            Ctx.rect(ctx, [w - 64, 64], [w, 32], "#80808080", { lineWidth: 1 })
+            Ctx.rect(ctx, [w - 64, 64], [w, 32], color, { lineWidth: 1 })
             Ctx.rect(
                 ctx,
                 [w - 64 + (1 - this.life / this.maxLife), 64],
                 [w * (1 - this.life / this.maxLife), 32],
-                "#80808080",
+                color,
                 {
                     lineWidth: 0,
                 },

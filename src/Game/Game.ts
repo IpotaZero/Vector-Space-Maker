@@ -202,6 +202,8 @@ export class Game extends GameNode {
             .filter((b) => b.type === "friend")
             .forEach((b) => {
                 this.enemies.forEach((e) => {
+                    if (e.isInvincible) return
+
                     if (this.bulletCollision.isColliding(b, e)) {
                         b.life = 0
 

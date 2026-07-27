@@ -35,12 +35,14 @@ export default class extends Enemy {
         this.removeScript("attack0")
         this.removeScript("move0")
 
+        this.isInvincible = true
         yield* this.moveTo(vec(this.game.width - 200, 200), 120)
         yield* this.game.textBox.say(
             ["いちちっ！近寄るんじゃあないっ！", "決してXを押して遠距離攻撃なんかするなよな！"],
             { name: "C8" },
         )
         this.game.gltfViewer.hide()
+        this.isInvincible = false
 
         this.addScript(this.attack1.bind(this), { loop: Infinity, id: "attack1" })
         this.addScript(this.move1.bind(this), { loop: Infinity, id: "move1" })
